@@ -1,8 +1,12 @@
-name: CICD
+name: CI/CD
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
 
 jobs:
   build:
@@ -10,6 +14,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
