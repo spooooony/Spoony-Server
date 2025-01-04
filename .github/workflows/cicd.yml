@@ -1,0 +1,60 @@
+name: CICD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Generate application.yml
+        run: |
+          mkdir -p ./src/main/resources
+          echo "${{ secrets.CD_APPLICATION }}" > ./src/main/resources/application.yml
+          cat ./src/main/resources/application.yml
+
+      - name: Build Project
+        run: ./gradlew clean build -x test
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: docker build -t yh0872/spoony-dev .
+
+      - name: Publish Image to Docker Hub
+        run: docker push yh0872/spoony-dev:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Create SSH Key File
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ssh_key.pem
+          chmod 600 ssh_key.pem
+
+      - name: SSH into EC2 and Deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          sudo docker pull yh0872/spoony-dev:latest
+          sudo docker rm -f spoony-dev-container || true
+          sudo docker run -d -p 8080:8080 --name spoony-dev-container yh0872/spoony-dev
+          EOF
