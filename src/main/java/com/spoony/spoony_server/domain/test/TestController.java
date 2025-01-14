@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.domain.test.controller;
+package com.spoony.spoony_server.domain.test;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.common.exception.BusinessException;
