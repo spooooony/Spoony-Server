@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "report")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "report")
 @Getter
 public class ReportEntity {
     @Id

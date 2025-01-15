@@ -2,8 +2,9 @@ package com.spoony.spoony_server.domain.report.enums;
 
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-
+@RequiredArgsConstructor
 @Getter
 public enum ReportType {
     ADVERTISEMENT("영리 목적/홍보성 리뷰"),
@@ -13,11 +14,6 @@ public enum ReportType {
     ILLEGAL_INFO("불법정보"),
     OTHER("기타");
 
-
     private final String description;
-
-    ReportType(String description) {
-        this.description = description;
-    }
 }
 

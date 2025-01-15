@@ -45,7 +45,7 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDTO.fail(BusinessErrorMessage.BAD_REQUEST));
         } catch (Exception e) {
-            
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ResponseDTO.fail(BusinessErrorMessage.INTERNAL_SERVER_ERROR));
         }
