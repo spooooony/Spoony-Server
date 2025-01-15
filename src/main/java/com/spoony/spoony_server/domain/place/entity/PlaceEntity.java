@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.domain.post.entity;
+package com.spoony.spoony_server.domain.place.entity;
 
 import jakarta.persistence.*;
 
