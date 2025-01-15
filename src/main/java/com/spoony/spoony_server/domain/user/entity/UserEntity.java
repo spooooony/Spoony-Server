@@ -1,10 +1,14 @@
 package com.spoony.spoony_server.domain.user.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,7 +17,11 @@ public class UserEntity {
     private String userPassword;
     private String userName;
     private String userImage;
-    private Integer regionId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private RegionEntity region;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

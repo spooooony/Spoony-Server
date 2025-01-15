@@ -5,16 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.common.exception.BusinessException;
 import com.spoony.spoony_server.common.message.PlaceErrorMessage;
-import com.spoony.spoony_server.domain.place.dto.PlaceListResponseDTO;
-import com.spoony.spoony_server.domain.place.dto.PlaceResponseDTO;
+import com.spoony.spoony_server.domain.place.dto.request.PlaceCheckRequestDTO;
+import com.spoony.spoony_server.domain.place.dto.request.PlaceCheckResponseDTO;
+import com.spoony.spoony_server.domain.place.dto.response.PlaceListResponseDTO;
+import com.spoony.spoony_server.domain.place.dto.response.PlaceResponseDTO;
+import com.spoony.spoony_server.domain.place.service.PlaceService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,6 +26,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/place")
 public class PlaceController {
+    public final PlaceService placeService;
+
+    public PlaceController(PlaceService placeService) {
+        this.placeService = placeService;
+    }
 
     @GetMapping(value = "/search")
     public ResponseEntity<ResponseDTO<PlaceListResponseDTO>> getPlaceList(
@@ -70,8 +75,8 @@ public class PlaceController {
                 String title = item.get("title").asText().replaceAll("<[^>]*>", ""); // HTML 태그 제거
                 String address = item.get("address").asText();
                 String roadAddress = item.get("roadAddress").asText();
-                String mapx = item.get("mapx").asText();
-                String mapy = item.get("mapy").asText();
+                Double mapx = item.get("mapx").asDouble();
+                Double mapy = item.get("mapy").asDouble();
 
                 places.add(new PlaceResponseDTO(title, address, roadAddress, mapx, mapy));
             });
@@ -83,5 +88,16 @@ public class PlaceController {
         } catch (Exception e) {
             throw new BusinessException(PlaceErrorMessage.JSON_PARSE_ERROR);
         }
+    }
+
+    @PostMapping("/check")
+    public ResponseEntity<ResponseDTO<PlaceCheckResponseDTO>> checkDuplicatePlace(
+            @RequestBody PlaceCheckRequestDTO placeCheckRequestDTO) {
+
+        boolean isDuplicate = placeService.isDuplicate(placeCheckRequestDTO);
+
+        PlaceCheckResponseDTO placeCheckResponseDTO = new PlaceCheckResponseDTO(isDuplicate);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(placeCheckResponseDTO));
     }
 }
