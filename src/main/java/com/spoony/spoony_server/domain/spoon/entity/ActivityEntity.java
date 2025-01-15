@@ -19,3 +19,4 @@ public class ActivityEntity {
         this.changeAmount = changeAmount;
     }
 }
+
