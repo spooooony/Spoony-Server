@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.domain.place.dto;
+package com.spoony.spoony_server.domain.place.dto.response;
 
 import java.util.List;
 
