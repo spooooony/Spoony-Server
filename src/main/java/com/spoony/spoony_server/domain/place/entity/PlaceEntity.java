@@ -14,23 +14,23 @@ public class PlaceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer placeId;
-    private Integer placeCode;
     private String placeName;
     private String placeAddress;
+    private String placeRoadAddress;
     private Double latitude;
     private Double longitude;
 
     @Builder
     public PlaceEntity(Integer placeId,
-                       Integer placeCode,
                        String placeName,
                        String placeAddress,
+                       String placeRoadAddress,
                        Double latitude,
                        Double longitude) {
         this.placeId = placeId;
-        this.placeCode = placeCode;
         this.placeName = placeName;
         this.placeAddress = placeAddress;
+        this.placeRoadAddress = placeRoadAddress;
         this.latitude = latitude;
         this.longitude = longitude;
     }
