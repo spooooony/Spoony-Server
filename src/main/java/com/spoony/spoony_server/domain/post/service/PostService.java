@@ -76,12 +76,12 @@ public class PostService {
 
         postCategoryRepository.save(postCategoryEntity);
 
-        MenuEntity menuEntity = MenuEntity.builder()
-                .post(postEntity)
-                .menuName(postCreateRequestDTO.menuName())
-                .build();
-
-        menuRepository.save(menuEntity);
+        postCreateRequestDTO.menuList().stream()
+                .map(menuName -> MenuEntity.builder()
+                        .post(postEntity)
+                        .menuName(menuName)
+                        .build())
+                .forEach(menuRepository::save);
 
         PhotoEntity photoEntity = PhotoEntity.builder()
                 .post(postEntity)
