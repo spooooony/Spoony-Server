@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class ScoopPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer scoopId;
+    private Long scoopId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -23,7 +23,7 @@ public class ScoopPostEntity {
     private PostEntity post;
 
     @Builder
-    public ScoopPostEntity(Integer scoopId, UserEntity user, PostEntity post) {
+    public ScoopPostEntity(Long scoopId, UserEntity user, PostEntity post) {
         this.scoopId = scoopId;
         this.user = user;
         this.post = post;

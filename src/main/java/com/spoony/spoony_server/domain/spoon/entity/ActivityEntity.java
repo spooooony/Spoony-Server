@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 public class ActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer activityId;
+    private Long activityId;
     private String activityName;
     private Integer changeAmount;
 
     @Builder
-    public ActivityEntity(Integer activityId, String activityName, Integer changeAmount) {
+    public ActivityEntity(Long activityId, String activityName, Integer changeAmount) {
         this.activityId = activityId;
         this.activityName = activityName;
         this.changeAmount = changeAmount;

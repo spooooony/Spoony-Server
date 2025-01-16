@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer categoryId;
+    private Long categoryId;
     private String categoryName;
 
     @Builder
-    public CategoryEntity(Integer categoryId, String categoryName) {
+    public CategoryEntity(Long categoryId, String categoryName) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
     }

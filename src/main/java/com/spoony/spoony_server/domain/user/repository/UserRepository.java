@@ -11,10 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-  
+
     @Query("SELECT p.user FROM PostEntity p WHERE p.postId = :postId")
-    Optional<UserEntity> findUserByPostId(@Param("postId") Integer postId);
+    Optional<UserEntity> findUserByPostId(@Param("postId") Long postId);
 
     @Query("SELECT u.region FROM UserEntity u WHERE u.userId = :userId")
-    Optional<RegionEntity> findReigonByUserId(@Param("userId") Integer userId);
+    Optional<RegionEntity> findReigonByUserId(@Param("userId") Long userId);
 }

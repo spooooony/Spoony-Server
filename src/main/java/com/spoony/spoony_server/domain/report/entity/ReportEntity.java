@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class ReportEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer reportId;
+    private Long reportId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -31,7 +31,7 @@ public class ReportEntity {
     private String reportDetail;
 
     @Builder
-    public ReportEntity(Integer reportId, PostEntity post, UserEntity user, ReportType reportType, String reportDetail) {
+    public ReportEntity(Long reportId, PostEntity post, UserEntity user, ReportType reportType, String reportDetail) {
         this.reportId = reportId;
         this.post = post;
         this.user = user;

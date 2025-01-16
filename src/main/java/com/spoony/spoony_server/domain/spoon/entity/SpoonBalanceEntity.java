@@ -14,16 +14,16 @@ import java.time.LocalDateTime;
 public class SpoonBalanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer spoonBalanceId;
+    private Long spoonBalanceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
-    private Integer amount;
+    private Long amount;
     private LocalDateTime updatedAt;
 
     @Builder
-    public SpoonBalanceEntity(Integer spoonBalanceId, Integer amount, UserEntity user, LocalDateTime updatedAt) {
+    public SpoonBalanceEntity(Long spoonBalanceId, Long amount, UserEntity user, LocalDateTime updatedAt) {
         this.spoonBalanceId = spoonBalanceId;
         this.amount = amount;
         this.user = user;

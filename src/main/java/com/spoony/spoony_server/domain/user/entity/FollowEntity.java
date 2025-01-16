@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class FollowEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer followId;
+    private Long followId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id")

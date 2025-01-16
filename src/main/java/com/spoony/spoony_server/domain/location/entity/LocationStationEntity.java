@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 public class LocationStationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer guId;
+    private Long guId;
     private String guName;
     private String guAddress;
     private Double latitude;
     private Double longitude;
 
     @Builder
-    public LocationStationEntity(Integer guId, String guName, String guAddress, Double latitude, Double longitude) {
+    public LocationStationEntity(Long guId, String guName, String guAddress, Double latitude, Double longitude) {
         this.guId = guId;
         this.guName = guName;
         this.guAddress = guAddress;

@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Table(name = "region")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 public class RegionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer regionId;
+    private Long regionId;
     private String regionName;
 }

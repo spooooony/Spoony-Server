@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class MenuEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer menuId;
+    private Long menuId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -22,7 +22,7 @@ public class MenuEntity {
     private String menuName;
 
     @Builder
-    public MenuEntity(Integer menuId, PostEntity post, String menuName) {
+    public MenuEntity(Long menuId, PostEntity post, String menuName) {
         this.menuId = menuId;
         this.post = post;
         this.menuName = menuName;

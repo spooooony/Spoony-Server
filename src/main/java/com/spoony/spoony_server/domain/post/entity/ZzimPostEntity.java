@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class ZzimPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer zzimId;
+    private Long zzimId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -23,7 +23,7 @@ public class ZzimPostEntity {
     private PostEntity post;
 
     @Builder
-    public ZzimPostEntity(UserEntity user, Integer zzimId, PostEntity post) {
+    public ZzimPostEntity(UserEntity user, Long zzimId, PostEntity post) {
         this.user = user;
         this.zzimId = zzimId;
         this.post = post;

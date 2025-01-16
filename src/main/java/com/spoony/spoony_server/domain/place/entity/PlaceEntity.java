@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class PlaceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer placeId;
+    private Long placeId;
     private String placeName;
     private String placeAddress;
     private String placeRoadAddress;
@@ -21,7 +21,7 @@ public class PlaceEntity {
     private Double longitude;
 
     @Builder
-    public PlaceEntity(Integer placeId,
+    public PlaceEntity(Long placeId,
                        String placeName,
                        String placeAddress,
                        String placeRoadAddress,

@@ -1,23 +1,16 @@
 package com.spoony.spoony_server.domain.post.service;
 
 import com.spoony.spoony_server.common.exception.BusinessException;
+import com.spoony.spoony_server.common.message.CategoryErrorMessage;
 import com.spoony.spoony_server.common.message.PostErrorMessage;
+import com.spoony.spoony_server.common.message.SpoonErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
-import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
-import com.spoony.spoony_server.domain.post.entity.CategoryEntity;
-import com.spoony.spoony_server.domain.post.entity.MenuEntity;
-import com.spoony.spoony_server.domain.post.entity.PostCategoryEntity;
-import com.spoony.spoony_server.domain.post.entity.PostEntity;
-import com.spoony.spoony_server.domain.post.repository.CategoryRepository;
-import com.spoony.spoony_server.domain.post.repository.MenuRepository;
-import com.spoony.spoony_server.domain.post.repository.PostCategoryRepository;
-import com.spoony.spoony_server.domain.post.repository.PostRepository;
-import com.spoony.spoony_server.domain.user.entity.RegionEntity;
-import com.spoony.spoony_server.common.message.CategoryErrorMessage;
-import com.spoony.spoony_server.common.message.SpoonErrorMessage;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
+import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
+import com.spoony.spoony_server.domain.post.entity.*;
+import com.spoony.spoony_server.domain.post.repository.*;
 import com.spoony.spoony_server.domain.spoon.entity.ActivityEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonBalanceEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonHistoryEntity;
@@ -25,6 +18,7 @@ import com.spoony.spoony_server.domain.spoon.repository.ActivityRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonBalanceRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonHistoryRepository;
 import com.spoony.spoony_server.domain.user.entity.FollowEntity;
+import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +48,7 @@ public class PostService {
     private final FeedRepository feedRepository;
 
     @Transactional
-    public PostResponseDTO getPostById(Integer postId) {
+    public PostResponseDTO getPostById(Long postId) {
 
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
         UserEntity userEntity = postEntity.getUser();
@@ -64,13 +58,13 @@ public class PostService {
 
         RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
         PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
-        Integer categoryId = postCategoryEntity.getCategory().getCategoryId();
+        Long categoryId = postCategoryEntity.getCategory().getCategoryId();
         CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
 
         PlaceEntity place = postEntity.getPlace();
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
         String formattedDate = latestDate.toLocalDate().toString();
-        Integer zzim_count = postRepository.countByPostId(postId);
+        Long zzim_count = postRepository.countByPostId(postId);
         //List<String> category_list = List.of(categoryEntity.getCategoryName());
         String category = categoryEntity.getCategoryName();
 
@@ -82,8 +76,8 @@ public class PostService {
 
         return new PostResponseDTO(postId, userEntity.getUserId(), userEntity.getUserName(), regionEntity.getRegionName(), category, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
                 place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzim_count
-
         );
+    }
 
     @Transactional
     public void createPost(PostCreateRequestDTO postCreateRequestDTO) {

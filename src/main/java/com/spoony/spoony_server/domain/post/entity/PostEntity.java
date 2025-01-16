@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer postId;
+    private Long postId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -33,7 +33,7 @@ public class PostEntity {
     private LocalDateTime updatedAt;
 
     @Builder
-    public PostEntity(Integer postId, UserEntity user, PlaceEntity place, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.postId = postId;
         this.user = user;
         this.place = place;

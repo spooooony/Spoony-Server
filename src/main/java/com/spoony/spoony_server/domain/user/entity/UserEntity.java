@@ -10,12 +10,11 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(name = "user")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    private Long userId;
     private String userEmail;
     private String userPassword;
     private String userName;

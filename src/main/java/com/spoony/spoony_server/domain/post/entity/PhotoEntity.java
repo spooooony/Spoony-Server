@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class PhotoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer photoId;
+    private Long photoId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -20,7 +20,7 @@ public class PhotoEntity {
     private String photoUrl;
 
     @Builder
-    public PhotoEntity(Integer photoId, PostEntity post, String photoUrl) {
+    public PhotoEntity(Long photoId, PostEntity post, String photoUrl) {
         this.photoId = photoId;
         this.post = post;
         this.photoUrl = photoUrl;

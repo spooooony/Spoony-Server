@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class FeedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer feedId;
+    private Long feedId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -23,7 +23,7 @@ public class FeedEntity {
     private PostEntity post;
 
     @Builder
-    public FeedEntity(Integer feedId, UserEntity user, PostEntity post) {
+    public FeedEntity(Long feedId, UserEntity user, PostEntity post) {
         this.feedId = feedId;
         this.user = user;
         this.post = post;

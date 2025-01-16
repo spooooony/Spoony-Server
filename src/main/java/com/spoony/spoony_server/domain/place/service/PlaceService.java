@@ -26,7 +26,7 @@ public class PlaceService {
 
         List<PostEntity> userPosts = postRepository.findByUser_UserId(userId);
 
-        List<Integer> placeIds = userPosts.stream()
+        List<Long> placeIds = userPosts.stream()
                 .map(post -> post.getPlace().getPlaceId())
                 .toList();
 

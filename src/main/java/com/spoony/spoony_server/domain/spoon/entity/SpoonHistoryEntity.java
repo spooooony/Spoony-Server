@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class SpoonHistoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer historyId;
+    private Long historyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -24,11 +24,11 @@ public class SpoonHistoryEntity {
     @JoinColumn(name = "activity_id")
     private ActivityEntity activity;
 
-    private Integer balanceAfter;
+    private Long balanceAfter;
     private LocalDateTime createdAt;
 
     @Builder
-    public SpoonHistoryEntity(Integer historyId, UserEntity user, ActivityEntity activity, Integer balanceAfter, LocalDateTime createdAt) {
+    public SpoonHistoryEntity(Long historyId, UserEntity user, ActivityEntity activity, Long balanceAfter, LocalDateTime createdAt) {
         this.historyId = historyId;
         this.user = user;
         this.activity = activity;

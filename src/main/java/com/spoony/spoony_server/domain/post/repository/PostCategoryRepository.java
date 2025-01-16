@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PostCategoryRepository extends JpaRepository<PostCategoryEntity, Integer> {
+public interface PostCategoryRepository extends JpaRepository<PostCategoryEntity, Long> {
     Optional<PostCategoryEntity> findByPost(PostEntity post);
+}

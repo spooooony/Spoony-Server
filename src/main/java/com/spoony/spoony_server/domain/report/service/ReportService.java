@@ -30,7 +30,6 @@ public class ReportService {
         this.userRepository = userRepository;
     }
 
-
     public ResponseEntity<ResponseDTO<Void>> createReport(ReportRequestDTO reportRequest) {
 
         if (reportRequest.reportDetail().trim().isEmpty()) {
