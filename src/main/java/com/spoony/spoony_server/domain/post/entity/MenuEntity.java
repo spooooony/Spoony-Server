@@ -3,10 +3,12 @@ package com.spoony.spoony_server.domain.post.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "menu")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MenuEntity {
     @Id

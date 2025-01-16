@@ -1,14 +1,23 @@
 package com.spoony.spoony_server.domain.post.service;
 
 import com.spoony.spoony_server.common.exception.BusinessException;
-import com.spoony.spoony_server.common.message.CategoryErrorMessage;
-import com.spoony.spoony_server.common.message.SpoonErrorMessage;
+import com.spoony.spoony_server.common.message.PostErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
+import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
+import com.spoony.spoony_server.domain.post.entity.CategoryEntity;
+import com.spoony.spoony_server.domain.post.entity.MenuEntity;
+import com.spoony.spoony_server.domain.post.entity.PostCategoryEntity;
+import com.spoony.spoony_server.domain.post.entity.PostEntity;
+import com.spoony.spoony_server.domain.post.repository.CategoryRepository;
+import com.spoony.spoony_server.domain.post.repository.MenuRepository;
+import com.spoony.spoony_server.domain.post.repository.PostCategoryRepository;
+import com.spoony.spoony_server.domain.post.repository.PostRepository;
+import com.spoony.spoony_server.domain.user.entity.RegionEntity;
+import com.spoony.spoony_server.common.message.CategoryErrorMessage;
+import com.spoony.spoony_server.common.message.SpoonErrorMessage;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
-import com.spoony.spoony_server.domain.post.entity.*;
-import com.spoony.spoony_server.domain.post.repository.*;
 import com.spoony.spoony_server.domain.spoon.entity.ActivityEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonBalanceEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonHistoryEntity;
@@ -24,24 +33,57 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
-    private final UserRepository userRepository;
-    private final PlaceRepository placeRepository;
     private final PostRepository postRepository;
-    private final MenuRepository menuRepository;
-    private final PhotoRepository photoRepository;
-    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
     private final PostCategoryRepository postCategoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final MenuRepository menuRepository;
+    private final PlaceRepository placeRepository;
+    private final PhotoRepository photoRepository;
     private final SpoonHistoryRepository spoonHistoryRepository;
     private final SpoonBalanceRepository spoonBalanceRepository;
     private final ActivityRepository activityRepository;
     private final ZzimPostRepository zzimPostRepository;
     private final FollowRepository followRepository;
     private final FeedRepository feedRepository;
+
+    @Transactional
+    public PostResponseDTO getPostById(Integer postId) {
+
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        UserEntity userEntity = postEntity.getUser();
+        if (userEntity == null) {
+            throw new BusinessException(PostErrorMessage.NOT_FOUND_ERROR);
+        }
+
+        RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        Integer categoryId = postCategoryEntity.getCategory().getCategoryId();
+        CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
+
+        PlaceEntity place = postEntity.getPlace();
+        LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
+        String formattedDate = latestDate.toLocalDate().toString();
+        Integer zzim_count = postRepository.countByPostId(postId);
+        //List<String> category_list = List.of(categoryEntity.getCategoryName());
+        String category = categoryEntity.getCategoryName();
+
+        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+
+        List<String> menuList = menuEntityList.stream()
+                .map(menuEntity -> menuEntity.getMenuName())
+                .collect(Collectors.toList());
+
+        return new PostResponseDTO(postId, userEntity.getUserId(), userEntity.getUserName(), regionEntity.getRegionName(), category, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
+                place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzim_count
+
+        );
 
     @Transactional
     public void createPost(PostCreateRequestDTO postCreateRequestDTO) {
