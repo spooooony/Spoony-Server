@@ -10,6 +10,7 @@ import com.spoony.spoony_server.domain.place.dto.request.PlaceCheckResponseDTO;
 import com.spoony.spoony_server.domain.place.dto.response.PlaceListResponseDTO;
 import com.spoony.spoony_server.domain.place.dto.response.PlaceResponseDTO;
 import com.spoony.spoony_server.domain.place.service.PlaceService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/place")
 public class PlaceController {
+
+    @Value("${naver.clientId}")
+    private String clientId;
+    @Value("${naver.clientSecret}")
+    private String clientSecret;
+
     public final PlaceService placeService;
 
     public PlaceController(PlaceService placeService) {
@@ -36,10 +43,6 @@ public class PlaceController {
     public ResponseEntity<ResponseDTO<PlaceListResponseDTO>> getPlaceList(
             @RequestParam(name = "query") String query,
             @RequestParam(name = "display", required = false, defaultValue = "5") int display) {
-
-        // 네이버 지역 검색 API
-        String clientId = "RftWm05kMhRNzohzXoIO";
-        String clientSecret = "6GAKpX5obG";
 
         URI uri = UriComponentsBuilder
                 .fromUriString("https://openapi.naver.com")
