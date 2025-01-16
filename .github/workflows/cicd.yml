@@ -32,6 +32,16 @@ jobs:
           echo "${{ secrets.CD_APPLICATION }}" > ./src/main/resources/application.yml
           cat ./src/main/resources/application.yml
 
+      - name: Generate application-aws.yml
+        run: |
+          echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
+          cat ./src/main/resources/application-aws.yml
+
+      - name: Generate application-naver.yml
+        run: |
+          echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
+          cat ./src/main/resources/application-naver.yml
+
       - name: Build Project
         run: ./gradlew clean build -x test
 
