@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
 @Table(name = "category")
 @Getter
@@ -16,10 +14,10 @@ public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer categoryId;
-    private List<String> categoryName;
+    private String categoryName;
 
     @Builder
-    public CategoryEntity(Integer categoryId, List<String> categoryName) {
+    public CategoryEntity(Integer categoryId, String categoryName) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
     }

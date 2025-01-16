@@ -41,7 +41,7 @@ public class PostService {
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
         UserEntity userEntity = postEntity.getUser();
         if (userEntity == null) {
-            throw new BusinessException(UserErrorMessage.NOT_FOUND_ERROR);
+            throw new BusinessException(PostErrorMessage.NOT_FOUND_ERROR);
         }
 
         RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
@@ -53,8 +53,8 @@ public class PostService {
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
         String formattedDate = latestDate.toLocalDate().toString();
         Integer zzim_count = postRepository.countByPostId(postId);
-        List<String> category_list = categoryEntity.getCategoryName();
-
+        //List<String> category_list = List.of(categoryEntity.getCategoryName());
+        String category = categoryEntity.getCategoryName();
 
         List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
 
@@ -62,7 +62,7 @@ public class PostService {
                 .map(menuEntity -> menuEntity.getMenuName())
                 .collect(Collectors.toList());
 
-        return new PostResponseDTO(postId, userEntity.getUserId(), userEntity.getUserName(), regionEntity.getRegionName(), category_list, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
+        return new PostResponseDTO(postId, userEntity.getUserId(), userEntity.getUserName(), regionEntity.getRegionName(), category, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
                 place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzim_count
 
         );
