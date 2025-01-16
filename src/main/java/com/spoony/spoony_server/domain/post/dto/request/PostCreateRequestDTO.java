@@ -11,7 +11,5 @@ public record PostCreateRequestDTO(Long userId,
                                    Double latitude,
                                    Double longitude,
                                    Long categoryId,
-                                   List<String> menuList,
-                                   String photo) {
-    // photo 임시 String으로 설정
+                                   List<String> menuList) {
 }

@@ -1,7 +1,6 @@
 package com.spoony.spoony_server.infra.service;
 
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.spoony.spoony_server.common.exception.BusinessException;
@@ -17,6 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,28 +35,36 @@ public class AwsFileService {
     private String PROFILE_IMG_DIR = "profile/";
     private String POST_IMG_DIR = "post/";
 
-    public String savePhoto(MultipartFile multipartFile, Long memberId) throws IOException {
+    public String saveProfileImage(MultipartFile multipartFile) throws IOException {
         File uploadFile = convert(multipartFile)
                 .orElseThrow(() -> new BusinessException(S3ErrorMessage.FILE_CHANGE_FAIL));
-        return upload(uploadFile, POST_IMG_DIR, memberId);
+        return upload(uploadFile, PROFILE_IMG_DIR);
     }
 
-    public String saveProfileImg(MultipartFile multipartFile, Long memberId) throws IOException {
+    public String savePostImage(MultipartFile multipartFile) throws IOException {
         File uploadFile = convert(multipartFile)
                 .orElseThrow(() -> new BusinessException(S3ErrorMessage.FILE_CHANGE_FAIL));
-        return upload(uploadFile, PROFILE_IMG_DIR, memberId);
+        return upload(uploadFile, POST_IMG_DIR);
     }
 
-    private String upload(File uploadFile, String dirName, Long memberId) {
-        String fileName = dirName + memberId + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
+    public List<String> savePostImages(List<MultipartFile> photos) throws IOException {
+        List<String> photoUrls = new ArrayList<>();
+        for (MultipartFile photo : photos) {
+            String photoUrl = savePostImage(photo); // 개별 파일 업로드
+            photoUrls.add(photoUrl);
+        }
+        return photoUrls;
+    }
+
+    private String upload(File uploadFile, String dirName) {
+        String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
         String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
         return uploadImageUrl;
     }
 
     private String putS3(File uploadFile, String fileName) {
-        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(
-                CannedAccessControlList.PublicRead));
+        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
@@ -68,7 +77,15 @@ public class AwsFileService {
     }
 
     private Optional<File> convert(MultipartFile file) throws IOException {
-        File convertFile = new File(System.getProperty("user.home") + "/" + file.getOriginalFilename());
+        String photosDir = "src/main/resources/photos/";
+
+        File directory = new File(photosDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        File convertFile = new File(photosDir + file.getOriginalFilename());
+
         if (convertFile.createNewFile()) {
             try (FileOutputStream fos = new FileOutputStream(convertFile)) {
                 fos.write(file.getBytes());
