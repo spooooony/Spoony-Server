@@ -4,6 +4,7 @@ import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 import java.time.LocalDateTime;
 
 @Entity
