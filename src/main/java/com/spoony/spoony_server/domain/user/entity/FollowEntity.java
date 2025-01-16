@@ -2,9 +2,11 @@ package com.spoony.spoony_server.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @Table(name = "follow")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FollowEntity {
