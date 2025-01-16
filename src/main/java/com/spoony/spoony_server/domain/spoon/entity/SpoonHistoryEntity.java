@@ -1,12 +1,15 @@
 package com.spoony.spoony_server.domain.spoon.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "spoon_history")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SpoonHistoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

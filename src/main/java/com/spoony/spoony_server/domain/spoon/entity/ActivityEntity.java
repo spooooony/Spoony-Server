@@ -1,10 +1,13 @@
 package com.spoony.spoony_server.domain.spoon.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "activity")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
