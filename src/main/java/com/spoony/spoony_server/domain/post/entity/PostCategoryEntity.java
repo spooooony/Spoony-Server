@@ -9,7 +9,12 @@ import lombok.NoArgsConstructor;
 @Table(name = "post_category")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostCategoryEntity {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // 자동 생성되는 기본 키
+    @Column(name = "post_category_id")
+    private Long postCategoryId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostEntity post;
@@ -19,7 +24,8 @@ public class PostCategoryEntity {
     private CategoryEntity category;
 
     @Builder
-    public PostCategoryEntity(PostEntity post, CategoryEntity category) {
+    public PostCategoryEntity(Long postCategoryId, PostEntity post, CategoryEntity category) {
+        this.postCategoryId = postCategoryId;
         this.post = post;
         this.category = category;
     }
