@@ -15,6 +15,7 @@ import com.spoony.spoony_server.domain.spoon.entity.SpoonHistoryEntity;
 import com.spoony.spoony_server.domain.spoon.repository.ActivityRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonBalanceRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonHistoryRepository;
+import com.spoony.spoony_server.domain.user.entity.FollowEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,9 @@ public class PostService {
     private final SpoonHistoryRepository spoonHistoryRepository;
     private final SpoonBalanceRepository spoonBalanceRepository;
     private final ActivityRepository activityRepository;
+    private final ZzimPostRepository zzimPostRepository;
+    private final FollowRepository followRepository;
+    private final FeedRepository feedRepository;
 
     @Transactional
     public void createPost(PostCreateRequestDTO postCreateRequestDTO) {
@@ -111,5 +116,25 @@ public class PostService {
                 .build();
 
         spoonHistoryRepository.save(spoonHistoryEntity);
+
+        // 작성자 지도 리스트에 게시물 추가
+        ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder()
+                .user(userEntity)
+                .post(postEntity)
+                .build();
+
+        zzimPostRepository.save(zzimPostEntity);
+
+        // 작성자를 팔로우하는 사용자들의 피드에 게시물 추가
+        List<FollowEntity> followerList = followRepository.findByFollowing(userEntity);
+
+        List<FeedEntity> feedList = followerList.stream()
+                .map(follower -> FeedEntity.builder()
+                        .user(follower.getFollower())
+                        .post(postEntity)
+                        .build())
+                .toList();
+
+        feedRepository.saveAll(feedList);
     }
 }
