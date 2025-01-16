@@ -1,9 +1,7 @@
 package com.spoony.spoony_server.domain.report.controller;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
-import com.spoony.spoony_server.common.message.BusinessErrorMessage;
 import com.spoony.spoony_server.domain.report.dto.request.ReportRequestDTO;
-import com.spoony.spoony_server.domain.report.dto.response.ReportResponseDTO;
 import com.spoony.spoony_server.domain.report.service.ReportService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,30 +22,8 @@ public class ReportController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDTO<ReportResponseDTO>> createReport(@RequestBody ReportRequestDTO reportRequestDTO) {
-
-
-        ReportRequestDTO updatedRequestDTO = new ReportRequestDTO(
-                reportRequestDTO.postId(),
-                reportRequestDTO.userId(),
-                reportRequestDTO.reportType(),
-                reportRequestDTO.reportDetail()
-        );
-
-        try {
-            ReportResponseDTO responseDTO = reportService.createReport(updatedRequestDTO);
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ResponseDTO.success(responseDTO));
-
-        } catch (IllegalArgumentException e) {
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ResponseDTO.fail(BusinessErrorMessage.BAD_REQUEST));
-        } catch (Exception e) {
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ResponseDTO.fail(BusinessErrorMessage.INTERNAL_SERVER_ERROR));
-        }
+    public ResponseEntity<ResponseDTO<Void>> createReport(@RequestBody ReportRequestDTO reportRequestDTO) {
+        reportService.createReport(reportRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }

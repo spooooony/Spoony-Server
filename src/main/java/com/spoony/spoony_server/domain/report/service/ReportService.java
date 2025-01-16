@@ -1,15 +1,21 @@
 package com.spoony.spoony_server.domain.report.service;
 
 
+import com.spoony.spoony_server.common.dto.ResponseDTO;
+import com.spoony.spoony_server.common.exception.BusinessException;
+import com.spoony.spoony_server.common.message.PostErrorMessage;
+import com.spoony.spoony_server.common.message.ReportErrorMessage;
+import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.repository.PostRepository;
 import com.spoony.spoony_server.domain.report.dto.request.ReportRequestDTO;
-import com.spoony.spoony_server.domain.report.dto.response.ReportResponseDTO;
 import com.spoony.spoony_server.domain.report.entity.ReportEntity;
 import com.spoony.spoony_server.domain.report.enums.ReportType;
 import com.spoony.spoony_server.domain.report.repository.ReportRepository;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,11 +31,15 @@ public class ReportService {
     }
 
 
-    public ReportResponseDTO createReport(ReportRequestDTO reportRequest) {
+    public ResponseEntity<ResponseDTO<Void>> createReport(ReportRequestDTO reportRequest) {
 
-        if (reportRequest == null || reportRequest.reportDetail() == null) {
-            throw new IllegalArgumentException();
+        if (reportRequest.reportDetail().trim().isEmpty()) {
+            throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_MISSING);
         }
+        if (reportRequest.reportDetail().length() > 300) {
+            throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_TOO_LONG);
+        }
+
 
         ReportType reportType = reportRequest.reportType();
         if (reportType == null) {
@@ -40,11 +50,10 @@ public class ReportService {
         Long userId = reportRequest.userId();
 
         PostEntity postEntity = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
 
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
-
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
         ReportEntity reportEntity = ReportEntity.builder()
                 .post(postEntity)
                 .user(userEntity)
@@ -54,12 +63,6 @@ public class ReportService {
 
         ReportEntity savedEntity = reportRepository.save(reportEntity);
 
-        return new ReportResponseDTO(
-                savedEntity.getReportId(),
-                savedEntity.getUser().getUserId(),
-                savedEntity.getReportType(),
-                savedEntity.getPost().getPostId()
-
-        );
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }
