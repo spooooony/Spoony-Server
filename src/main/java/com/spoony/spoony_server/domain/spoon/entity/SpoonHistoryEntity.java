@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.domain.spoon.entity;
 
+import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,7 +18,7 @@ public class SpoonHistoryEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private SpoonBalanceEntity spoonBalance;
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "activity_id")
@@ -27,9 +28,9 @@ public class SpoonHistoryEntity {
     private LocalDateTime createdAt;
 
     @Builder
-    public SpoonHistoryEntity(Integer historyId, SpoonBalanceEntity spoonBalance, ActivityEntity activity, Integer balanceAfter, LocalDateTime createdAt) {
+    public SpoonHistoryEntity(Integer historyId, UserEntity user, ActivityEntity activity, Integer balanceAfter, LocalDateTime createdAt) {
         this.historyId = historyId;
-        this.spoonBalance = spoonBalance;
+        this.user = user;
         this.activity = activity;
         this.balanceAfter = balanceAfter;
         this.createdAt = createdAt;

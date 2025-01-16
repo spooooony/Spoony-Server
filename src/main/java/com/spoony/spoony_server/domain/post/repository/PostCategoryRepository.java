@@ -10,6 +10,3 @@ import java.util.Optional;
 @Repository
 public interface PostCategoryRepository extends JpaRepository<PostCategoryEntity, Integer> {
     Optional<PostCategoryEntity> findByPost(PostEntity post);
-
-
-}

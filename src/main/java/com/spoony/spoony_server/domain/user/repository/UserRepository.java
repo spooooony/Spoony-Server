@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-
+  
     @Query("SELECT p.user FROM PostEntity p WHERE p.postId = :postId")
     Optional<UserEntity> findUserByPostId(@Param("postId") Integer postId);
 

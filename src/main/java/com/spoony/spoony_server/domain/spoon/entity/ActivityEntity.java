@@ -3,9 +3,11 @@ package com.spoony.spoony_server.domain.spoon.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @Table(name = "activity")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ActivityEntity {
@@ -22,3 +24,4 @@ public class ActivityEntity {
         this.changeAmount = changeAmount;
     }
 }
+
