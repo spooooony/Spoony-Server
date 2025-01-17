@@ -8,11 +8,11 @@ import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
-import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.entity.*;
+import com.spoony.spoony_server.domain.post.enums.CategoryType;
 import com.spoony.spoony_server.domain.post.repository.*;
 import com.spoony.spoony_server.domain.spoon.entity.ActivityEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonBalanceEntity;
@@ -24,7 +24,6 @@ import com.spoony.spoony_server.domain.user.entity.FollowEntity;
 import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
-import com.spoony.spoony_server.domain.post.enums.CategoryType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -180,7 +179,7 @@ public class PostService {
 
     // 모든 카테고리 조회
     public CategoryMonoListResponseDTO getAllCategories() {
-        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList =  categoryRepository.findAll().stream()
+        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findAll().stream()
                 .map(category -> new CategoryMonoResponseDTO(
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
@@ -192,7 +191,7 @@ public class PostService {
 
     // 음식 카테고리 조회
     public CategoryMonoListResponseDTO getFoodCategories() {
-        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList =  categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
+        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
                 .map(category -> new CategoryMonoResponseDTO(
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
