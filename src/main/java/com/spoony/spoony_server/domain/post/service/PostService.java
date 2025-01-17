@@ -8,9 +8,7 @@ import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
-import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.*;
 import com.spoony.spoony_server.domain.post.entity.*;
 import com.spoony.spoony_server.domain.post.enums.CategoryType;
 import com.spoony.spoony_server.domain.post.repository.*;
@@ -53,14 +51,14 @@ public class PostService {
     @Transactional
     public PostResponseDTO getPostById(Long postId) {
 
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         UserEntity userEntity = postEntity.getUser();
         if (userEntity == null) {
-            throw new BusinessException(PostErrorMessage.NOT_FOUND_ERROR);
+            throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
         RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
-        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         Long categoryId = postCategoryEntity.getCategory().getCategoryId();
         CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
 
@@ -71,7 +69,7 @@ public class PostService {
         //List<String> category_list = List.of(categoryEntity.getCategoryName());
         String category = categoryEntity.getCategoryName();
 
-        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         List<String> menuList = menuEntityList.stream()
                 .map(menuEntity -> menuEntity.getMenuName())
@@ -178,6 +176,7 @@ public class PostService {
     }
 
     // 모든 카테고리 조회
+    @Transactional
     public CategoryMonoListResponseDTO getAllCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findAll().stream()
                 .map(category -> new CategoryMonoResponseDTO(
@@ -190,6 +189,7 @@ public class PostService {
     }
 
     // 음식 카테고리 조회
+    @Transactional
     public CategoryMonoListResponseDTO getFoodCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
                 .map(category -> new CategoryMonoResponseDTO(
@@ -199,5 +199,41 @@ public class PostService {
                 .collect(Collectors.toList());
 
         return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
+    }
+
+    //사용자 지도 리스트 조회
+    public ZzimCardListResponse getZzimCardList(Long userId) {
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
+
+        List<ZzimCardResponse> zzimCardResponses = zzimPostEntityList.stream()
+                .map(zzimPostEntity -> {
+                    PostEntity postEntity = zzimPostEntity.getPost();
+                    PlaceEntity placeEntity = postEntity.getPlace();
+                    if (placeEntity == null) {
+                        throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
+                    }
+
+                    CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
+                            .map(PostCategoryEntity::getCategory)
+                            .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryName(),
+                                    categoryEntity.getIconUrlColor(),
+                                    categoryEntity.getBackgroundColor()
+                            ))
+                            .orElse(null);
+
+                    return new ZzimCardResponse(
+                            placeEntity.getPlaceName(),
+                            placeEntity.getPlaceAddress(),
+                            postEntity.getTitle(),
+                            placeEntity.getLatitude(),
+                            placeEntity.getLongitude(),
+                            categoryColorResponse
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new ZzimCardListResponse(zzimCardResponses);
     }
 }
