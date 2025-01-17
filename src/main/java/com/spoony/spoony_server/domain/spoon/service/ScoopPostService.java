@@ -76,7 +76,7 @@ public class ScoopPostService {
         SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity)
                 .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
 
-        spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() - activityEntity.getChangeAmount());
+        spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + activityEntity.getChangeAmount());
         spoonBalanceEntity.setUpdatedAt(LocalDateTime.now());
 
         spoonBalanceRepository.save(spoonBalanceEntity);
