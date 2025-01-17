@@ -4,8 +4,8 @@ import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.ZzimCardListResponse;
 import com.spoony.spoony_server.domain.post.service.PostService;
 import com.spoony.spoony_server.infra.service.AwsFileService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-
 import java.util.List;
 
 @RestController
@@ -70,5 +68,11 @@ public class PostController {
     public ResponseEntity<ResponseDTO<CategoryMonoListResponseDTO>> getFoodCategories() {
         CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getFoodCategories();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
+    }
+
+    @GetMapping("/zzim/{userId}")
+    public ResponseEntity<ResponseDTO<ZzimCardListResponse>> getZzimCardList(@PathVariable Long userId) {
+        ZzimCardListResponse zzimCardListResponse = postService.getZzimCardList(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 }

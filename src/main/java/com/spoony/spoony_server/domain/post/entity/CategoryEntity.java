@@ -29,13 +29,13 @@ public class CategoryEntity {
                           String iconUrlColor,
                           String iconUrlBlack,
                           String iconUrlWhite,
-                          String backgroundColor) {
+                          String iconBackgroundColor) {
         this.categoryId = categoryId;
         this.categoryType = categoryType;
         this.categoryName = categoryName;
         this.iconUrlColor = iconUrlColor;
         this.iconUrlBlack = iconUrlBlack;
         this.iconUrlWhite = iconUrlWhite;
-        this.backgroundColor = backgroundColor;
+        this.backgroundColor = iconBackgroundColor;
     }
 }
