@@ -7,6 +7,7 @@ import com.spoony.spoony_server.common.message.SpoonErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
+import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
@@ -83,21 +84,21 @@ public class PostService {
     }
 
     @Transactional
-    public void createPost(PostCreateRequestDTO postCreateRequestDTO) {
+    public void createPost(PostCreateDTO postCreateDTO) {
 
         // 게시글 업로드
-        UserEntity userEntity = userRepository.findById(postCreateRequestDTO.userId())
+        UserEntity userEntity = userRepository.findById(postCreateDTO.userId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
 
-        CategoryEntity categoryEntity = categoryRepository.findById(postCreateRequestDTO.categoryId())
+        CategoryEntity categoryEntity = categoryRepository.findById(postCreateDTO.categoryId())
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.NOT_FOUND_ERROR));
 
         PlaceEntity placeEntity = PlaceEntity.builder()
-                .placeName(postCreateRequestDTO.placeName())
-                .placeAddress(postCreateRequestDTO.placeAddress())
-                .placeRoadAddress(postCreateRequestDTO.placeRoadAddress())
-                .latitude(postCreateRequestDTO.latitude())
-                .longitude(postCreateRequestDTO.longitude())
+                .placeName(postCreateDTO.placeName())
+                .placeAddress(postCreateDTO.placeAddress())
+                .placeRoadAddress(postCreateDTO.placeRoadAddress())
+                .latitude(postCreateDTO.latitude())
+                .longitude(postCreateDTO.longitude())
                 .build();
 
         placeRepository.save(placeEntity);
@@ -105,8 +106,8 @@ public class PostService {
         PostEntity postEntity = PostEntity.builder()
                 .user(userEntity)
                 .place(placeEntity)
-                .title(postCreateRequestDTO.title())
-                .description(postCreateRequestDTO.description())
+                .title(postCreateDTO.title())
+                .description(postCreateDTO.description())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -120,19 +121,19 @@ public class PostService {
 
         postCategoryRepository.save(postCategoryEntity);
 
-        postCreateRequestDTO.menuList().stream()
+        postCreateDTO.menuList().stream()
                 .map(menuName -> MenuEntity.builder()
                         .post(postEntity)
                         .menuName(menuName)
                         .build())
                 .forEach(menuRepository::save);
 
-        PhotoEntity photoEntity = PhotoEntity.builder()
-                .post(postEntity)
-                .photoUrl(postCreateRequestDTO.photo())
-                .build();
-
-        photoRepository.save(photoEntity);
+        postCreateDTO.photoUrlList().stream()
+                .map(photoUrl -> PhotoEntity.builder()
+                        .post(postEntity)
+                        .photoUrl(photoUrl)
+                        .build())
+                .forEach(photoRepository::save);
 
         // 작성자 스푼 개수 조정
         ActivityEntity activityEntity = activityRepository.findById(2L)
