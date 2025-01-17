@@ -4,7 +4,6 @@ import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.service.PostService;
 import com.spoony.spoony_server.infra.service.AwsFileService;
@@ -18,8 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/post")
 @RequiredArgsConstructor
@@ -28,9 +25,9 @@ public class PostController {
     private final PostService postService;
     private final AwsFileService awsFileService;
 
-    @GetMapping("/{postId}")
-    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable Long postId) {
-        PostResponseDTO postResponse = postService.getPostById(postId);
+    @GetMapping("/{userId}/{postId}")
+    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable Long postId, @PathVariable Long userId) {
+        PostResponseDTO postResponse = postService.getPostById(postId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));
     }
 
