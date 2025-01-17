@@ -8,6 +8,7 @@ import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.entity.*;
 import com.spoony.spoony_server.domain.post.repository.*;
@@ -21,6 +22,7 @@ import com.spoony.spoony_server.domain.user.entity.FollowEntity;
 import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
+import com.spoony.spoony_server.domain.post.enums.CategoryType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -172,5 +174,25 @@ public class PostService {
                 .toList();
 
         feedRepository.saveAll(feedList);
+    }
+
+    // 모든 카테고리 조회
+    public List<CategoryMonoDTO> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(category -> new CategoryMonoDTO(
+                        category.getCategoryName(),
+                        category.getIconUrlBlack(),
+                        category.getIconUrlWhite()))
+                .collect(Collectors.toList());
+    }
+
+    // 음식 카테고리 조회
+    public List<CategoryMonoDTO> getFoodCategories() {
+        return categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
+                .map(category -> new CategoryMonoDTO(
+                        category.getCategoryName(),
+                        category.getIconUrlBlack(),
+                        category.getIconUrlWhite()))
+                .collect(Collectors.toList());
     }
 }

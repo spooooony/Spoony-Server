@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.domain.post.entity;
 
+import com.spoony.spoony_server.domain.post.enums.CategoryType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,11 +15,27 @@ public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
+    private CategoryType categoryType;
     private String categoryName;
+    private String iconUrlColor;
+    private String iconUrlBlack;
+    private String iconUrlWhite;
+    private String backgroundColor;
 
     @Builder
-    public CategoryEntity(Long categoryId, String categoryName) {
+    public CategoryEntity(Long categoryId,
+                          CategoryType categoryType,
+                          String categoryName,
+                          String iconUrlColor,
+                          String iconUrlBlack,
+                          String iconUrlWhite,
+                          String backgroundColor) {
         this.categoryId = categoryId;
+        this.categoryType = categoryType;
         this.categoryName = categoryName;
+        this.iconUrlColor = iconUrlColor;
+        this.iconUrlBlack = iconUrlBlack;
+        this.iconUrlWhite = iconUrlWhite;
+        this.backgroundColor = backgroundColor;
     }
 }
