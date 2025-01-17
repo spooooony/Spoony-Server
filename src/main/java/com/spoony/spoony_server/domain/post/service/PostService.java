@@ -203,32 +203,32 @@ public class PostService {
 
     //사용자 지도 리스트 조회
     public ZzimCardListResponse getZzimCardList(Long userId) {
-        List<ZzimPostEntity> zzimEntityList = zzimPostRepository.findByUser_UserId(userId)
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
 
-        List<ZzimCardResponse> zzimCardResponses = zzimEntityList.stream()
-                .map(zzimPost -> {
-                    PostEntity post = zzimPost.getPost();
-                    PlaceEntity place = post.getPlace();
-                    if (place == null) {
+        List<ZzimCardResponse> zzimCardResponses = zzimPostEntityList.stream()
+                .map(zzimPostEntity -> {
+                    PostEntity postEntity = zzimPostEntity.getPost();
+                    PlaceEntity placeEntity = postEntity.getPlace();
+                    if (placeEntity == null) {
                         throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
                     }
 
-                    CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(post)
+                    CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
-                            .map(category -> new CategoryColorResponseDTO(
-                                    category.getCategoryName(),
-                                    category.getIconUrlColor(),
-                                    category.getBackgroundColor()
+                            .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryName(),
+                                    categoryEntity.getIconUrlColor(),
+                                    categoryEntity.getBackgroundColor()
                             ))
                             .orElse(null);
 
                     return new ZzimCardResponse(
-                            place.getPlaceName(),
-                            place.getPlaceAddress(),
-                            post.getTitle(),
-                            place.getLatitude(),
-                            place.getLongitude(),
+                            placeEntity.getPlaceName(),
+                            placeEntity.getPlaceAddress(),
+                            postEntity.getTitle(),
+                            placeEntity.getLatitude(),
+                            placeEntity.getLongitude(),
                             categoryColorResponse
                     );
                 })
