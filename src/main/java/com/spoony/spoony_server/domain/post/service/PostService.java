@@ -8,7 +8,8 @@ import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
-import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.entity.*;
 import com.spoony.spoony_server.domain.post.repository.*;
@@ -177,22 +178,26 @@ public class PostService {
     }
 
     // 모든 카테고리 조회
-    public List<CategoryMonoDTO> getAllCategories() {
-        return categoryRepository.findAll().stream()
-                .map(category -> new CategoryMonoDTO(
+    public CategoryMonoListResponseDTO getAllCategories() {
+        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList =  categoryRepository.findAll().stream()
+                .map(category -> new CategoryMonoResponseDTO(
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
                 .collect(Collectors.toList());
+
+        return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
     }
 
     // 음식 카테고리 조회
-    public List<CategoryMonoDTO> getFoodCategories() {
-        return categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
-                .map(category -> new CategoryMonoDTO(
+    public CategoryMonoListResponseDTO getFoodCategories() {
+        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList =  categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
+                .map(category -> new CategoryMonoResponseDTO(
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
                 .collect(Collectors.toList());
+
+        return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
     }
 }

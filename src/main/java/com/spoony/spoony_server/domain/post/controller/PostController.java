@@ -2,7 +2,8 @@ package com.spoony.spoony_server.domain.post.controller;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
-import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +33,14 @@ public class PostController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<ResponseDTO<List<CategoryMonoDTO>>> getAllCategories() {
-        List<CategoryMonoDTO> categories = postService.getAllCategories();
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categories));
+    public ResponseEntity<ResponseDTO<CategoryMonoListResponseDTO>> getAllCategories() {
+        CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getAllCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
     }
 
     @GetMapping("/categories/food")
-    public ResponseEntity<ResponseDTO<List<CategoryMonoDTO>>> getFoodCategories() {
-        List<CategoryMonoDTO> foodCategories = postService.getFoodCategories();
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(foodCategories));
+    public ResponseEntity<ResponseDTO<CategoryMonoListResponseDTO>> getFoodCategories() {
+        CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getFoodCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
     }
 }
