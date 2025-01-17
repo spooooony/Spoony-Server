@@ -69,10 +69,4 @@ public class PostController {
         CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getFoodCategories();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
     }
-
-    @GetMapping("/zzim/{userId}")
-    public ResponseEntity<ResponseDTO<ZzimCardListResponse>> getZzimCardList(@PathVariable Long userId) {
-        ZzimCardListResponse zzimCardListResponse = postService.getZzimCardList(userId);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
-    }
 }

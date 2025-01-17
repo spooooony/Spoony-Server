@@ -23,11 +23,15 @@ import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -199,41 +203,5 @@ public class PostService {
                 .collect(Collectors.toList());
 
         return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
-    }
-
-    //사용자 지도 리스트 조회
-    public ZzimCardListResponse getZzimCardList(Long userId) {
-        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
-
-        List<ZzimCardResponse> zzimCardResponses = zzimPostEntityList.stream()
-                .map(zzimPostEntity -> {
-                    PostEntity postEntity = zzimPostEntity.getPost();
-                    PlaceEntity placeEntity = postEntity.getPlace();
-                    if (placeEntity == null) {
-                        throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
-                    }
-
-                    CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
-                            .map(PostCategoryEntity::getCategory)
-                            .map(categoryEntity -> new CategoryColorResponseDTO(
-                                    categoryEntity.getCategoryName(),
-                                    categoryEntity.getIconUrlColor(),
-                                    categoryEntity.getBackgroundColor()
-                            ))
-                            .orElse(null);
-
-                    return new ZzimCardResponse(
-                            placeEntity.getPlaceName(),
-                            placeEntity.getPlaceAddress(),
-                            postEntity.getTitle(),
-                            placeEntity.getLatitude(),
-                            placeEntity.getLongitude(),
-                            categoryColorResponse
-                    );
-                })
-                .collect(Collectors.toList());
-
-        return new ZzimCardListResponse(zzimCardResponses);
     }
 }
