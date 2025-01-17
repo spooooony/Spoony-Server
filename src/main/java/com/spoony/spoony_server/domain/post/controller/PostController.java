@@ -3,6 +3,8 @@ package com.spoony.spoony_server.domain.post.controller;
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
 import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.service.PostService;
 import com.spoony.spoony_server.infra.service.AwsFileService;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+
 import java.util.List;
 
 @RestController
@@ -54,5 +58,17 @@ public class PostController {
         postService.createPost(updatedPostCreateDTO);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<ResponseDTO<CategoryMonoListResponseDTO>> getAllCategories() {
+        CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getAllCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
+    }
+
+    @GetMapping("/categories/food")
+    public ResponseEntity<ResponseDTO<CategoryMonoListResponseDTO>> getFoodCategories() {
+        CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getFoodCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
     }
 }
