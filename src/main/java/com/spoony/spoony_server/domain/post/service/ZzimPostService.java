@@ -47,7 +47,7 @@ public class ZzimPostService {
         Long userId = zzimPostAddRequest.userId();
 
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder().post(postEntity).user(userEntity).build();
 
@@ -106,7 +106,7 @@ public class ZzimPostService {
 
     public ZzimFocusListResponseDTO getZzimFocusList(Long userId, Long placeId) {
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PlaceEntity targetPlaceEntity = placeRepository.findById(placeId)
                 .orElseThrow(() -> new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND));
 
@@ -157,7 +157,7 @@ public class ZzimPostService {
     @Transactional
     public void deleteZzim(Long userId, Long postId) {
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PostEntity postEntity = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 

@@ -8,7 +8,9 @@ import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
-import com.spoony.spoony_server.domain.post.dto.response.*;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.entity.*;
 import com.spoony.spoony_server.domain.post.enums.CategoryType;
 import com.spoony.spoony_server.domain.post.repository.*;
@@ -23,15 +25,11 @@ import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +59,7 @@ public class PostService {
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
-        RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+        RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         Long categoryId = postCategoryEntity.getCategory().getCategoryId();
         CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
@@ -89,7 +87,7 @@ public class PostService {
 
         // 게시글 업로드
         UserEntity userEntity = userRepository.findById(postCreateDTO.userId())
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         CategoryEntity categoryEntity = categoryRepository.findById(postCreateDTO.categoryId())
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.NOT_FOUND_ERROR));

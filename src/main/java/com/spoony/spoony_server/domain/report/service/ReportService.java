@@ -52,7 +52,7 @@ public class ReportService {
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         ReportEntity reportEntity = ReportEntity.builder()
                 .post(postEntity)
                 .user(userEntity)
