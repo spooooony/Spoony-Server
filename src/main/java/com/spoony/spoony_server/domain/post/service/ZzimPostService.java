@@ -85,6 +85,7 @@ public class ZzimPostService {
                             .map(categoryEntity -> new CategoryColorResponseDTO(
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
+                                    categoryEntity.getTextColor(),
                                     categoryEntity.getBackgroundColor()
                             ))
                             .orElse(null);
@@ -127,6 +128,7 @@ public class ZzimPostService {
                             .map(categoryEntity -> new CategoryColorResponseDTO(
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
+                                    categoryEntity.getTextColor(),
                                     categoryEntity.getBackgroundColor()
                             ))
                             .orElse(null);
