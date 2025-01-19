@@ -15,6 +15,3 @@ public record PostResponseDTO(Long postId, Long userId,
                               CategoryColorResponseDTO categoryColorResponse
 ) {
 }
-
-
-//Integer postId, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt
