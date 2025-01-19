@@ -1,14 +1,12 @@
 package com.spoony.spoony_server.domain.post.controller;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.response.FeedResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.FeedListResponseDTO;
 import com.spoony.spoony_server.domain.post.service.FeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RestController
@@ -19,11 +17,11 @@ public class FeedController {
     private final FeedService feedService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ResponseDTO<List<FeedResponseDTO>>> getPost(@PathVariable Long userId,
-                                                                      @RequestParam(name = "query") String locationQuery) {
+    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getPost(@PathVariable Long userId,
+                                                                    @RequestParam(name = "query") String locationQuery) {
         // FeedService 인스턴스를 통해 메서드 호출
-        List<FeedResponseDTO> feedResponse = feedService.getFeedListByUserId(userId, locationQuery);
+        FeedListResponseDTO feedListResponse = feedService.getFeedListByUserId(userId, locationQuery);
         // 응답 반환
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedResponse));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 }

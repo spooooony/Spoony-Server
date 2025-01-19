@@ -4,13 +4,11 @@ import com.spoony.spoony_server.common.exception.BusinessException;
 import com.spoony.spoony_server.common.message.PostErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryColorResponseDTO;
+import com.spoony.spoony_server.domain.post.dto.response.FeedListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.FeedResponseDTO;
-import com.spoony.spoony_server.domain.post.entity.CategoryEntity;
+import com.spoony.spoony_server.domain.post.dto.response.RegionDTO;
 import com.spoony.spoony_server.domain.post.entity.FeedEntity;
-import com.spoony.spoony_server.domain.post.entity.PostCategoryEntity;
-import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.repository.*;
-import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +105,7 @@ public class FeedService {
     private final ZzimPostRepository zzimPostRepository;
 
 
-    public List<FeedResponseDTO> getFeedListByUserId(Long userId, String location_query) {
+    public FeedListResponseDTO getFeedListByUserId(Long userId, String location_query) {
         // 1차 필터링: location_query를 포함하는 피드 조회
 
         //feed테이블에서 특정 user_id를 뽑은 걸로 피드 리스트 만들기
@@ -142,12 +140,12 @@ public class FeedService {
 //                })
 //                .toList();
 
-        List<FeedResponseDTO> feedResponseDTOList = feedEntityList.stream()
+        List<FeedResponseDTO> feedResponseList = feedEntityList.stream()
                 .filter(feedEntity -> feedEntity.getPost().getPlace().getPlaceAddress().contains(location_query))
                 .map(feedEntity -> new FeedResponseDTO(
                         feedEntity.getPost().getUser().getUserId(),
                         feedEntity.getPost().getUser().getUserName(),
-                        userEntity.getRegion(),
+                        new RegionDTO(userEntity.getRegion().getRegionId(), userEntity.getRegion().getRegionName()),
                         feedEntity.getPost().getTitle(),
                         new CategoryColorResponseDTO(
                                 postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
@@ -155,44 +153,14 @@ public class FeedService {
                                 postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
                                         -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getIconUrlColor(),
                                 postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
+                                        -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getTextColor(),
+                                postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
                                         -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getBackgroundColor()
                         ),
                         zzimPostRepository.countByPost(feedEntity.getPost())))
                 .toList();
 
-        return feedResponseDTOList;
-    }
-
-    private FeedResponseDTO convertToDto(FeedEntity feedEntity) {
-        PostEntity postEntity = feedEntity.getPost();
-
-        // 유저 정보
-        Long postUserId = postEntity.getUser().getUserId();
-        String postUserName = postEntity.getUser().getUserName();
-        RegionEntity postUserRegion = postEntity.getUser().getRegion();
-
-        // 카테고리 정보
-        PostCategoryEntity postCategoryEntity = postCategoryRepository
-                .findByPost(postEntity)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-
-        CategoryEntity categoryEntity = postCategoryEntity.getCategory();
-        String categoryName = categoryEntity.getCategoryName();
-        String iconUrlColor = categoryEntity.getIconUrlColor();
-        String backgroundColor = categoryEntity.getBackgroundColor();
-
-        // 찜 리스트에 등록된 횟수
-        Long zzimCount = zzimPostRepository.countByPost(postEntity);
-
-        // FeedResponseDTO 생성
-        return new FeedResponseDTO(
-                postUserId,
-                postUserName,
-                postUserRegion,
-                postEntity.getTitle(),
-                new CategoryColorResponseDTO(categoryName, iconUrlColor, backgroundColor),
-                zzimCount
-        );
+        return new FeedListResponseDTO(feedResponseList);
     }
 }
 
