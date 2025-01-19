@@ -81,7 +81,7 @@ public class PlaceController {
                 Double mapx = item.get("mapx").asDouble();
                 Double mapy = item.get("mapy").asDouble();
 
-                places.add(new PlaceResponseDTO(title, address, roadAddress, mapx, mapy));
+                places.add(new PlaceResponseDTO(title, address, roadAddress, mapy / 10000000, mapx / 10000000));
             });
 
             PlaceListResponseDTO placeListResponseDTO = new PlaceListResponseDTO(places);
