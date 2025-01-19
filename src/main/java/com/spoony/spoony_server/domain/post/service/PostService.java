@@ -207,6 +207,7 @@ public class PostService {
     public CategoryMonoListResponseDTO getAllCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findAll().stream()
                 .map(category -> new CategoryMonoResponseDTO(
+                        category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
@@ -220,6 +221,7 @@ public class PostService {
     public CategoryMonoListResponseDTO getFoodCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
                 .map(category -> new CategoryMonoResponseDTO(
+                        category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
