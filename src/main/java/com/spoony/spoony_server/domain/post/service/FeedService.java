@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 //
 //@Service
@@ -105,7 +106,7 @@ public class FeedService {
     private final ZzimPostRepository zzimPostRepository;
 
 
-    public FeedListResponseDTO getFeedListByUserId(Long userId, String location_query) {
+    public FeedListResponseDTO getFeedListByUserId(Long userId, String location_query, String sortBy) {
         // 1차 필터링: location_query를 포함하는 피드 조회
 
         //feed테이블에서 특정 user_id를 뽑은 걸로 피드 리스트 만들기
@@ -145,6 +146,7 @@ public class FeedService {
                 .map(feedEntity -> new FeedResponseDTO(
                         feedEntity.getPost().getUser().getUserId(),
                         feedEntity.getPost().getUser().getUserName(),
+                        feedEntity.getPost().getCreatedAt(),
                         new RegionDTO(userEntity.getRegion().getRegionId(), userEntity.getRegion().getRegionName()),
                         feedEntity.getPost().getTitle(),
                         new CategoryColorResponseDTO(
@@ -158,7 +160,13 @@ public class FeedService {
                                         -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getBackgroundColor()
                         ),
                         zzimPostRepository.countByPost(feedEntity.getPost())))
-                .toList();
+                .collect(Collectors.toList());
+
+        if (sortBy.equals("popularity")) {
+            feedResponseList.sort((dto1, dto2) -> Long.compare(dto2.zzimCount(), dto1.zzimCount()));
+        } else if (sortBy.equals("latest")) {
+            feedResponseList.sort((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt()));
+        }
 
         return new FeedListResponseDTO(feedResponseList);
     }

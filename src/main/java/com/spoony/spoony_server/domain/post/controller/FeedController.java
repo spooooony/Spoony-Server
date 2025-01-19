@@ -18,9 +18,10 @@ public class FeedController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getPost(@PathVariable Long userId,
-                                                                    @RequestParam(name = "query") String locationQuery) {
+                                                                    @RequestParam(name = "query") String locationQuery,
+                                                                    @RequestParam(name = "sortBy") String sortBy) {
         // FeedService 인스턴스를 통해 메서드 호출
-        FeedListResponseDTO feedListResponse = feedService.getFeedListByUserId(userId, locationQuery);
+        FeedListResponseDTO feedListResponse = feedService.getFeedListByUserId(userId, locationQuery, sortBy);
         // 응답 반환
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
