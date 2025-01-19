@@ -1,15 +1,18 @@
 package com.spoony.spoony_server.domain.post.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-public record PostResponseDTO(Long postId, Long userId, String userName, String userRegion, String category,
+
+public record PostResponseDTO(Long postId, Long userId,
+                              List<String> photoUrlList,
                               String title,
-                              String date,
+                              LocalDateTime date,
                               List<String> menuList,
                               String description,
-                              String place_name, String place_address, Double latitude,
-                              Double longitude, Long zzinCount, Boolean is_scoop, String IconUrlColor,
-                              String BackgroundColor
+                              String placeName, String placeAddress, Double latitude,
+                              Double longitude, Long zzinCount, Boolean isZzim, Boolean isScoop,
+                              CategoryColorResponseDTO categoryColorResponse
 ) {
 }
 
