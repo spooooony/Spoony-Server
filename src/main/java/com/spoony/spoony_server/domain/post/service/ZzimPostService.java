@@ -5,6 +5,8 @@ import com.spoony.spoony_server.common.exception.BusinessException;
 import com.spoony.spoony_server.common.message.PlaceErrorMessage;
 import com.spoony.spoony_server.common.message.PostErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
+import com.spoony.spoony_server.domain.location.entity.LocationEntity;
+import com.spoony.spoony_server.domain.location.repository.LocationRepository;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.request.ZzimPostAddRequestDTO;
@@ -40,6 +42,7 @@ public class ZzimPostService {
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final PlaceRepository placeRepository;
+    private final LocationRepository locationRepository;
 
     public ResponseEntity<ResponseDTO<Void>> addZzimPost(ZzimPostAddRequestDTO zzimPostAddRequest) {
 
@@ -164,5 +167,141 @@ public class ZzimPostService {
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         zzimPostRepository.deleteByUserAndPost(userEntity, postEntity);
+    }
+
+    public ZzimCardListResponseDTO getZzimByLocation(Long userId, Long locationId) {
+        LocationEntity locationEntity = locationRepository.findById(locationId)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.LOCATION_NOT_FOUND));
+
+        if (locationEntity.getLocationTypeEntity().getLocationTypeId() == 3) {
+            return getZzimByAddress(userId, locationEntity.getLocationAddress());
+        } else {
+            return getZzimByArea(userId, locationEntity.getLongitude(), locationEntity.getLatitude());
+        }
+    }
+
+    private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationAddress) {
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
+
+        Map<Long, ZzimPostEntity> uniquePlacePostMap = new LinkedHashMap<>();
+
+        for (ZzimPostEntity zzimPostEntity : zzimPostEntityList) {
+            PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
+            if (placeEntity == null) {
+                throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
+            }
+
+            Long placeId = placeEntity.getPlaceId();
+            if (!uniquePlacePostMap.containsKey(placeId)) {
+                uniquePlacePostMap.put(placeId, zzimPostEntity);
+            }
+        }
+
+        // placeAddress에 locationAddress 문자열이 포함된 데이터만 필터링
+        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
+                .filter(zzimPostEntity -> {
+                    PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
+                    return placeEntity.getPlaceAddress() != null && placeEntity.getPlaceAddress().contains(locationAddress);
+                })
+                .map(zzimPostEntity -> {
+                    PostEntity postEntity = zzimPostEntity.getPost();
+                    PlaceEntity placeEntity = postEntity.getPlace();
+
+                    CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
+                            .map(PostCategoryEntity::getCategory)
+                            .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryName(),
+                                    categoryEntity.getIconUrlColor(),
+                                    categoryEntity.getTextColor(),
+                                    categoryEntity.getBackgroundColor()
+                            ))
+                            .orElse(null);
+
+                    return new ZzimCardResponseDTO(
+                            placeEntity.getPlaceId(),  // placeId 추가
+                            placeEntity.getPlaceName(),
+                            placeEntity.getPlaceAddress(),
+                            postEntity.getTitle(),
+                            placeEntity.getLatitude(),
+                            placeEntity.getLongitude(),
+                            categoryColorResponse
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new ZzimCardListResponseDTO(zzimCardResponses);
+    }
+
+    private ZzimCardListResponseDTO getZzimByArea(Long userId, Double longitude, Double latitude) {
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
+
+        Map<Long, ZzimPostEntity> uniquePlacePostMap = new LinkedHashMap<>();
+
+        for (ZzimPostEntity zzimPostEntity : zzimPostEntityList) {
+            PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
+            if (placeEntity == null) {
+                throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
+            }
+
+            Long placeId = placeEntity.getPlaceId();
+            if (!uniquePlacePostMap.containsKey(placeId)) {
+                uniquePlacePostMap.put(placeId, zzimPostEntity);
+            }
+        }
+
+        // 주어진 위도(latitude)와 경도(longitude) 기준으로 10km 이내 장소만 필터링
+        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
+                .filter(zzimPostEntity -> {
+                    PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
+                    if (placeEntity.getLatitude() == null || placeEntity.getLongitude() == null) {
+                        return false;
+                    }
+                    return calculateDistance(latitude, longitude, placeEntity.getLatitude(), placeEntity.getLongitude()) <= 10.0;
+                })
+                .map(zzimPostEntity -> {
+                    PostEntity postEntity = zzimPostEntity.getPost();
+                    PlaceEntity placeEntity = postEntity.getPlace();
+
+                    CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
+                            .map(PostCategoryEntity::getCategory)
+                            .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryName(),
+                                    categoryEntity.getIconUrlColor(),
+                                    categoryEntity.getTextColor(),
+                                    categoryEntity.getBackgroundColor()
+                            ))
+                            .orElse(null);
+
+                    return new ZzimCardResponseDTO(
+                            placeEntity.getPlaceId(),  // placeId 추가
+                            placeEntity.getPlaceName(),
+                            placeEntity.getPlaceAddress(),
+                            postEntity.getTitle(),
+                            placeEntity.getLatitude(),
+                            placeEntity.getLongitude(),
+                            categoryColorResponse
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new ZzimCardListResponseDTO(zzimCardResponses);
+    }
+
+    // 두 좌표 간의 거리를 계산하는 메서드 (단위: km)
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int EARTH_RADIUS = 6371; // 지구 반지름 (단위: km)
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c;
     }
 }

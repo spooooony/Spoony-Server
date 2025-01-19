@@ -40,4 +40,10 @@ public class ZzimPostController {
         zzimPostService.deleteZzim(userId, placeId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
+
+    @GetMapping("/location/{userId}/{locationId}")
+    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimCardList(@PathVariable Long userId, @PathVariable Long locationId) {
+        ZzimCardListResponseDTO zzimCardListResponse = zzimPostService.getZzimByLocation(userId, locationId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
+    }
 }
