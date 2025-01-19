@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ZzimPostController {
 
     public final ZzimPostService zzimPostService;
-    
+
     @PostMapping
     public ResponseEntity<ResponseDTO<Void>> addZzimPost(@RequestBody ZzimPostAddRequestDTO zzimPostAddRequestDTO) {
         zzimPostService.addZzimPost(zzimPostAddRequestDTO);
@@ -33,5 +33,11 @@ public class ZzimPostController {
     public ResponseEntity<ResponseDTO<ZzimFocusListResponseDTO>> getZzimFocusList(@PathVariable Long userId, @PathVariable Long placeId) {
         ZzimFocusListResponseDTO zzimFocusListResponse = zzimPostService.getZzimFocusList(userId, placeId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimFocusListResponse));
+    }
+
+    @DeleteMapping("/{userId}/{placeId}")
+    public ResponseEntity<ResponseDTO<Void>> deleteZzim(@PathVariable Long userId, @PathVariable Long placeId) {
+        zzimPostService.deleteZzim(userId, placeId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }

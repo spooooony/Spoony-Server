@@ -9,6 +9,7 @@ import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.request.ZzimPostAddRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.*;
+import com.spoony.spoony_server.domain.post.entity.PhotoEntity;
 import com.spoony.spoony_server.domain.post.entity.PostCategoryEntity;
 import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.entity.ZzimPostEntity;
@@ -18,11 +19,11 @@ import com.spoony.spoony_server.domain.post.repository.PostRepository;
 import com.spoony.spoony_server.domain.post.repository.ZzimPostRepository;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
-import com.spoony.spoony_server.domain.post.entity.PhotoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -151,5 +152,15 @@ public class ZzimPostService {
                 .collect(Collectors.toList());
 
         return new ZzimFocusListResponseDTO(zzimFocusResponseList);
+    }
+
+    @Transactional
+    public void deleteZzim(Long userId, Long postId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+
+        zzimPostRepository.deleteByUserAndPost(userEntity, postEntity);
     }
 }
