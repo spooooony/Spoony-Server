@@ -59,8 +59,8 @@ public class PostService {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
 
 
-        RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
-        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         Long categoryId = postCategoryEntity.getCategory().getCategoryId();
         CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
 
@@ -78,7 +78,7 @@ public class PostService {
         //List<String> category_list = List.of(categoryEntity.getCategoryName());
         String category = categoryEntity.getCategoryName();
 
-        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         List<String> menuList = menuEntityList.stream()
                 .map(menuEntity -> menuEntity.getMenuName())
@@ -97,7 +97,7 @@ public class PostService {
 
         // 게시글 업로드
         UserEntity userEntity = userRepository.findById(postCreateDTO.userId())
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         CategoryEntity categoryEntity = categoryRepository.findById(postCreateDTO.categoryId())
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.NOT_FOUND_ERROR));
@@ -188,6 +188,7 @@ public class PostService {
     }
 
     // 모든 카테고리 조회
+    @Transactional
     public CategoryMonoListResponseDTO getAllCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findAll().stream()
                 .map(category -> new CategoryMonoResponseDTO(
@@ -200,6 +201,7 @@ public class PostService {
     }
 
     // 음식 카테고리 조회
+    @Transactional
     public CategoryMonoListResponseDTO getFoodCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
                 .map(category -> new CategoryMonoResponseDTO(

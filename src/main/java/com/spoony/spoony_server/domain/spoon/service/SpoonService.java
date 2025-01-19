@@ -22,7 +22,7 @@ public class SpoonService {
     @Transactional
     public SpoonResponseDTO getAmountById(Long userId){
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity)
                 .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
