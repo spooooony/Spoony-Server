@@ -8,6 +8,7 @@ import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.place.entity.PlaceEntity;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
+import com.spoony.spoony_server.domain.post.dto.response.CategoryColorResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
@@ -22,7 +23,6 @@ import com.spoony.spoony_server.domain.spoon.repository.ScoopPostRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonBalanceRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonHistoryRepository;
 import com.spoony.spoony_server.domain.user.entity.FollowEntity;
-import com.spoony.spoony_server.domain.user.entity.RegionEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,11 +55,9 @@ public class PostService {
     @Transactional
     public PostResponseDTO getPostById(Long postId, Long userId) {
 
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
-
-        RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         Long categoryId = postCategoryEntity.getCategory().getCategoryId();
         CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
@@ -68,9 +66,10 @@ public class PostService {
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
         String formattedDate = latestDate.toLocalDate().toString();
 
-        Long zzim_count = zzimPostRepository.countByPost(postEntity);
+        Long zzimCount = zzimPostRepository.countByPost(postEntity);
+        Boolean isZzim = zzimPostRepository.existsByUserAndPost(userEntity, postEntity);
         Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
-
+        List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity);
 
         String IconUrlColor = categoryEntity.getIconUrlColor();
         String BackgroundColor = categoryEntity.getBackgroundColor();
@@ -84,11 +83,14 @@ public class PostService {
                 .map(menuEntity -> menuEntity.getMenuName())
                 .collect(Collectors.toList());
 
+        //List<PhotoEntity> -> List<String>
+        List<String> photoUrlList = photoEntityList.stream()
+                .map(PhotoEntity::getPhotoUrl)
+                .collect(Collectors.toList());
 
-        //boolean scoop, String IconUrlColor,String BackgroundColor
 
-        return new PostResponseDTO(postId, userEntity.getUserId(), userEntity.getUserName(), regionEntity.getRegionName(), category, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
-                place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzim_count, isScoop, IconUrlColor, BackgroundColor
+        return new PostResponseDTO(postId, userEntity.getUserId(), photoUrlList, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
+                place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzimCount, isZzim, isScoop, new CategoryColorResponseDTO(category, IconUrlColor, BackgroundColor)
         );
     }
 
