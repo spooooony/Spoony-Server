@@ -1,12 +1,9 @@
 package com.spoony.spoony_server.domain.post.repository;
 
-import com.spoony.spoony_server.domain.post.dto.response.ZzimCardResponse;
 import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.entity.ZzimPostEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;

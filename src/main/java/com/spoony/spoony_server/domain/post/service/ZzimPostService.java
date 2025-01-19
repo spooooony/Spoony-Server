@@ -56,7 +56,7 @@ public class ZzimPostService {
     }
 
     //사용자 지도 리스트 조회
-    public ZzimCardListResponse getZzimCardList(Long userId) {
+    public ZzimCardListResponseDTO getZzimCardList(Long userId) {
         List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
 
@@ -74,7 +74,7 @@ public class ZzimPostService {
             }
         }
 
-        List<ZzimCardResponse> zzimCardResponses = uniquePlacePostMap.values().stream()
+        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
                 .map(zzimPostEntity -> {
                     PostEntity postEntity = zzimPostEntity.getPost();
                     PlaceEntity placeEntity = postEntity.getPlace();
@@ -88,7 +88,7 @@ public class ZzimPostService {
                             ))
                             .orElse(null);
 
-                    return new ZzimCardResponse(
+                    return new ZzimCardResponseDTO(
                             placeEntity.getPlaceId(),  // placeId 추가
                             placeEntity.getPlaceName(),
                             placeEntity.getPlaceAddress(),
@@ -100,10 +100,10 @@ public class ZzimPostService {
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponse(zzimCardResponses);
+        return new ZzimCardListResponseDTO(zzimCardResponses);
     }
 
-    public ZzimFocusListResponse getZzimFocusList(Long userId, Long placeId) {
+    public ZzimFocusListResponseDTO getZzimFocusList(Long userId, Long placeId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.NOT_FOUND_ERROR));
         PlaceEntity targetPlaceEntity = placeRepository.findById(placeId)
@@ -111,7 +111,7 @@ public class ZzimPostService {
 
         List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userEntity);
 
-        List<ZzimFocusResponse> zzimFocusResponseList = zzimPostEntityList.stream()
+        List<ZzimFocusResponseDTO> zzimFocusResponseList = zzimPostEntityList.stream()
                 .filter(zzimPostEntity -> {
                     PostEntity postEntity = zzimPostEntity.getPost();
                     PlaceEntity postPlaceEntity = postEntity.getPlace();
@@ -136,7 +136,7 @@ public class ZzimPostService {
                             .map(PhotoEntity::getPhotoUrl)
                             .collect(Collectors.toList());
 
-                    return new ZzimFocusResponse(
+                    return new ZzimFocusResponseDTO(
                             postPlaceEntity.getPlaceId(),
                             postPlaceEntity.getPlaceName(),
                             categoryColorResponse,
@@ -150,6 +150,6 @@ public class ZzimPostService {
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimFocusListResponse(zzimFocusResponseList);
+        return new ZzimFocusListResponseDTO(zzimFocusResponseList);
     }
 }
