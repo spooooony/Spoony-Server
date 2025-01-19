@@ -20,6 +20,7 @@ public class CategoryEntity {
     private String iconUrlColor;
     private String iconUrlBlack;
     private String iconUrlWhite;
+    private String textColor;
     private String backgroundColor;
 
     @Builder
@@ -29,6 +30,7 @@ public class CategoryEntity {
                           String iconUrlColor,
                           String iconUrlBlack,
                           String iconUrlWhite,
+                          String iconTextColor,
                           String iconBackgroundColor) {
         this.categoryId = categoryId;
         this.categoryType = categoryType;
@@ -36,6 +38,7 @@ public class CategoryEntity {
         this.iconUrlColor = iconUrlColor;
         this.iconUrlBlack = iconUrlBlack;
         this.iconUrlWhite = iconUrlWhite;
+        this.textColor = iconTextColor;
         this.backgroundColor = iconBackgroundColor;
     }
 }

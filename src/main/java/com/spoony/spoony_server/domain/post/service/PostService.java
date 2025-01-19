@@ -70,8 +70,9 @@ public class PostService {
         Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
         List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity);
 
-        String IconUrlColor = categoryEntity.getIconUrlColor();
-        String BackgroundColor = categoryEntity.getBackgroundColor();
+        String iconUrlColor = categoryEntity.getIconUrlColor();
+        String backgroundColor = categoryEntity.getBackgroundColor();
+        String textColor = categoryEntity.getTextColor();
 
         //List<String> category_list = List.of(categoryEntity.getCategoryName());
         String category = categoryEntity.getCategoryName();
@@ -88,8 +89,21 @@ public class PostService {
                 .collect(Collectors.toList());
 
 
-        return new PostResponseDTO(postId, userEntity.getUserId(), photoUrlList, postEntity.getTitle(), latestDate, menuList, postEntity.getDescription(),
-                place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzimCount, isZzim, isScoop, new CategoryColorResponseDTO(category, IconUrlColor, BackgroundColor)
+        return new PostResponseDTO(postId,
+                userEntity.getUserId(),
+                photoUrlList,
+                postEntity.getTitle(),
+                latestDate,
+                menuList,
+                postEntity.getDescription(),
+                place.getPlaceName(),
+                place.getPlaceAddress(),
+                place.getLatitude(),
+                place.getLongitude(),
+                zzimCount,
+                isZzim,
+                isScoop,
+                new CategoryColorResponseDTO(category, iconUrlColor, textColor, backgroundColor)
         );
     }
 
