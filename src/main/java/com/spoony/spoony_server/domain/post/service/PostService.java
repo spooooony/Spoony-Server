@@ -64,7 +64,6 @@ public class PostService {
 
         PlaceEntity place = postEntity.getPlace();
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
-        String formattedDate = latestDate.toLocalDate().toString();
 
         Long zzimCount = zzimPostRepository.countByPost(postEntity);
         Boolean isZzim = zzimPostRepository.existsByUserAndPost(userEntity, postEntity);
@@ -89,7 +88,7 @@ public class PostService {
                 .collect(Collectors.toList());
 
 
-        return new PostResponseDTO(postId, userEntity.getUserId(), photoUrlList, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
+        return new PostResponseDTO(postId, userEntity.getUserId(), photoUrlList, postEntity.getTitle(), latestDate, menuList, postEntity.getDescription(),
                 place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzimCount, isZzim, isScoop, new CategoryColorResponseDTO(category, IconUrlColor, BackgroundColor)
         );
     }
