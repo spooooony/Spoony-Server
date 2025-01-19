@@ -55,8 +55,8 @@ public class PostService {
     @Transactional
     public PostResponseDTO getPostById(Long postId, Long userId) {
 
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
 
         RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
