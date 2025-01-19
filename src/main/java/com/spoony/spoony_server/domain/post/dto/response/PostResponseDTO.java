@@ -8,7 +8,8 @@ public record PostResponseDTO(Long postId, Long userId, String userName, String 
                               List<String> menuList,
                               String description,
                               String place_name, String place_address, Double latitude,
-                              Double longitude, Long zzinCount
+                              Double longitude, Long zzinCount, Boolean is_scoop, String IconUrlColor,
+                              String BackgroundColor
 ) {
 }
 

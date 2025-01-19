@@ -25,9 +25,9 @@ public class PostController {
     private final PostService postService;
     private final AwsFileService awsFileService;
 
-    @GetMapping("/{postId}")
-    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable Long postId) {
-        PostResponseDTO postResponse = postService.getPostById(postId);
+    @GetMapping("/{userId}/{postId}")
+    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable Long postId, @PathVariable Long userId) {
+        PostResponseDTO postResponse = postService.getPostById(postId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));
     }
 

@@ -18,6 +18,7 @@ import com.spoony.spoony_server.domain.spoon.entity.ActivityEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonBalanceEntity;
 import com.spoony.spoony_server.domain.spoon.entity.SpoonHistoryEntity;
 import com.spoony.spoony_server.domain.spoon.repository.ActivityRepository;
+import com.spoony.spoony_server.domain.spoon.repository.ScoopPostRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonBalanceRepository;
 import com.spoony.spoony_server.domain.spoon.repository.SpoonHistoryRepository;
 import com.spoony.spoony_server.domain.user.entity.FollowEntity;
@@ -49,15 +50,14 @@ public class PostService {
     private final ZzimPostRepository zzimPostRepository;
     private final FollowRepository followRepository;
     private final FeedRepository feedRepository;
+    private final ScoopPostRepository scoopPostRepository;
 
     @Transactional
-    public PostResponseDTO getPostById(Long postId) {
+    public PostResponseDTO getPostById(Long postId, Long userId) {
 
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-        UserEntity userEntity = postEntity.getUser();
-        if (userEntity == null) {
-            throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
-        }
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.NOT_FOUND_ERROR));
+
 
         RegionEntity regionEntity = userRepository.findReigonByUserId(userEntity.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
@@ -67,7 +67,14 @@ public class PostService {
         PlaceEntity place = postEntity.getPlace();
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
         String formattedDate = latestDate.toLocalDate().toString();
-        Long zzim_count = postRepository.countByPostId(postId);
+
+        Long zzim_count = zzimPostRepository.countByPost(postEntity);
+        Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
+
+
+        String IconUrlColor = categoryEntity.getIconUrlColor();
+        String BackgroundColor = categoryEntity.getBackgroundColor();
+
         //List<String> category_list = List.of(categoryEntity.getCategoryName());
         String category = categoryEntity.getCategoryName();
 
@@ -77,8 +84,11 @@ public class PostService {
                 .map(menuEntity -> menuEntity.getMenuName())
                 .collect(Collectors.toList());
 
+
+        //boolean scoop, String IconUrlColor,String BackgroundColor
+
         return new PostResponseDTO(postId, userEntity.getUserId(), userEntity.getUserName(), regionEntity.getRegionName(), category, postEntity.getTitle(), formattedDate, menuList, postEntity.getDescription(),
-                place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzim_count
+                place.getPlaceName(), place.getPlaceAddress(), place.getLatitude(), place.getLongitude(), zzim_count, isScoop, IconUrlColor, BackgroundColor
         );
     }
 
