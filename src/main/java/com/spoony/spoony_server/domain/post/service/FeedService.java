@@ -7,7 +7,10 @@ import com.spoony.spoony_server.domain.post.dto.response.CategoryColorResponseDT
 import com.spoony.spoony_server.domain.post.dto.response.FeedListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.FeedResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.RegionDTO;
+import com.spoony.spoony_server.domain.post.entity.CategoryEntity;
 import com.spoony.spoony_server.domain.post.entity.FeedEntity;
+import com.spoony.spoony_server.domain.post.entity.PostCategoryEntity;
+import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.repository.*;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
@@ -107,59 +110,31 @@ public class FeedService {
 
 
     public FeedListResponseDTO getFeedListByUserId(Long userId, String location_query, String sortBy) {
-        // 1차 필터링: location_query를 포함하는 피드 조회
-
-        //feed테이블에서 특정 user_id를 뽑은 걸로 피드 리스트 만들기
 
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         List<FeedEntity> feedEntityList = feedRepository.findByUser(userEntity);
 
-        // 지역에 대해 필터링
-//        List<FeedResponseDTO> feedResponseDTOList = feedEntityList.stream()
-//                .filter(feedEntity -> feedEntity.getPost().getPlace().getPlaceAddress().contains(location_query))
-//                .map(feedEntity -> {
-//                    PostEntity postEntity = feedEntity.getPost();
-//                    UserEntity authorUserEntity = postEntity.getUser();
-//
-//                    PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
-//                            .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-//
-//                    CategoryEntity eachCategoryEntity = postCategoryEntity.getCategory();
-//
-//                    return new FeedResponseDTO(
-//                            authorUserEntity.getUserId(),
-//                            authorUserEntity.getUserName(),
-//                            authorUserEntity.getRegion(),
-//                            postEntity.getTitle(),
-//                            new CategoryColorResponseDTO(
-//                                    eachCategoryEntity.getCategoryName(),
-//                                    eachCategoryEntity.getIconUrlColor(),
-//                                    eachCategoryEntity.getBackgroundColor()
-//                            ),
-//                            zzimPostRepository.countByPost(postEntity)
-//                    );
-//                })
-//                .toList();
-
         List<FeedResponseDTO> feedResponseList = feedEntityList.stream()
                 .filter(feedEntity -> feedEntity.getPost().getPlace().getPlaceAddress().contains(location_query))
-                .map(feedEntity -> new FeedResponseDTO(
-                        feedEntity.getPost().getUser().getUserId(),
-                        feedEntity.getPost().getUser().getUserName(),
-                        feedEntity.getPost().getCreatedAt(),
-                        new RegionDTO(userEntity.getRegion().getRegionId(), userEntity.getRegion().getRegionName()),
-                        feedEntity.getPost().getTitle(),
-                        new CategoryColorResponseDTO(
-                                postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
-                                        -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getCategoryName(),
-                                postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
-                                        -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getIconUrlColor(),
-                                postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
-                                        -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getTextColor(),
-                                postCategoryRepository.findByPost(feedEntity.getPost()).orElseThrow(()
-                                        -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getBackgroundColor()
-                        ),
-                        zzimPostRepository.countByPost(feedEntity.getPost())))
+                .map(feedEntity -> {
+                    PostEntity postEntity = feedEntity.getPost();
+                    UserEntity authorUserEntity = postEntity.getUser();
+                    PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+                    CategoryEntity eachCategoryEntity = postCategoryEntity.getCategory();
+
+
+                    return new FeedResponseDTO(
+                            authorUserEntity.getUserId(),
+                            authorUserEntity.getUserName(),
+                            postEntity.getCreatedAt(), new RegionDTO(authorUserEntity.getRegion().getRegionId(), authorUserEntity.getRegion().getRegionName()),
+                            postEntity.getTitle(),
+
+                            new CategoryColorResponseDTO(
+                                    postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getCategoryName(),
+                                    postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getIconUrlColor(),
+                                    postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getTextColor(),
+                                    postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND)).getCategory().getBackgroundColor()), zzimPostRepository.countByPost(postEntity));
+                })
                 .collect(Collectors.toList());
 
         if (sortBy.equals("popularity")) {
@@ -171,5 +146,3 @@ public class FeedService {
         return new FeedListResponseDTO(feedResponseList);
     }
 }
-
-//;
