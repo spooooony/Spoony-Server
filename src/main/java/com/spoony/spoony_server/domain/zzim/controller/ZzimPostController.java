@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/post/zzim")
+@RequestMapping("/api/v1/post/zzim")
 public class ZzimPostController {
 
     public final ZzimPostService zzimPostService;
