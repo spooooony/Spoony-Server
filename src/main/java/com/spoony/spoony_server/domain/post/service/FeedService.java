@@ -41,14 +41,15 @@ public class FeedService {
                         return true;
                     }
                     PostEntity postEntity = feedEntity.getPost();
-                    PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+                    PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
                     return postCategoryEntity.getCategory().getCategoryId().equals(categoryId);
                 })
                 .map(feedEntity -> {
                     PostEntity postEntity = feedEntity.getPost();
                     UserEntity authorUserEntity = postEntity.getUser();
                     PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
-                            .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
                     CategoryEntity categoryEntity = postCategoryEntity.getCategory();
 
                     return new FeedResponseDTO(

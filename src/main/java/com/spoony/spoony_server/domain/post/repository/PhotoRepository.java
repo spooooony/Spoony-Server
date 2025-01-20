@@ -5,7 +5,8 @@ import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PhotoRepository extends JpaRepository<PhotoEntity, Long> {
-    List<PhotoEntity> findByPost(PostEntity post);
+    Optional<List<PhotoEntity>> findByPost(PostEntity post);
 }

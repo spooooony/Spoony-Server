@@ -62,9 +62,11 @@ public class PostService {
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
-        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
         Long categoryId = postCategoryEntity.getCategory().getCategoryId();
-        CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId);
+        CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId)
+                .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
 
         PlaceEntity place = postEntity.getPlace();
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
@@ -72,7 +74,8 @@ public class PostService {
         Long zzimCount = zzimPostRepository.countByPost(postEntity);
         Boolean isZzim = zzimPostRepository.existsByUserAndPost(userEntity, postEntity);
         Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
-        List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity);
+        List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
 
         String iconUrlColor = categoryEntity.getIconUrlColor();
         String backgroundColor = categoryEntity.getBackgroundColor();
@@ -80,7 +83,8 @@ public class PostService {
 
         String category = categoryEntity.getCategoryName();
 
-        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.MENU_NOT_FOUND));
 
         List<String> menuList = menuEntityList.stream()
                 .map(menuEntity -> menuEntity.getMenuName())
@@ -116,7 +120,7 @@ public class PostService {
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         CategoryEntity categoryEntity = categoryRepository.findById(postCreateDTO.categoryId())
-                .orElseThrow(() -> new BusinessException(CategoryErrorMessage.NOT_FOUND_ERROR));
+                .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
 
         PlaceEntity placeEntity = PlaceEntity.builder()
                 .placeName(postCreateDTO.placeName())

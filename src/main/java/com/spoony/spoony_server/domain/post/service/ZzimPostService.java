@@ -2,6 +2,7 @@ package com.spoony.spoony_server.domain.post.service;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.common.exception.BusinessException;
+import com.spoony.spoony_server.common.message.PlaceErrorMessage;
 import com.spoony.spoony_server.common.message.PostErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.location.entity.LocationEntity;
@@ -60,15 +61,16 @@ public class ZzimPostService {
 
     //사용자 지도 리스트 조회
     public ZzimCardListResponseDTO getZzimCardList(Long userId) {
-        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND))
+        );
 
         Map<Long, ZzimPostEntity> uniquePlacePostMap = new LinkedHashMap<>();
 
         for (ZzimPostEntity zzimPostEntity : zzimPostEntityList) {
             PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
             if (placeEntity == null) {
-                throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
+                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
             }
 
             Long placeId = placeEntity.getPlaceId();
@@ -90,7 +92,7 @@ public class ZzimPostService {
                                     categoryEntity.getTextColor(),
                                     categoryEntity.getBackgroundColor()
                             ))
-                            .orElse(null);
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
 
                     return new ZzimCardResponseDTO(
                             placeEntity.getPlaceId(),  // placeId 추가
@@ -131,11 +133,13 @@ public class ZzimPostService {
                                     categoryEntity.getTextColor(),
                                     categoryEntity.getBackgroundColor()
                             ))
-                            .orElse(null);
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
 
                     Long zzimCount = zzimPostRepository.countByPost(postEntity);
 
-                    List<String> photoUrlList = photoRepository.findByPost(postEntity).stream()
+                    List<String> photoUrlList = photoRepository.findByPost(postEntity)
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND))
+                            .stream()
                             .map(PhotoEntity::getPhotoUrl)
                             .collect(Collectors.toList());
 
@@ -178,15 +182,16 @@ public class ZzimPostService {
     }
 
     private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationAddress) {
-        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser((userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND))
+        ));
 
         Map<Long, ZzimPostEntity> uniquePlacePostMap = new LinkedHashMap<>();
 
         for (ZzimPostEntity zzimPostEntity : zzimPostEntityList) {
             PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
             if (placeEntity == null) {
-                throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
+                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
             }
 
             Long placeId = placeEntity.getPlaceId();
@@ -213,7 +218,7 @@ public class ZzimPostService {
                                     categoryEntity.getTextColor(),
                                     categoryEntity.getBackgroundColor()
                             ))
-                            .orElse(null);
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
 
                     return new ZzimCardResponseDTO(
                             placeEntity.getPlaceId(),  // placeId 추가
@@ -231,15 +236,16 @@ public class ZzimPostService {
     }
 
     private ZzimCardListResponseDTO getZzimByArea(Long userId, Double longitude, Double latitude) {
-        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.ZZIM_NOT_FOUND));
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND))
+        );
 
         Map<Long, ZzimPostEntity> uniquePlacePostMap = new LinkedHashMap<>();
 
         for (ZzimPostEntity zzimPostEntity : zzimPostEntityList) {
             PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
             if (placeEntity == null) {
-                throw new BusinessException(PostErrorMessage.PLACE_NOT_FOUND);
+                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
             }
 
             Long placeId = placeEntity.getPlaceId();
@@ -269,7 +275,7 @@ public class ZzimPostService {
                                     categoryEntity.getTextColor(),
                                     categoryEntity.getBackgroundColor()
                             ))
-                            .orElse(null);
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
 
                     return new ZzimCardResponseDTO(
                             placeEntity.getPlaceId(),  // placeId 추가
