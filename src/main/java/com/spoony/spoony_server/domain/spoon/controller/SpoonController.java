@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/spoon")
+@RequestMapping("/api/v1/spoon")
 public class SpoonController {
 
     private final SpoonService spoonService;

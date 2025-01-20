@@ -27,7 +27,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/place")
+@RequestMapping("/api/v1/place")
 public class PlaceController {
 
     @Value("${naver.clientId}")
