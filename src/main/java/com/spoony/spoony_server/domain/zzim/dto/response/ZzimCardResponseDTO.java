@@ -6,6 +6,7 @@ public record ZzimCardResponseDTO(Long placeId,
                                   String placeName,
                                   String placeAddress,
                                   String postTitle,
+                                  String photoUrl,
                                   Double latitude,
                                   Double longitude,
                                   CategoryColorResponseDTO categoryColorResponse) {
