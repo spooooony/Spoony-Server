@@ -1,8 +1,8 @@
-package com.spoony.spoony_server.domain.post.repository;
+package com.spoony.spoony_server.domain.zzim.repository;
 
 import com.spoony.spoony_server.domain.post.entity.PostEntity;
-import com.spoony.spoony_server.domain.post.entity.ZzimPostEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
+import com.spoony.spoony_server.domain.zzim.entity.ZzimPostEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

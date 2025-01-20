@@ -27,6 +27,8 @@ import com.spoony.spoony_server.domain.spoon.repository.SpoonHistoryRepository;
 import com.spoony.spoony_server.domain.user.entity.FollowEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
+import com.spoony.spoony_server.domain.zzim.entity.ZzimPostEntity;
+import com.spoony.spoony_server.domain.zzim.repository.ZzimPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

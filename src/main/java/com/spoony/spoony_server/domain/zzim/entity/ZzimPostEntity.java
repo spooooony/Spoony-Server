@@ -1,5 +1,6 @@
-package com.spoony.spoony_server.domain.post.entity;
+package com.spoony.spoony_server.domain.zzim.entity;
 
+import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
