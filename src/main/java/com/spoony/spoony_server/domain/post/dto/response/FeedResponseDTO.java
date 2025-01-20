@@ -8,7 +8,7 @@ public record FeedResponseDTO(
         String userRegion,
         Long postId,
         String title,
-        CategoryColorResponseDTO categoryColorResponseDTO,
+        CategoryColorResponseDTO categoryColorResponse,
         Long zzimCount,
         LocalDateTime createdAt
 ) {
