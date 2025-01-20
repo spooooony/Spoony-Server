@@ -1,10 +1,10 @@
-package com.spoony.spoony_server.domain.post.controller;
+package com.spoony.spoony_server.domain.zzim.controller;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.request.ZzimPostAddRequestDTO;
-import com.spoony.spoony_server.domain.post.dto.response.ZzimCardListResponseDTO;
-import com.spoony.spoony_server.domain.post.dto.response.ZzimFocusListResponseDTO;
-import com.spoony.spoony_server.domain.post.service.ZzimPostService;
+import com.spoony.spoony_server.domain.zzim.dto.request.ZzimPostAddRequestDTO;
+import com.spoony.spoony_server.domain.zzim.dto.response.ZzimCardListResponseDTO;
+import com.spoony.spoony_server.domain.zzim.dto.response.ZzimFocusListResponseDTO;
+import com.spoony.spoony_server.domain.zzim.service.ZzimPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

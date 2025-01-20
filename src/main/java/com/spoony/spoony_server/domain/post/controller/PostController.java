@@ -2,11 +2,11 @@ package com.spoony.spoony_server.domain.post.controller;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.PostCreateDTO;
-import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.service.PostService;
 import com.spoony.spoony_server.domain.spoon.dto.request.ScoopPostRequestDTO;
+import com.spoony.spoony_server.domain.zzim.dto.response.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.infra.service.AwsFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

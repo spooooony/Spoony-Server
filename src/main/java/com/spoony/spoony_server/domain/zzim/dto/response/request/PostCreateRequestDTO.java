@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.domain.post.dto.request;
+package com.spoony.spoony_server.domain.zzim.dto.response.request;
 
 import java.util.List;
 
