@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ZzimPostRepository extends JpaRepository<ZzimPostEntity, Long> {
-
     Long countByPost(PostEntity postEntity);
 
     Optional<List<ZzimPostEntity>> findByUser_UserId(Long userId);
