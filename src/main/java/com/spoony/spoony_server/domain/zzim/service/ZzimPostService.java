@@ -88,6 +88,9 @@ public class ZzimPostService {
                     PostEntity postEntity = zzimPostEntity.getPost();
                     PlaceEntity placeEntity = postEntity.getPlace();
 
+                    PhotoEntity photoEntity = photoRepository.findFirstByPost(postEntity)
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
+
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
@@ -103,6 +106,7 @@ public class ZzimPostService {
                             placeEntity.getPlaceName(),
                             placeEntity.getPlaceAddress(),
                             postEntity.getTitle(),
+                            photoEntity.getPhotoUrl(),
                             placeEntity.getLatitude(),
                             placeEntity.getLongitude(),
                             categoryColorResponse
@@ -214,6 +218,9 @@ public class ZzimPostService {
                     PostEntity postEntity = zzimPostEntity.getPost();
                     PlaceEntity placeEntity = postEntity.getPlace();
 
+                    PhotoEntity photoEntity = photoRepository.findFirstByPost(postEntity)
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
+
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
@@ -229,6 +236,7 @@ public class ZzimPostService {
                             placeEntity.getPlaceName(),
                             placeEntity.getPlaceAddress(),
                             postEntity.getTitle(),
+                            photoEntity.getPhotoUrl(),
                             placeEntity.getLatitude(),
                             placeEntity.getLongitude(),
                             categoryColorResponse
@@ -271,6 +279,9 @@ public class ZzimPostService {
                     PostEntity postEntity = zzimPostEntity.getPost();
                     PlaceEntity placeEntity = postEntity.getPlace();
 
+                    PhotoEntity photoEntity = photoRepository.findFirstByPost(postEntity)
+                            .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
+
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
@@ -286,6 +297,7 @@ public class ZzimPostService {
                             placeEntity.getPlaceName(),
                             placeEntity.getPlaceAddress(),
                             postEntity.getTitle(),
+                            photoEntity.getPhotoUrl(),
                             placeEntity.getLatitude(),
                             placeEntity.getLongitude(),
                             categoryColorResponse
