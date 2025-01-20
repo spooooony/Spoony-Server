@@ -10,6 +10,7 @@ import com.spoony.spoony_server.domain.place.dto.request.PlaceCheckResponseDTO;
 import com.spoony.spoony_server.domain.place.dto.response.PlaceListResponseDTO;
 import com.spoony.spoony_server.domain.place.dto.response.PlaceResponseDTO;
 import com.spoony.spoony_server.domain.place.service.PlaceService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/place")
 public class PlaceController {
 
@@ -34,10 +36,6 @@ public class PlaceController {
     private String clientSecret;
 
     public final PlaceService placeService;
-
-    public PlaceController(PlaceService placeService) {
-        this.placeService = placeService;
-    }
 
     @GetMapping(value = "/search")
     public ResponseEntity<ResponseDTO<PlaceListResponseDTO>> getPlaceList(
@@ -96,11 +94,8 @@ public class PlaceController {
     @PostMapping("/check")
     public ResponseEntity<ResponseDTO<PlaceCheckResponseDTO>> checkDuplicatePlace(
             @RequestBody PlaceCheckRequestDTO placeCheckRequestDTO) {
-
         boolean isDuplicate = placeService.isDuplicate(placeCheckRequestDTO);
-
         PlaceCheckResponseDTO placeCheckResponseDTO = new PlaceCheckResponseDTO(isDuplicate);
-
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(placeCheckResponseDTO));
     }
 }

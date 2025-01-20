@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/feed")
 @RequiredArgsConstructor
+@RequestMapping("/api/feed")
 public class FeedController {
 
     private final FeedService feedService;
@@ -21,7 +21,6 @@ public class FeedController {
                                                                     @RequestParam(name = "query") String locationQuery,
                                                                     @RequestParam(name = "sortBy") String sortBy) {
         FeedListResponseDTO feedListResponse = feedService.getFeedListByUserId(userId, categoryId, locationQuery, sortBy);
-
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 }

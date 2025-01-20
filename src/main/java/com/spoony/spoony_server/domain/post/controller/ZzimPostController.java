@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/post/zzim")
 @RequiredArgsConstructor
+@RequestMapping("/api/post/zzim")
 public class ZzimPostController {
 
     public final ZzimPostService zzimPostService;
