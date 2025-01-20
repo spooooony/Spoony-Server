@@ -12,9 +12,9 @@ import com.spoony.spoony_server.domain.post.entity.PostCategoryEntity;
 import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.repository.FeedRepository;
 import com.spoony.spoony_server.domain.post.repository.PostCategoryRepository;
-import com.spoony.spoony_server.domain.post.repository.ZzimPostRepository;
 import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import com.spoony.spoony_server.domain.user.repository.UserRepository;
+import com.spoony.spoony_server.domain.zzim.repository.ZzimPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

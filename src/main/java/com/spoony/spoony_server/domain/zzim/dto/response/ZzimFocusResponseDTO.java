@@ -1,4 +1,6 @@
-package com.spoony.spoony_server.domain.post.dto.response;
+package com.spoony.spoony_server.domain.zzim.dto.response;
+
+import com.spoony.spoony_server.domain.post.dto.response.CategoryColorResponseDTO;
 
 import java.util.List;
 
@@ -11,5 +13,5 @@ public record ZzimFocusResponseDTO(Long placeId,
                                    String postTitle,
                                    Long zzimCount,
                                    List<String> photoUrlList
-                                ) {
+) {
 }
