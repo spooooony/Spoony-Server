@@ -4,13 +4,15 @@ import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "spoon_history")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "spoon_history")
 public class SpoonHistoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

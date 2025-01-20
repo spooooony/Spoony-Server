@@ -6,9 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "location_type")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "location_type")
 public class LocationTypeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

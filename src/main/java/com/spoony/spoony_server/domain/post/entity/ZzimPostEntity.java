@@ -8,9 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "zzim_post")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "zzim_post")
 public class ZzimPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

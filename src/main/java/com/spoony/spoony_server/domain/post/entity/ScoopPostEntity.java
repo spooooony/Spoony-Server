@@ -4,11 +4,13 @@ import com.spoony.spoony_server.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "scoop_post")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "scoop_post")
 public class ScoopPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

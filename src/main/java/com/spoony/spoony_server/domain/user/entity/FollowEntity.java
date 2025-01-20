@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "follow")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "follow")
 public class FollowEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

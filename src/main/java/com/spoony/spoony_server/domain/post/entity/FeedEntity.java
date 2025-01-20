@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "feed")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "feed")
 public class FeedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

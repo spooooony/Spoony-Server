@@ -2,6 +2,7 @@ package com.spoony.spoony_server.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,8 +10,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +27,23 @@ public class UserEntity {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Builder
+    public UserEntity(Long userId,
+                      String userEmail,
+                      String userPassword,
+                      String userName,
+                      String userImage,
+                      RegionEntity region,
+                      LocalDateTime createdAt,
+                      LocalDateTime updatedAt) {
+        this.userId = userId;
+        this.userEmail = userEmail;
+        this.userPassword = userPassword;
+        this.userName = userName;
+        this.userImage = userImage;
+        this.region = region;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

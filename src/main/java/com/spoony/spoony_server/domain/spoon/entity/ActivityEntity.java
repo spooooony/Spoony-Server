@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "activity")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "activity")
 public class ActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

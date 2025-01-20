@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "spoon_balance")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "spoon_balance")
 public class SpoonBalanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +23,10 @@ public class SpoonBalanceEntity {
     private LocalDateTime updatedAt;
 
     @Builder
-    public SpoonBalanceEntity(Long spoonBalanceId, Long amount, UserEntity user, LocalDateTime updatedAt) {
+    public SpoonBalanceEntity(Long spoonBalanceId, UserEntity user, Long amount, LocalDateTime updatedAt) {
         this.spoonBalanceId = spoonBalanceId;
-        this.amount = amount;
         this.user = user;
+        this.amount = amount;
         this.updatedAt = updatedAt;
     }
 }
