@@ -17,6 +17,8 @@ public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
 
     List<FeedEntity> findByUser(UserEntity userEntity);
 
+    void deleteByUserAndPost(UserEntity userEntity, PostEntity postEntity);
+
     boolean existsByPost(PostEntity postEntity); // user_id의 존재 여부 확인
 }
 

@@ -6,6 +6,7 @@ import com.spoony.spoony_server.domain.post.dto.request.PostCreateRequestDTO;
 import com.spoony.spoony_server.domain.post.dto.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.domain.post.dto.response.PostResponseDTO;
 import com.spoony.spoony_server.domain.post.service.PostService;
+import com.spoony.spoony_server.domain.spoon.dto.request.ScoopPostRequestDTO;
 import com.spoony.spoony_server.infra.service.AwsFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -67,5 +68,11 @@ public class PostController {
     public ResponseEntity<ResponseDTO<CategoryMonoListResponseDTO>> getFoodCategories() {
         CategoryMonoListResponseDTO categoryMonoListResponseDTO = postService.getFoodCategories();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(categoryMonoListResponseDTO));
+    }
+
+    @PostMapping("/scoop")
+    public ResponseEntity<ResponseDTO<Void>> scoopPost(@RequestBody ScoopPostRequestDTO scoopPostRequestDTO) {
+        postService.scoopPost(scoopPostRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }
