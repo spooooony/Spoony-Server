@@ -5,10 +5,11 @@ import java.time.LocalDateTime;
 public record FeedResponseDTO(
         Long userId,
         String userName,
-        LocalDateTime createdAt,
-        RegionDTO userRegion,
+        String userRegion,
+        Long postId,
         String title,
         CategoryColorResponseDTO categoryColorResponseDTO,
-        Long zzimCount
+        Long zzimCount,
+        LocalDateTime createdAt
 ) {
 }
