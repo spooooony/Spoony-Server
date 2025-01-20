@@ -2,7 +2,6 @@ package com.spoony.spoony_server.domain.post.service;
 
 import com.spoony.spoony_server.common.dto.ResponseDTO;
 import com.spoony.spoony_server.common.exception.BusinessException;
-import com.spoony.spoony_server.common.message.PlaceErrorMessage;
 import com.spoony.spoony_server.common.message.PostErrorMessage;
 import com.spoony.spoony_server.common.message.UserErrorMessage;
 import com.spoony.spoony_server.domain.location.entity.LocationEntity;
@@ -111,8 +110,6 @@ public class ZzimPostService {
     public ZzimFocusListResponseDTO getZzimFocusList(Long userId, Long placeId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-        PlaceEntity targetPlaceEntity = placeRepository.findById(placeId)
-                .orElseThrow(() -> new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND));
 
         List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userEntity);
 

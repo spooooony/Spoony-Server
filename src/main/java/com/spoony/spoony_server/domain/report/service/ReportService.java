@@ -31,14 +31,12 @@ public class ReportService {
     }
 
     public ResponseEntity<ResponseDTO<Void>> createReport(ReportRequestDTO reportRequest) {
-
         if (reportRequest.reportDetail().trim().isEmpty()) {
             throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_MISSING);
         }
         if (reportRequest.reportDetail().length() > 300) {
             throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_TOO_LONG);
         }
-
 
         ReportType reportType = reportRequest.reportType();
         if (reportType == null) {
@@ -60,7 +58,7 @@ public class ReportService {
                 .reportDetail(reportRequest.reportDetail())
                 .build();
 
-        ReportEntity savedEntity = reportRepository.save(reportEntity);
+        reportRepository.save(reportEntity);
 
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }

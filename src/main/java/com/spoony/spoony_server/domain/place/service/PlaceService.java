@@ -4,20 +4,17 @@ import com.spoony.spoony_server.domain.place.dto.request.PlaceCheckRequestDTO;
 import com.spoony.spoony_server.domain.place.repository.PlaceRepository;
 import com.spoony.spoony_server.domain.post.entity.PostEntity;
 import com.spoony.spoony_server.domain.post.repository.PostRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PlaceService {
 
     public final PlaceRepository placeRepository;
     public final PostRepository postRepository;
-
-    public PlaceService(PlaceRepository placeRepository, PostRepository postRepository) {
-        this.placeRepository = placeRepository;
-        this.postRepository = postRepository;
-    }
 
     public Boolean isDuplicate(PlaceCheckRequestDTO placeCheckRequestDTO) {
         Long userId = placeCheckRequestDTO.userId();

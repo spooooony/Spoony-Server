@@ -78,7 +78,6 @@ public class PostService {
         String backgroundColor = categoryEntity.getBackgroundColor();
         String textColor = categoryEntity.getTextColor();
 
-        //List<String> category_list = List.of(categoryEntity.getCategoryName());
         String category = categoryEntity.getCategoryName();
 
         List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
@@ -87,11 +86,9 @@ public class PostService {
                 .map(menuEntity -> menuEntity.getMenuName())
                 .collect(Collectors.toList());
 
-        //List<PhotoEntity> -> List<String>
         List<String> photoUrlList = photoEntityList.stream()
                 .map(PhotoEntity::getPhotoUrl)
                 .collect(Collectors.toList());
-
 
         return new PostResponseDTO(postId,
                 userEntity.getUserId(),
