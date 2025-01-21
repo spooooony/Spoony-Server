@@ -59,6 +59,7 @@ public class FeedService {
                             postEntity.getPostId(),
                             postEntity.getTitle(),
                             new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryId(),
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
                                     categoryEntity.getTextColor(),

@@ -94,6 +94,7 @@ public class ZzimPostService {
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryId(),
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
                                     categoryEntity.getTextColor(),
@@ -136,6 +137,7 @@ public class ZzimPostService {
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryId(),
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
                                     categoryEntity.getTextColor(),
@@ -224,6 +226,7 @@ public class ZzimPostService {
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryId(),
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
                                     categoryEntity.getTextColor(),
@@ -285,6 +288,7 @@ public class ZzimPostService {
                     CategoryColorResponseDTO categoryColorResponse = postCategoryRepository.findByPost(postEntity)
                             .map(PostCategoryEntity::getCategory)
                             .map(categoryEntity -> new CategoryColorResponseDTO(
+                                    categoryEntity.getCategoryId(),
                                     categoryEntity.getCategoryName(),
                                     categoryEntity.getIconUrlColor(),
                                     categoryEntity.getTextColor(),

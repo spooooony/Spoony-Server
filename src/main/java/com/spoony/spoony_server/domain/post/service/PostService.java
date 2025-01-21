@@ -79,12 +79,6 @@ public class PostService {
         List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
 
-        String iconUrlColor = categoryEntity.getIconUrlColor();
-        String backgroundColor = categoryEntity.getBackgroundColor();
-        String textColor = categoryEntity.getTextColor();
-
-        String category = categoryEntity.getCategoryName();
-
         List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.MENU_NOT_FOUND));
 
@@ -110,7 +104,12 @@ public class PostService {
                 zzimCount,
                 isZzim,
                 isScoop,
-                new CategoryColorResponseDTO(category, iconUrlColor, textColor, backgroundColor)
+                new CategoryColorResponseDTO(
+                        categoryEntity.getCategoryId(),
+                        categoryEntity.getCategoryName(),
+                        categoryEntity.getIconUrlColor(),
+                        categoryEntity.getTextColor(),
+                        categoryEntity.getBackgroundColor())
         );
     }
 
