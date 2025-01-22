@@ -245,6 +245,16 @@ public class PostService {
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
+
+        //현재 사용자의 스푼 갯수 조회
+        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity).orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
+
+
+        //스푼 잔액이 1개 미만이면 에러 발생
+
+        if (spoonBalanceEntity.getAmount() < 1) {
+            throw new BusinessException(SpoonErrorMessage.NOT_ENOUGH_SPOONS);
+        }
         //떠먹은 포스트에 반영
         ScoopPostEntity scoopPostEntity = ScoopPostEntity.builder().user(userEntity).post(postEntity).build();
         scoopPostRepository.save(scoopPostEntity);
