@@ -115,7 +115,7 @@ public class ZzimPostService {
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponseDTO(zzimCardResponses);
+        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
     public ZzimFocusListResponseDTO getZzimFocusList(Long userId, Long placeId) {
@@ -247,7 +247,7 @@ public class ZzimPostService {
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponseDTO(zzimCardResponses);
+        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
     private ZzimCardListResponseDTO getZzimByArea(Long userId, Double longitude, Double latitude) {
@@ -309,7 +309,7 @@ public class ZzimPostService {
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponseDTO(zzimCardResponses);
+        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
     // 두 좌표 간의 거리를 계산하는 메서드 (단위: km)

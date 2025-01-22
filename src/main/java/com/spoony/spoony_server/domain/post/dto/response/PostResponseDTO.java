@@ -14,7 +14,7 @@ public record PostResponseDTO(Long postId,
                               String placeAddress,
                               Double latitude,
                               Double longitude,
-                              Long zzinCount,
+                              Long zzimCount,
                               Boolean isZzim,
                               Boolean isScoop,
                               CategoryColorResponseDTO categoryColorResponse
