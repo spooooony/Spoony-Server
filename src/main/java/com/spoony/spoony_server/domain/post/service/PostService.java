@@ -246,7 +246,7 @@ public class PostService {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
 
-        //현재 사용자의 스푼 갯수 조회
+        //현재 사용자의 스푼 개수 조회
         SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity).orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
 
 
@@ -263,8 +263,6 @@ public class PostService {
         ActivityEntity activityEntity = activityRepository.findById(3L)
                 .orElseThrow(() -> new BusinessException(SpoonErrorMessage.ACTIVITY_NOT_FOUND));
 
-        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity)
-                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
 
         spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + activityEntity.getChangeAmount());
         spoonBalanceEntity.setUpdatedAt(LocalDateTime.now());
