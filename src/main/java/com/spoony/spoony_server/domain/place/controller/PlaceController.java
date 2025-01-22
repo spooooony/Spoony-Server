@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -73,7 +74,9 @@ public class PlaceController {
             List<PlaceResponseDTO> places = new ArrayList<>();
 
             placeList.get("items").forEach(item -> {
-                String title = item.get("title").asText().replaceAll("<[^>]*>", ""); // HTML 태그 제거
+                String title = HtmlUtils.htmlUnescape(
+                        item.get("title").asText().replaceAll("<[^>]*>", "") // HTML 태그 제거
+                );
                 String address = item.get("address").asText();
                 String roadAddress = item.get("roadAddress").asText();
                 Double mapx = item.get("mapx").asDouble();
