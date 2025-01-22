@@ -75,10 +75,11 @@ public class PlaceController {
 
             placeList.get("items").forEach(item -> {
                 String title = HtmlUtils.htmlUnescape(
-                        item.get("title").asText().replaceAll("<[^>]*>", "") // HTML 태그 제거
-                );
-                String address = item.get("address").asText();
-                String roadAddress = item.get("roadAddress").asText();
+                        item.get("title").asText().replaceAll("<[^>]*>", ""));
+                String address = HtmlUtils.htmlUnescape(
+                        item.get("address").asText().replaceAll("<[^>]*>", ""));
+                String roadAddress = HtmlUtils.htmlUnescape(
+                        item.get("roadAddress").asText().replaceAll("<[^>]*>", ""));
                 Double mapx = item.get("mapx").asDouble();
                 Double mapy = item.get("mapy").asDouble();
 
