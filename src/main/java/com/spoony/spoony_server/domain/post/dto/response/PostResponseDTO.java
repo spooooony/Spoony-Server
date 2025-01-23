@@ -15,6 +15,7 @@ public record PostResponseDTO(Long postId,
                               Double latitude,
                               Double longitude,
                               Long zzimCount,
+                              Boolean isMine,
                               Boolean isZzim,
                               Boolean isScoop,
                               CategoryColorResponseDTO categoryColorResponse
