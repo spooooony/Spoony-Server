@@ -74,6 +74,7 @@ public class PostService {
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
 
         Long zzimCount = zzimPostRepository.countByPost(postEntity);
+        Boolean isMine = postEntity.getUser().getUserId().equals(userId);
         Boolean isZzim = zzimPostRepository.existsByUserAndPost(userEntity, postEntity);
         Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
         List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity)
@@ -102,6 +103,7 @@ public class PostService {
                 place.getLatitude(),
                 place.getLongitude(),
                 zzimCount,
+                isMine,
                 isZzim,
                 isScoop,
                 new CategoryColorResponseDTO(
