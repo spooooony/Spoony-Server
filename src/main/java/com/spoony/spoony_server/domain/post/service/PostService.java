@@ -92,7 +92,7 @@ public class PostService {
                 .collect(Collectors.toList());
 
         return new PostResponseDTO(postId,
-                userEntity.getUserId(),
+                postEntity.getUser().getUserId(),
                 photoUrlList,
                 postEntity.getTitle(),
                 latestDate,
