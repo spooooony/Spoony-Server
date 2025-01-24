@@ -40,6 +40,10 @@ public class FeedService {
                     if (categoryId == 1) {
                         return true;
                     }
+                    else if (categoryId == 2) {
+                        PostEntity postEntity = feedEntity.getPost();
+                        return postEntity.getUser().getRegion().getRegionName().contains(location_query);
+                    }
                     PostEntity postEntity = feedEntity.getPost();
                     PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
                             .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
