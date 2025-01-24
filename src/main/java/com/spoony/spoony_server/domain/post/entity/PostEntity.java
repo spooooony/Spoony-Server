@@ -28,7 +28,10 @@ public class PostEntity {
     private PlaceEntity place;
 
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
