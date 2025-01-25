@@ -185,7 +185,7 @@ public class ZzimPostService {
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.LOCATION_NOT_FOUND));
 
         if (locationEntity.getLocationTypeEntity().getLocationTypeId() == 1) {
-            return getZzimByAddress(userId, locationEntity.getLocationAddress());
+            return getZzimByAddress(userId, locationEntity.getLocationName());
         } else if (locationEntity.getLocationTypeEntity().getLocationTypeId() == 2) {
             return getZzimByAreaDong(userId, locationEntity.getLongitude(), locationEntity.getLatitude());
         } else{
@@ -193,7 +193,7 @@ public class ZzimPostService {
         }
     }
 
-    private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationAddress) {
+    private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationName) {
         List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser((userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND))
         ));
@@ -212,11 +212,11 @@ public class ZzimPostService {
             }
         }
 
-        // placeAddress에 locationAddress 문자열이 포함된 데이터만 필터링
+        // placeAddress에 locationName 문자열이 포함된 데이터만 필터링
         List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
                 .filter(zzimPostEntity -> {
                     PlaceEntity placeEntity = zzimPostEntity.getPost().getPlace();
-                    return placeEntity.getPlaceAddress() != null && placeEntity.getPlaceAddress().contains(locationAddress);
+                    return placeEntity.getPlaceAddress() != null && placeEntity.getPlaceAddress().contains(locationName);
                 })
                 .map(zzimPostEntity -> {
                     PostEntity postEntity = zzimPostEntity.getPost();
