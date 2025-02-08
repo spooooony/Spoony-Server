@@ -5,8 +5,8 @@ import com.spoony.spoony_server.application.port.in.location.LocationSearchUseCa
 import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
-import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
-import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationRepository;
+import com.spoony.spoony_server.application.port.out.location.LocationPort;
+import com.spoony.spoony_server.domain.location.Location;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,24 +17,24 @@ import java.util.List;
 public class LocationService implements
         LocationSearchUseCase {
 
-    private final LocationRepository locationRepository;
+    private final LocationPort locationPort;
 
     public LocationResponseListDTO searchLocationsByQuery(LocationSearchCommand command) {
 
-        List<LocationEntity> locationEntityList = locationRepository.findByLocationNameContaining(command.getQuery());
+        List<Location> locationList = locationPort.findByLocationNameContaining(command.getQuery());
 
-        List<LocationResponseDTO> locationResponseList = locationEntityList.stream()
-                .map(locationEntity -> new LocationResponseDTO(
-                        locationEntity.getLocationId(),
-                        locationEntity.getLocationName(),
-                        locationEntity.getLocationAddress(),
+        List<LocationResponseDTO> locationResponseList = locationList.stream()
+                .map(location -> new LocationResponseDTO(
+                        location.getLocationId(),
+                        location.getLocationName(),
+                        location.getLocationAddress(),
                         new LocationTypeDTO(
-                                locationEntity.getLocationTypeEntity().getLocationTypeId(),
-                                locationEntity.getLocationTypeEntity().getLocationTypeName(),
-                                locationEntity.getLocationTypeEntity().getScope()
+                                location.getLocationType().getLocationTypeId(),
+                                location.getLocationType().getLocationTypeName(),
+                                location.getLocationType().getScope()
                         ),
-                        locationEntity.getLongitude(),
-                        locationEntity.getLatitude()
+                        location.getLongitude(),
+                        location.getLatitude()
                 ))
                 .toList();
 
