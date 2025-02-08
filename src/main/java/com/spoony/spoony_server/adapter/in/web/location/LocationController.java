@@ -1,8 +1,9 @@
 package com.spoony.spoony_server.adapter.in.web.location;
 
+import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.in.location.LocationSearchUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.application.port.dto.location.LocationResponseListDTO;
+import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,8 @@ public class LocationController {
 
     @GetMapping("/search")
     public ResponseEntity<ResponseDTO<LocationResponseListDTO>> searchLocations(@RequestParam String query) {
-        LocationResponseListDTO locationResponseListDTO = locationSearchUseCase.searchLocationsByQuery(query);
+        LocationSearchCommand command = new LocationSearchCommand(query);
+        LocationResponseListDTO locationResponseListDTO = locationSearchUseCase.searchLocationsByQuery(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(locationResponseListDTO));
     }
 }

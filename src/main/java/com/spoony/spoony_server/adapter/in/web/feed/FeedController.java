@@ -1,8 +1,9 @@
 package com.spoony.spoony_server.adapter.in.web.feed;
 
+import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.FeedListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,8 @@ public class FeedController {
                                                                                 @PathVariable Long categoryId,
                                                                                 @RequestParam(name = "query") String locationQuery,
                                                                                 @RequestParam(name = "sortBy") String sortBy) {
-        FeedListResponseDTO feedListResponse = feedGetUseCase.getFeedListByUserId(userId, categoryId, locationQuery, sortBy);
+        FeedGetCommand command = new FeedGetCommand(userId, categoryId, locationQuery, sortBy);
+        FeedListResponseDTO feedListResponse = feedGetUseCase.getFeedListByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 }

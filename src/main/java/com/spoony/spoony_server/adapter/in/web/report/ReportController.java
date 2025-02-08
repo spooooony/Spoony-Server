@@ -1,8 +1,9 @@
 package com.spoony.spoony_server.adapter.in.web.report;
 
+import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.application.port.dto.report.ReportRequestDTO;
+import com.spoony.spoony_server.adapter.dto.report.ReportRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,13 @@ public class ReportController {
 
     @PostMapping
     public ResponseEntity<ResponseDTO<Void>> createReport(@RequestBody ReportRequestDTO reportRequestDTO) {
-        reportCreateUseCase.createReport(reportRequestDTO);
+        ReportCreateCommand command = new ReportCreateCommand(
+                reportRequestDTO.postId(),
+                reportRequestDTO.userId(),
+                reportRequestDTO.reportType(),
+                reportRequestDTO.reportDetail()
+        );
+        reportCreateUseCase.createReport(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }

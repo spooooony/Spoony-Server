@@ -1,8 +1,9 @@
 package com.spoony.spoony_server.adapter.in.web.user;
 
+import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.application.port.dto.user.UserResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,8 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfo(@PathVariable Long userId) {
-        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(userId);
+        UserGetCommand command = new UserGetCommand(userId);
+        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
 }

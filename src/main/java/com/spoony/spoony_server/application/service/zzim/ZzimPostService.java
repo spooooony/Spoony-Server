@@ -1,32 +1,32 @@
 package com.spoony.spoony_server.application.service.zzim;
 
+import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
-import com.spoony.spoony_server.application.port.in.zzim.ZzimRemoveUseCase;
+import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.PostErrorMessage;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
-import com.spoony.spoony_server.adapter.out.persistence.location.jpa.LocationEntity;
-import com.spoony.spoony_server.adapter.out.persistence.location.jpa.LocationRepository;
-import com.spoony.spoony_server.adapter.out.persistence.place.jpa.PlaceEntity;
-import com.spoony.spoony_server.adapter.out.persistence.place.jpa.PlaceRepository;
-import com.spoony.spoony_server.application.port.dto.post.CategoryColorResponseDTO;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PhotoEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostCategoryEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PhotoRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostCategoryRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostRepository;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserRepository;
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimPostAddRequestDTO;
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimCardListResponseDTO;
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimCardResponseDTO;
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimFocusListResponseDTO;
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimFocusResponseDTO;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.jpa.ZzimPostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.jpa.ZzimPostRepository;
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationRepository;
+import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
+import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceRepository;
+import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PhotoEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PhotoRepository;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryRepository;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusResponseDTO;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 public class ZzimPostService implements
         ZzimAddUseCase,
         ZzimGetUseCase,
-        ZzimRemoveUseCase {
+        ZzimDeleteUseCase {
 
     private final ZzimPostRepository zzimPostRepository;
     private final PostCategoryRepository postCategoryRepository;
@@ -51,10 +51,10 @@ public class ZzimPostService implements
     private final PlaceRepository placeRepository;
     private final LocationRepository locationRepository;
 
-    public void addZzimPost(ZzimPostAddRequestDTO zzimPostAddRequest) {
+    public void addZzimPost(ZzimAddCommand command) {
 
-        Long postId = zzimPostAddRequest.postId();
-        Long userId = zzimPostAddRequest.userId();
+        Long postId = command.getPostId();
+        Long userId = command.getUserId();
 
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
@@ -65,8 +65,8 @@ public class ZzimPostService implements
     }
 
     //사용자 지도 리스트 조회
-    public ZzimCardListResponseDTO getZzimCardList(Long userId) {
-        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userRepository.findById(userId)
+    public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
+        List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userRepository.findById(command.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND))
         );
 
@@ -119,8 +119,8 @@ public class ZzimPostService implements
         return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
-    public ZzimFocusListResponseDTO getZzimFocusList(Long userId, Long placeId) {
-        UserEntity userEntity = userRepository.findById(userId)
+    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) {
+        UserEntity userEntity = userRepository.findById(command.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         List<ZzimPostEntity> zzimPostEntityList = zzimPostRepository.findByUser(userEntity);
@@ -129,7 +129,7 @@ public class ZzimPostService implements
                 .filter(zzimPostEntity -> {
                     PostEntity postEntity = zzimPostEntity.getPost();
                     PlaceEntity postPlaceEntity = postEntity.getPlace();
-                    return postPlaceEntity != null && postPlaceEntity.getPlaceId().equals(placeId);
+                    return postPlaceEntity != null && postPlaceEntity.getPlaceId().equals(command.getPlaceId());
                 })
                 .map(zzimPostEntity -> {
                     PostEntity postEntity = zzimPostEntity.getPost();
@@ -172,25 +172,25 @@ public class ZzimPostService implements
     }
 
     @Transactional
-    public void deleteZzim(Long userId, Long postId) {
-        UserEntity userEntity = userRepository.findById(userId)
+    public void deleteZzim(ZzimDeleteCommand command) {
+        UserEntity userEntity = userRepository.findById(command.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findById(command.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         zzimPostRepository.deleteByUserAndPost(userEntity, postEntity);
     }
 
-    public ZzimCardListResponseDTO getZzimByLocation(Long userId, Long locationId) {
-        LocationEntity locationEntity = locationRepository.findById(locationId)
+    public ZzimCardListResponseDTO getZzimByLocation(ZzimGetLocationCardCommand command) {
+        LocationEntity locationEntity = locationRepository.findById(command.getLocationId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.LOCATION_NOT_FOUND));
 
         if (locationEntity.getLocationTypeEntity().getLocationTypeId() == 1) {
-            return getZzimByAddress(userId, locationEntity.getLocationName());
+            return getZzimByAddress(command.getUserId(), locationEntity.getLocationName());
         } else if (locationEntity.getLocationTypeEntity().getLocationTypeId() == 2) {
-            return getZzimByAreaDong(userId, locationEntity.getLongitude(), locationEntity.getLatitude());
+            return getZzimByAreaDong(command.getUserId(), locationEntity.getLongitude(), locationEntity.getLatitude());
         } else{
-            return getZzimByAreaStation(userId, locationEntity.getLongitude(), locationEntity.getLatitude());
+            return getZzimByAreaStation(command.getUserId(), locationEntity.getLongitude(), locationEntity.getLatitude());
         }
     }
 

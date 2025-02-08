@@ -1,8 +1,8 @@
 package com.spoony.spoony_server.application.port.out.feed;
 
-import com.spoony.spoony_server.adapter.out.persistence.feed.jpa.FeedEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 
 import java.util.List;
 

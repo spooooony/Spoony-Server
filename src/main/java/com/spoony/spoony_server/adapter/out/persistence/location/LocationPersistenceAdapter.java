@@ -1,0 +1,21 @@
+package com.spoony.spoony_server.adapter.out.persistence.location;
+
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationRepository;
+import com.spoony.spoony_server.application.port.out.location.LocationPort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class LocationPersistenceAdapter implements LocationPort {
+
+    private final LocationRepository locationRepository;
+
+    @Override
+    public List<LocationEntity> findByLocationNameContaining(String query) {
+        return locationRepository.findByLocationNameContaining(query);
+    }
+}

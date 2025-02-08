@@ -1,21 +1,22 @@
 package com.spoony.spoony_server.application.service.feed;
 
+import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.PostErrorMessage;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
-import com.spoony.spoony_server.application.port.dto.post.CategoryColorResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.FeedListResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.FeedResponseDTO;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.CategoryEntity;
-import com.spoony.spoony_server.adapter.out.persistence.feed.jpa.FeedEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostCategoryEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.feed.jpa.FeedRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostCategoryRepository;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserRepository;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.jpa.ZzimPostRepository;
+import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.FeedResponseDTO;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.CategoryEntity;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryRepository;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,25 +31,28 @@ public class FeedService implements FeedGetUseCase {
     private final PostCategoryRepository postCategoryRepository;
     private final ZzimPostRepository zzimPostRepository;
 
-    public FeedListResponseDTO getFeedListByUserId(Long userId, Long categoryId, String location_query, String sortBy) {
+    public FeedListResponseDTO getFeedListByUserId(FeedGetCommand command) {
 
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        String locationQuery = command.getLocationQuery();
+        String sortBy = command.getSortBy();
+
+        UserEntity userEntity = userRepository.findById(command.getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         List<FeedEntity> feedEntityList = feedRepository.findByUser(userEntity);
 
         List<FeedResponseDTO> feedResponseList = feedEntityList.stream()
-                .filter(feedEntity -> feedEntity.getPost().getPlace().getPlaceAddress().contains(location_query))
+                .filter(feedEntity -> feedEntity.getPost().getPlace().getPlaceAddress().contains(locationQuery))
                 .filter(feedEntity -> {
-                    if (categoryId == 1) {
+                    if (command.getCategoryId() == 1) {
                         return true;
                     }
-                    else if (categoryId == 2) {
+                    else if (command.getCategoryId() == 2) {
                         PostEntity postEntity = feedEntity.getPost();
-                        return postEntity.getUser().getRegion().getRegionName().contains(location_query);
+                        return postEntity.getUser().getRegion().getRegionName().contains(locationQuery);
                     }
                     PostEntity postEntity = feedEntity.getPost();
                     PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
                             .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
-                    return postCategoryEntity.getCategory().getCategoryId().equals(categoryId);
+                    return postCategoryEntity.getCategory().getCategoryId().equals(command.getCategoryId());
                 })
                 .map(feedEntity -> {
                     PostEntity postEntity = feedEntity.getPost();

@@ -1,8 +1,8 @@
 package com.spoony.spoony_server.application.port.out.zzim;
 
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.PostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.jpa.ZzimPostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
 
 import java.util.List;
 

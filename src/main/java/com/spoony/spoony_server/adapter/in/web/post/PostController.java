@@ -1,15 +1,18 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
+import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
+import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
+import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
 import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostScoopPostUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.PostCreateDTO;
-import com.spoony.spoony_server.application.port.dto.post.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.PostResponseDTO;
-import com.spoony.spoony_server.application.port.dto.spoon.ScoopPostRequestDTO;
-import com.spoony.spoony_server.application.port.dto.zzim.PostCreateRequestDTO;
+import com.spoony.spoony_server.adapter.dto.post.PostCreateDTO;
+import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.PostCreateRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +35,8 @@ public class PostController {
 
     @GetMapping("/{userId}/{postId}")
     public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable Long postId, @PathVariable Long userId) {
-        PostResponseDTO postResponse = postGetUseCase.getPostById(postId, userId);
+        PostGetCommand command = new PostGetCommand(postId, userId);
+        PostResponseDTO postResponse = postGetUseCase.getPostById(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));
     }
 
@@ -41,9 +45,10 @@ public class PostController {
             @RequestPart("data") PostCreateRequestDTO postCreateRequestDTO,
             @RequestPart("photos") List<MultipartFile> photos
     ) throws IOException {
-        List<String> photoUrlList = postCreateUseCase.savePostImages(photos);
+        PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
+        List<String> photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
 
-        PostCreateDTO updatedPostCreateDTO = new PostCreateDTO(
+        PostCreateCommand command = new PostCreateCommand(
                 postCreateRequestDTO.userId(),
                 postCreateRequestDTO.title(),
                 postCreateRequestDTO.description(),
@@ -57,7 +62,7 @@ public class PostController {
                 photoUrlList
         );
 
-        postCreateUseCase.createPost(updatedPostCreateDTO);
+        postCreateUseCase.createPost(command);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
     }

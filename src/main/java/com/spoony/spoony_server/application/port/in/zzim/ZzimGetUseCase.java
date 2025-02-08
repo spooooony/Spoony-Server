@@ -1,10 +1,13 @@
 package com.spoony.spoony_server.application.port.in.zzim;
 
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimCardListResponseDTO;
-import com.spoony.spoony_server.application.port.dto.zzim.ZzimFocusListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusListResponseDTO;
+import com.spoony.spoony_server.application.port.command.zzim.ZzimGetCardCommand;
+import com.spoony.spoony_server.application.port.command.zzim.ZzimGetFocusCommand;
+import com.spoony.spoony_server.application.port.command.zzim.ZzimGetLocationCardCommand;
 
 public interface ZzimGetUseCase {
-    ZzimCardListResponseDTO getZzimCardList(Long userId);
-    ZzimFocusListResponseDTO getZzimFocusList(Long userId, Long placeId);
-    ZzimCardListResponseDTO getZzimByLocation(Long userId, Long locationId);
+    ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command);
+    ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command);
+    ZzimCardListResponseDTO getZzimByLocation(ZzimGetLocationCardCommand command);
 }

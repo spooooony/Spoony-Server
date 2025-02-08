@@ -1,8 +1,11 @@
 package com.spoony.spoony_server.application.service.post;
 
-import com.spoony.spoony_server.adapter.out.persistence.feed.jpa.FeedEntity;
-import com.spoony.spoony_server.adapter.out.persistence.feed.jpa.FeedRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.jpa.*;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.*;
+import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
+import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
+import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
 import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
@@ -13,27 +16,27 @@ import com.spoony.spoony_server.global.message.CategoryErrorMessage;
 import com.spoony.spoony_server.global.message.PostErrorMessage;
 import com.spoony.spoony_server.global.message.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
-import com.spoony.spoony_server.adapter.out.persistence.place.jpa.PlaceEntity;
-import com.spoony.spoony_server.adapter.out.persistence.place.jpa.PlaceRepository;
-import com.spoony.spoony_server.application.port.dto.post.PostCreateDTO;
-import com.spoony.spoony_server.application.port.dto.post.CategoryColorResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.CategoryMonoResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.PostResponseDTO;
-import com.spoony.spoony_server.application.port.dto.post.CategoryType;
-import com.spoony.spoony_server.application.port.dto.spoon.ScoopPostRequestDTO;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.ActivityEntity;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.SpoonBalanceEntity;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.SpoonHistoryEntity;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.ActivityRepository;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.ScoopPostRepository;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.SpoonBalanceRepository;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.jpa.SpoonHistoryRepository;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.FollowEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.jpa.UserRepository;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.jpa.ZzimPostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.jpa.ZzimPostRepository;
+import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
+import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceRepository;
+import com.spoony.spoony_server.adapter.dto.post.PostCreateDTO;
+import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.CategoryMonoResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.CategoryType;
+import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.ActivityEntity;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonBalanceEntity;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonHistoryEntity;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.ActivityRepository;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.ScoopPostRepository;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonBalanceRepository;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonHistoryRepository;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.FollowEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,10 +73,10 @@ public class PostService implements
     private final PostCreatePort postCreatePort;
 
     @Transactional
-    public PostResponseDTO getPostById(Long postId, Long userId) {
+    public PostResponseDTO getPostById(PostGetCommand command) {
 
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        PostEntity postEntity = postRepository.findById(command.getPostId()).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        UserEntity userEntity = userRepository.findById(command.getUserId()).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
@@ -85,7 +88,7 @@ public class PostService implements
         LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
 
         Long zzimCount = zzimPostRepository.countByPost(postEntity);
-        Boolean isMine = postEntity.getUser().getUserId().equals(userId);
+        Boolean isMine = postEntity.getUser().getUserId().equals(command.getUserId());
         Boolean isZzim = zzimPostRepository.existsByUserAndPost(userEntity, postEntity);
         Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
         List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity)
@@ -102,7 +105,7 @@ public class PostService implements
                 .map(PhotoEntity::getPhotoUrl)
                 .collect(Collectors.toList());
 
-        return new PostResponseDTO(postId,
+        return new PostResponseDTO(command.getPostId(),
                 postEntity.getUser().getUserId(),
                 photoUrlList,
                 postEntity.getTitle(),
@@ -126,27 +129,26 @@ public class PostService implements
         );
     }
 
-    public List<String> savePostImages(List<MultipartFile> photos) throws IOException {
-        List<String> photoUrlList = postCreatePort.savePostImages(photos);
+    public List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException {
+        List<String> photoUrlList = postCreatePort.savePostImages(photoSaveCommand.getPhotos());
         return photoUrlList;
     }
 
     @Transactional
-    public void createPost(PostCreateDTO postCreateDTO) {
-
+    public void createPost(PostCreateCommand command) {
         // 게시글 업로드
-        UserEntity userEntity = userRepository.findById(postCreateDTO.userId())
+        UserEntity userEntity = userRepository.findById(command.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
-        CategoryEntity categoryEntity = categoryRepository.findById(postCreateDTO.categoryId())
+        CategoryEntity categoryEntity = categoryRepository.findById(command.getCategoryId())
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
 
         PlaceEntity placeEntity = PlaceEntity.builder()
-                .placeName(postCreateDTO.placeName())
-                .placeAddress(postCreateDTO.placeAddress())
-                .placeRoadAddress(postCreateDTO.placeRoadAddress())
-                .latitude(postCreateDTO.latitude())
-                .longitude(postCreateDTO.longitude())
+                .placeName(command.getPlaceName())
+                .placeAddress(command.getPlaceAddress())
+                .placeRoadAddress(command.getPlaceRoadAddress())
+                .latitude(command.getLatitude())
+                .longitude(command.getLongitude())
                 .build();
 
         placeRepository.save(placeEntity);
@@ -154,8 +156,8 @@ public class PostService implements
         PostEntity postEntity = PostEntity.builder()
                 .user(userEntity)
                 .place(placeEntity)
-                .title(postCreateDTO.title())
-                .description(postCreateDTO.description())
+                .title(command.getTitle())
+                .description(command.getDescription())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -169,14 +171,14 @@ public class PostService implements
 
         postCategoryRepository.save(postCategoryEntity);
 
-        postCreateDTO.menuList().stream()
+        command.getMenuList().stream()
                 .map(menuName -> MenuEntity.builder()
                         .post(postEntity)
                         .menuName(menuName)
                         .build())
                 .forEach(menuRepository::save);
 
-        postCreateDTO.photoUrlList().stream()
+        command.getPhotoUrlList().stream()
                 .map(photoUrl -> PhotoEntity.builder()
                         .post(postEntity)
                         .photoUrl(photoUrl)

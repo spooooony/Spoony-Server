@@ -1,11 +1,12 @@
 package com.spoony.spoony_server.application.service.location;
 
+import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.in.location.LocationSearchUseCase;
-import com.spoony.spoony_server.application.port.dto.location.LocationResponseDTO;
-import com.spoony.spoony_server.application.port.dto.location.LocationResponseListDTO;
-import com.spoony.spoony_server.application.port.dto.location.LocationTypeDTO;
-import com.spoony.spoony_server.adapter.out.persistence.location.jpa.LocationEntity;
-import com.spoony.spoony_server.adapter.out.persistence.location.jpa.LocationRepository;
+import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
+import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
+import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,9 @@ public class LocationService implements
 
     private final LocationRepository locationRepository;
 
-    public LocationResponseListDTO searchLocationsByQuery(String query) {
-        List<LocationEntity> locationEntityList = locationRepository.findByLocationNameContaining(query);
+    public LocationResponseListDTO searchLocationsByQuery(LocationSearchCommand command) {
+
+        List<LocationEntity> locationEntityList = locationRepository.findByLocationNameContaining(command.getQuery());
 
         List<LocationResponseDTO> locationResponseList = locationEntityList.stream()
                 .map(locationEntity -> new LocationResponseDTO(
