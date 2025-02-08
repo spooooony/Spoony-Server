@@ -4,12 +4,12 @@ import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
 
 import java.util.List;
 
-public record ZzimFocusResponseDTO(Long placeId,
+public record ZzimFocusResponseDTO(long placeId,
                                    String placeName,
                                    CategoryColorResponseDTO categoryColorResponse,
                                    String authorName,
                                    String authorRegionName,
-                                   Long postId,
+                                   long postId,
                                    String postTitle,
                                    Long zzimCount,
                                    List<String> photoUrlList

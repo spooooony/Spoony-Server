@@ -34,7 +34,7 @@ public class PostController {
     private final PostScoopPostUseCase postScoopPostUseCase;
 
     @GetMapping("/{userId}/{postId}")
-    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable Long postId, @PathVariable Long userId) {
+    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable long postId, @PathVariable long userId) {
         PostGetCommand command = new PostGetCommand(postId, userId);
         PostResponseDTO postResponse = postGetUseCase.getPostById(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));

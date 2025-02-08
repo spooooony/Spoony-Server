@@ -17,8 +17,8 @@ public class FeedController {
     private final FeedGetUseCase feedGetUseCase;
 
     @GetMapping("/{userId}/{categoryId}")
-    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getFeedListByUserId(@PathVariable Long userId,
-                                                                                @PathVariable Long categoryId,
+    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getFeedListByUserId(@PathVariable long userId,
+                                                                                @PathVariable long categoryId,
                                                                                 @RequestParam(name = "query") String locationQuery,
                                                                                 @RequestParam(name = "sortBy") String sortBy) {
         FeedGetCommand command = new FeedGetCommand(userId, categoryId, locationQuery, sortBy);

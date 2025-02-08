@@ -2,7 +2,7 @@ package com.spoony.spoony_server.adapter.dto.zzim;
 
 import java.util.List;
 
-public record PostCreateRequestDTO(Long userId,
+public record PostCreateRequestDTO(long userId,
                                    String title,
                                    String description,
                                    String placeName,
@@ -10,6 +10,6 @@ public record PostCreateRequestDTO(Long userId,
                                    String placeRoadAddress,
                                    Double latitude,
                                    Double longitude,
-                                   Long categoryId,
+                                   long categoryId,
                                    List<String> menuList) {
 }

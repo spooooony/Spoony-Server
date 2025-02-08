@@ -33,28 +33,28 @@ public class ZzimPostController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimCardList(@PathVariable Long userId) {
+    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimCardList(@PathVariable long userId) {
         ZzimGetCardCommand command = new ZzimGetCardCommand(userId);
         ZzimCardListResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimCardList(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 
     @GetMapping("/{userId}/{placeId}")
-    public ResponseEntity<ResponseDTO<ZzimFocusListResponseDTO>> getZzimFocusList(@PathVariable Long userId, @PathVariable Long placeId) {
+    public ResponseEntity<ResponseDTO<ZzimFocusListResponseDTO>> getZzimFocusList(@PathVariable long userId, @PathVariable long placeId) {
         ZzimGetFocusCommand command = new ZzimGetFocusCommand(userId, placeId);
         ZzimFocusListResponseDTO zzimFocusListResponse = zzimGetUseCase.getZzimFocusList(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimFocusListResponse));
     }
 
     @GetMapping("/location/{userId}/{locationId}")
-    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimLocationCardList(@PathVariable Long userId, @PathVariable Long locationId) {
+    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimLocationCardList(@PathVariable long userId, @PathVariable long locationId) {
         ZzimGetLocationCardCommand command = new ZzimGetLocationCardCommand(userId, locationId);
         ZzimCardListResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimByLocation(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 
     @DeleteMapping("/{userId}/{placeId}")
-    public ResponseEntity<ResponseDTO<Void>> deleteZzim(@PathVariable Long userId, @PathVariable Long postId) {
+    public ResponseEntity<ResponseDTO<Void>> deleteZzim(@PathVariable long userId, @PathVariable long postId) {
         ZzimDeleteCommand command = new ZzimDeleteCommand(userId, postId);
         zzimRemoveUseCase.deleteZzim(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));

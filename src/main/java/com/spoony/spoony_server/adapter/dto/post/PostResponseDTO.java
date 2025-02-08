@@ -3,8 +3,8 @@ package com.spoony.spoony_server.adapter.dto.post;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record PostResponseDTO(Long postId,
-                              Long userId,
+public record PostResponseDTO(long postId,
+                              long userId,
                               List<String> photoUrlList,
                               String title,
                               LocalDateTime date,

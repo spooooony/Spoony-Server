@@ -20,7 +20,7 @@ public class SpoonController {
     private final SpoonGetUseCase spoonGetUseCase;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(@PathVariable Long userId) {
+    public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(@PathVariable long userId) {
         SpoonGetCommand command = new SpoonGetCommand(userId);
         SpoonResponseDTO spoonResponseDTO = spoonGetUseCase.getAmountById(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(spoonResponseDTO));

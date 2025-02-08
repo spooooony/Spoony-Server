@@ -3,10 +3,10 @@ package com.spoony.spoony_server.adapter.dto.post;
 import java.time.LocalDateTime;
 
 public record FeedResponseDTO(
-        Long userId,
+        long userId,
         String userName,
         String userRegion,
-        Long postId,
+        long postId,
         String title,
         CategoryColorResponseDTO categoryColorResponse,
         Long zzimCount,

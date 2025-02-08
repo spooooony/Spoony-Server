@@ -20,7 +20,7 @@ public class UserController {
     private final UserGetUseCase userGetUseCase;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfo(@PathVariable Long userId) {
+    public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfo(@PathVariable long userId) {
         UserGetCommand command = new UserGetCommand(userId);
         UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
