@@ -12,4 +12,12 @@ public class Place {
     private String placeRoadAddress;
     private Double latitude;
     private Double longitude;
+
+    public Place(String placeName, String placeAddress, String placeRoadAddress, Double latitude, Double longitude) {
+        this.placeName = placeName;
+        this.placeAddress = placeAddress;
+        this.placeRoadAddress = placeRoadAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

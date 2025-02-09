@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ScoopPostRepository extends JpaRepository<ScoopPostEntity, Long> {
     boolean existsByUserAndPost(UserEntity userEntity, PostEntity postEntity);
+    boolean existsByUser_UserIdAndPost_PostId(Long userId, Long postId);
 }
 
 

@@ -3,6 +3,7 @@ package com.spoony.spoony_server.adapter.in.web.post;
 import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
 import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
 import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
+import com.spoony.spoony_server.application.port.command.post.PostScoopPostCommand;
 import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
@@ -81,7 +82,8 @@ public class PostController {
 
     @PostMapping("/scoop")
     public ResponseEntity<ResponseDTO<Void>> scoopPost(@RequestBody ScoopPostRequestDTO scoopPostRequestDTO) {
-        postScoopPostUseCase.scoopPost(scoopPostRequestDTO);
+        PostScoopPostCommand command = new PostScoopPostCommand(scoopPostRequestDTO.userId(), scoopPostRequestDTO.postId());
+        postScoopPostUseCase.scoopPost(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }

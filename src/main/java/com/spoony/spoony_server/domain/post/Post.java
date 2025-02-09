@@ -17,4 +17,13 @@ public class Post {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Post(User user, Place place, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.user = user;
+        this.place = place;
+        this.title = title;
+        this.description = description;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

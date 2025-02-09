@@ -1,51 +1,41 @@
 package com.spoony.spoony_server.application.service.post;
 
-import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
-import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.*;
 import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
 import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
 import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
+import com.spoony.spoony_server.application.port.command.post.PostScoopPostCommand;
 import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostScoopPostUseCase;
+import com.spoony.spoony_server.application.port.out.feed.FeedPort;
+import com.spoony.spoony_server.application.port.out.place.PlacePort;
+import com.spoony.spoony_server.application.port.out.post.CategoryPort;
+import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostCreatePort;
+import com.spoony.spoony_server.application.port.out.post.PostPort;
+import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
+import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.application.port.out.zzim.ZzimPort;
+import com.spoony.spoony_server.domain.place.Place;
+import com.spoony.spoony_server.domain.post.*;
+import com.spoony.spoony_server.domain.spoon.Activity;
+import com.spoony.spoony_server.domain.spoon.SpoonBalance;
+import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.CategoryErrorMessage;
-import com.spoony.spoony_server.global.message.PostErrorMessage;
 import com.spoony.spoony_server.global.message.SpoonErrorMessage;
-import com.spoony.spoony_server.global.message.UserErrorMessage;
-import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
-import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceRepository;
-import com.spoony.spoony_server.adapter.dto.post.PostCreateDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.CategoryType;
-import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.ActivityEntity;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonBalanceEntity;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonHistoryEntity;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.ActivityRepository;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.ScoopPostRepository;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonBalanceRepository;
-import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonHistoryRepository;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.FollowEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,63 +45,51 @@ public class PostService implements
         PostGetCategoriesUseCase,
         PostScoopPostUseCase {
 
-    private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    private final PostCategoryRepository postCategoryRepository;
-    private final CategoryRepository categoryRepository;
-    private final MenuRepository menuRepository;
-    private final PlaceRepository placeRepository;
-    private final PhotoRepository photoRepository;
-    private final SpoonHistoryRepository spoonHistoryRepository;
-    private final SpoonBalanceRepository spoonBalanceRepository;
-    private final ActivityRepository activityRepository;
-    private final ZzimPostRepository zzimPostRepository;
-    private final FollowRepository followRepository;
-    private final FeedRepository feedRepository;
-    private final ScoopPostRepository scoopPostRepository;
-
+    private final PostPort postPort;
     private final PostCreatePort postCreatePort;
+    private final PostCategoryPort postCategoryPort;
+    private final CategoryPort categoryPort;
+    private final UserPort userPort;
+    private final ZzimPort zzimPort;
+    private final PlacePort placePort;
+    private final SpoonPort spoonPort;
+    private final FeedPort feedPort;
 
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
 
-        PostEntity postEntity = postRepository.findById(command.getPostId()).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-        UserEntity userEntity = userRepository.findById(command.getUserId()).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        Post post = postPort.findPostById(command.getPostId());
+        User user = userPort.findUserById(command.getUserId());
 
-        PostCategoryEntity postCategoryEntity = postCategoryRepository.findByPost(postEntity)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.CATEGORY_NOT_FOUND));
-        Long categoryId = postCategoryEntity.getCategory().getCategoryId();
-        CategoryEntity categoryEntity = categoryRepository.findByCategoryId(categoryId)
-                .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
+        PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+        Long categoryId = postCategory.getCategory().getCategoryId();
+        Category category = categoryPort.findCategoryById(categoryId);
 
-        PlaceEntity place = postEntity.getPlace();
-        LocalDateTime latestDate = postEntity.getUpdatedAt().isAfter(postEntity.getCreatedAt()) ? postEntity.getUpdatedAt() : postEntity.getCreatedAt();
+        Place place = post.getPlace();
+        LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt()) ? post.getUpdatedAt() : post.getCreatedAt();
 
-        Long zzimCount = zzimPostRepository.countByPost(postEntity);
-        Boolean isMine = postEntity.getUser().getUserId().equals(command.getUserId());
-        Boolean isZzim = zzimPostRepository.existsByUserAndPost(userEntity, postEntity);
-        Boolean isScoop = scoopPostRepository.existsByUserAndPost(userEntity, postEntity);
-        List<PhotoEntity> photoEntityList = photoRepository.findByPost(postEntity)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
+        Long zzimCount = zzimPort.countZzimByPostId(post.getPostId());
+        boolean isMine = post.getUser().getUserId().equals(command.getUserId());
+        boolean isZzim = zzimPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
+        boolean isScoop = postPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
 
-        List<MenuEntity> menuEntityList = menuRepository.findByPost(postEntity)
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.MENU_NOT_FOUND));
+        List<Photo> photoList = postPort.findPhotoById(post.getPostId());
+        List<String> photoUrlList = photoList.stream()
+                .map(Photo::getPhotoUrl)
+                .toList();
 
-        List<String> menuList = menuEntityList.stream()
-                .map(menuEntity -> menuEntity.getMenuName())
-                .collect(Collectors.toList());
-
-        List<String> photoUrlList = photoEntityList.stream()
-                .map(PhotoEntity::getPhotoUrl)
-                .collect(Collectors.toList());
+        List<Menu> menuList = postPort.findMenuById(post.getPostId());
+        List<String> menuNameList = menuList.stream()
+                .map(Menu::getMenuName)
+                .toList();
 
         return new PostResponseDTO(command.getPostId(),
-                postEntity.getUser().getUserId(),
+                post.getUser().getUserId(),
                 photoUrlList,
-                postEntity.getTitle(),
+                post.getTitle(),
                 latestDate,
-                menuList,
-                postEntity.getDescription(),
+                menuNameList,
+                post.getDescription(),
                 place.getPlaceName(),
                 place.getPlaceAddress(),
                 place.getLatitude(),
@@ -121,11 +99,11 @@ public class PostService implements
                 isZzim,
                 isScoop,
                 new CategoryColorResponseDTO(
-                        categoryEntity.getCategoryId(),
-                        categoryEntity.getCategoryName(),
-                        categoryEntity.getIconUrlColor(),
-                        categoryEntity.getTextColor(),
-                        categoryEntity.getBackgroundColor())
+                        category.getCategoryId(),
+                        category.getCategoryName(),
+                        category.getIconUrlColor(),
+                        category.getTextColor(),
+                        category.getBackgroundColor())
         );
     }
 
@@ -137,107 +115,69 @@ public class PostService implements
     @Transactional
     public void createPost(PostCreateCommand command) {
         // 게시글 업로드
-        UserEntity userEntity = userRepository.findById(command.getUserId())
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        User user = userPort.findUserById(command.getUserId());
+        Category category = categoryPort.findCategoryById(command.getCategoryId());
 
-        CategoryEntity categoryEntity = categoryRepository.findById(command.getCategoryId())
-                .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
+        Place place = new Place(
+                command.getPlaceName(),
+                command.getPlaceAddress(),
+                command.getPlaceRoadAddress(),
+                command.getLatitude(),
+                command.getLongitude()
+        );
 
-        PlaceEntity placeEntity = PlaceEntity.builder()
-                .placeName(command.getPlaceName())
-                .placeAddress(command.getPlaceAddress())
-                .placeRoadAddress(command.getPlaceRoadAddress())
-                .latitude(command.getLatitude())
-                .longitude(command.getLongitude())
-                .build();
+        placePort.savePlace(place);
 
-        placeRepository.save(placeEntity);
+        Post post = new Post(
+                user,
+                place,
+                command.getTitle(),
+                command.getDescription(),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
 
-        PostEntity postEntity = PostEntity.builder()
-                .user(userEntity)
-                .place(placeEntity)
-                .title(command.getTitle())
-                .description(command.getDescription())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        postPort.savePost(post);
 
-        postRepository.save(postEntity);
+        PostCategory postCategory = new PostCategory(post, category);
 
-        PostCategoryEntity postCategoryEntity = PostCategoryEntity.builder()
-                .post(postEntity)
-                .category(categoryEntity)
-                .build();
+        postPort.savePostCategory(postCategory);
 
-        postCategoryRepository.save(postCategoryEntity);
+        command.getMenuList().forEach(menuName -> {
+            Menu menu = new Menu(post, menuName);
+            postPort.saveMenu(menu);
+        });
 
-        command.getMenuList().stream()
-                .map(menuName -> MenuEntity.builder()
-                        .post(postEntity)
-                        .menuName(menuName)
-                        .build())
-                .forEach(menuRepository::save);
-
-        command.getPhotoUrlList().stream()
-                .map(photoUrl -> PhotoEntity.builder()
-                        .post(postEntity)
-                        .photoUrl(photoUrl)
-                        .build())
-                .forEach(photoRepository::save);
+        command.getPhotoUrlList().forEach(photoUrl -> {
+            Photo photo = new Photo(post, photoUrl);
+            postPort.savePhoto(photo);
+        });
 
         // 작성자 스푼 개수 조정
-        ActivityEntity activityEntity = activityRepository.findById(2L)
-                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.ACTIVITY_NOT_FOUND));
-
-        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity)
-                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
-
-        spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + activityEntity.getChangeAmount());
-        spoonBalanceEntity.setUpdatedAt(LocalDateTime.now());
-
-        spoonBalanceRepository.save(spoonBalanceEntity);
+        Activity activity = spoonPort.findActivityByActivityId(2L);
+        spoonPort.updateSpoonBalance(user, activity);
 
         // 스푼 히스토리 기록
-        SpoonHistoryEntity spoonHistoryEntity = SpoonHistoryEntity.builder()
-                .user(userEntity)
-                .activity(activityEntity)
-                .balanceAfter(spoonBalanceEntity.getAmount())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        spoonHistoryRepository.save(spoonHistoryEntity);
+        spoonPort.updateSpoonHistory(user, activity);
 
         // 작성자 지도 리스트에 게시물 추가
-        ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder()
-                .user(userEntity)
-                .post(postEntity)
-                .build();
-
-        zzimPostRepository.save(zzimPostEntity);
+        zzimPort.saveZzimPost(user, post);
 
         // 작성자를 팔로우하는 사용자들의 피드에 게시물 추가
-        List<FollowEntity> followerList = followRepository.findByFollowing(userEntity);
-
-        List<FeedEntity> feedList = followerList.stream()
-                .map(follower -> FeedEntity.builder()
-                        .user(follower.getFollower())
-                        .post(postEntity)
-                        .build())
-                .toList();
-
-        feedRepository.saveAll(feedList);
+        List<Follow> followList = userPort.findFollowersByUserId(user.getUserId());
+        feedPort.saveFollowersFeed(followList, post);
     }
 
     // 모든 카테고리 조회
     @Transactional
     public CategoryMonoListResponseDTO getAllCategories() {
-        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findAll().stream()
+        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryPort.findAllCategories().stream()
                 .map(category -> new CategoryMonoResponseDTO(
                         category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
-                .collect(Collectors.toList());
+                .toList();
 
         return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
     }
@@ -245,61 +185,41 @@ public class PostService implements
     // 음식 카테고리 조회
     @Transactional
     public CategoryMonoListResponseDTO getFoodCategories() {
-        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
+        List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryPort.findFoodCategories().stream()
                 .map(category -> new CategoryMonoResponseDTO(
                         category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
-                .collect(Collectors.toList());
+                .toList();
 
         return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
     }
 
     @Transactional
-    public void scoopPost(ScoopPostRequestDTO scoopPostRequestDTO) {
+    public void scoopPost(PostScoopPostCommand command) {
 
-        Long postId = scoopPostRequestDTO.postId();
-        Long userId = scoopPostRequestDTO.userId();
+        User user = userPort.findUserById(command.getUserId());
+        Post post = postPort.findPostById(command.getPostId());
 
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-
-
-        //현재 사용자의 스푼 개수 조회
-        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser(userEntity).orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
-
+        SpoonBalance spoonBalance = spoonPort.findBalanceByUserId(command.getUserId());
 
         //스푼 잔액이 1개 미만이면 에러 발생
-
-        if (spoonBalanceEntity.getAmount() < 1) {
+        if (spoonBalance.getAmount() < 1) {
             throw new BusinessException(SpoonErrorMessage.NOT_ENOUGH_SPOONS);
         }
+
         //떠먹은 포스트에 반영
-        ScoopPostEntity scoopPostEntity = ScoopPostEntity.builder().user(userEntity).post(postEntity).build();
-        scoopPostRepository.save(scoopPostEntity);
+        postPort.saveScoopPost(user, post);
 
         // 작성자 스푼 개수 조정
-        ActivityEntity activityEntity = activityRepository.findById(3L)
-                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.ACTIVITY_NOT_FOUND));
-
-
-        spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + activityEntity.getChangeAmount());
-        spoonBalanceEntity.setUpdatedAt(LocalDateTime.now());
-
-        spoonBalanceRepository.save(spoonBalanceEntity);
+        Activity activity = spoonPort.findActivityByActivityId(3L);
+        spoonPort.updateSpoonBalance(user, activity);
 
         // 스푼 히스토리 기록
-        SpoonHistoryEntity spoonHistoryEntity = SpoonHistoryEntity.builder()
-                .user(userEntity)
-                .activity(activityEntity)
-                .balanceAfter(spoonBalanceEntity.getAmount())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        spoonHistoryRepository.save(spoonHistoryEntity);
+        spoonPort.updateSpoonHistory(user, activity);
 
         // 사용자의 피드에서 게시물 삭제
-        feedRepository.deleteByUserAndPost(userEntity, postEntity);
+        feedPort.deleteFeedByUserIdAndPostId(command.getUserId(), command.getPostId());
     }
 }

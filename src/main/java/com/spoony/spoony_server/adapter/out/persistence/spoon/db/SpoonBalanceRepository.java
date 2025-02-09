@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface SpoonBalanceRepository extends JpaRepository<SpoonBalanceEntity, Long> {
     Optional<SpoonBalanceEntity> findByUser(UserEntity user);
+    Optional<SpoonBalanceEntity> findByUser_UserId(Long userId);
 }

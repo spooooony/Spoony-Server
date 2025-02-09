@@ -10,4 +10,5 @@ public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
     List<FeedEntity> findByUser(UserEntity userEntity);
 
     void deleteByUserAndPost(UserEntity userEntity, PostEntity postEntity);
+    void deleteByUser_UserIdAndPost_PostId(Long userId, Long postId);
 }

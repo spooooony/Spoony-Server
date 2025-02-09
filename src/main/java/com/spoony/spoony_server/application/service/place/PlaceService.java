@@ -29,7 +29,7 @@ public class PlaceService implements
     }
 
     public Boolean isDuplicate(PlaceCheckCommand command) {
-        List<Post> userPosts = postPort.findPostsByUser(command.getUserId());
+        List<Post> userPosts = postPort.findUserByUserId(command.getUserId());
 
         List<Long> placeIds = userPosts.stream()
                 .map(post -> post.getPlace().getPlaceId())
