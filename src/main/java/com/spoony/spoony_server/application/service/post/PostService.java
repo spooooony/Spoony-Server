@@ -126,7 +126,8 @@ public class PostService implements
                 command.getLongitude()
         );
 
-        placePort.savePlace(place);
+        Long placeId = placePort.savePlace(place);
+        place = placePort.findPlaceById(placeId);
 
         Post post = new Post(
                 user,
@@ -137,19 +138,21 @@ public class PostService implements
                 LocalDateTime.now()
         );
 
-        postPort.savePost(post);
+        Long postId = postPort.savePost(post);
+        post = postPort.findPostById(postId);
 
         PostCategory postCategory = new PostCategory(post, category);
 
         postPort.savePostCategory(postCategory);
 
+        Post finalPost = post;
         command.getMenuList().forEach(menuName -> {
-            Menu menu = new Menu(post, menuName);
+            Menu menu = new Menu(finalPost, menuName);
             postPort.saveMenu(menu);
         });
 
         command.getPhotoUrlList().forEach(photoUrl -> {
-            Photo photo = new Photo(post, photoUrl);
+            Photo photo = new Photo(finalPost, photoUrl);
             postPort.savePhoto(photo);
         });
 

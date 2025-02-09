@@ -14,7 +14,7 @@ public interface PostPort {
     Post findPostById(Long postId);
     List<Photo> findPhotoById(Long postId);
     List<Menu> findMenuById(Long postId);
-    void savePost(Post post);
+    Long savePost(Post post);
     void savePostCategory(PostCategory postCategory);
     void saveMenu(Menu menu);
     void savePhoto(Photo photo);

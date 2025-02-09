@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface PlacePort {
     boolean existsByPlaceIdInAndLatitudeAndLongitude(List<Long> placeIds, Double latitude, Double longitude);
-    void savePlace(Place place);
+    Long savePlace(Place place);
+    Place findPlaceById(Long placeId);
 }

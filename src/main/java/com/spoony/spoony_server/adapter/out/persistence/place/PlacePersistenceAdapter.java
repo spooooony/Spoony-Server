@@ -10,6 +10,7 @@ import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,7 +31,7 @@ public class PlacePersistenceAdapter implements PlacePort {
     }
 
     @Override
-    public void savePlace(Place place) {
+    public Long savePlace(Place place) {
         PlaceEntity placeEntity = PlaceEntity.builder()
                 .placeName(place.getPlaceName())
                 .placeAddress(place.getPlaceAddress())
@@ -39,5 +40,13 @@ public class PlacePersistenceAdapter implements PlacePort {
                 .longitude(place.getLongitude())
                 .build();
         placeRepository.save(placeEntity);
+
+        return placeEntity.getPlaceId();
+    }
+
+    public Place findPlaceById(Long placeId) {
+        return placeRepository.findById(placeId)
+                .map(PlaceMapper::toDomain)
+                .orElseThrow(() -> new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND));
     }
 }
