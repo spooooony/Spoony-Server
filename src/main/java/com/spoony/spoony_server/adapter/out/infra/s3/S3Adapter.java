@@ -33,8 +33,8 @@ public class S3Adapter implements PostCreatePort {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    private String PROFILE_IMG_DIR = "profile/";
-    private String POST_IMG_DIR = "post/";
+    private String PROFILE_IMG_DIR = "profile";
+    private String POST_IMG_DIR = "post";
 
     public String saveProfileImage(MultipartFile multipartFile) throws IOException {
         File uploadFile = convert(multipartFile)
