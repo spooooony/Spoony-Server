@@ -53,7 +53,7 @@ public class ZzimPostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 
-    @DeleteMapping("/{userId}/{placeId}")
+    @DeleteMapping("/{userId}/{postId}")
     public ResponseEntity<ResponseDTO<Void>> deleteZzim(@PathVariable long userId, @PathVariable long postId) {
         ZzimDeleteCommand command = new ZzimDeleteCommand(userId, postId);
         zzimRemoveUseCase.deleteZzim(command);
