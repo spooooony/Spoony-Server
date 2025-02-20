@@ -8,6 +8,7 @@ import com.spoony.spoony_server.adapter.out.persistence.spoon.mapper.ActivityMap
 import com.spoony.spoony_server.adapter.out.persistence.spoon.mapper.SpoonBalanceMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.application.port.out.spoon.SpoonBalancePort;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.spoon.Activity;
@@ -25,7 +26,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class SpoonPersistenceAdapter implements SpoonPort {
+public class SpoonPersistenceAdapter implements SpoonPort, SpoonBalancePort {
 
     private final SpoonBalanceRepository balanceRepository;
     private final SpoonHistoryRepository historyRepository;

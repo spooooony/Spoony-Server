@@ -7,4 +7,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SpoonGetCommand {
     private final Long userId;
+
 }

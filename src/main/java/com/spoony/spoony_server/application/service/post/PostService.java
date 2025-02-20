@@ -16,7 +16,7 @@ import com.spoony.spoony_server.application.port.out.post.PostCreatePort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
-import com.spoony.spoony_server.application.port.out.zzim.ZzimPort;
+import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.spoon.Activity;
@@ -50,7 +50,7 @@ public class PostService implements
     private final PostCategoryPort postCategoryPort;
     private final CategoryPort categoryPort;
     private final UserPort userPort;
-    private final ZzimPort zzimPort;
+    private final ZzimPostPort zzimPort;
     private final PlacePort placePort;
     private final SpoonPort spoonPort;
     private final FeedPort feedPort;

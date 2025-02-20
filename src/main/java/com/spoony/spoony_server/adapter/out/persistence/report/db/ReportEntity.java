@@ -17,6 +17,9 @@ public class ReportEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reportId;
+    private ReportType reportType;
+    private String reportDetail;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -26,8 +29,7 @@ public class ReportEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    private ReportType reportType;
-    private String reportDetail;
+
 
     @Builder
     public ReportEntity(Long reportId, PostEntity post, UserEntity user, ReportType reportType, String reportDetail) {

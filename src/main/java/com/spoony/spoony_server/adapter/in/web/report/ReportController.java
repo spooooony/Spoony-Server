@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/report")
 public class ReportController {
-
     public final ReportCreateUseCase reportCreateUseCase;
-
     @PostMapping
     public ResponseEntity<ResponseDTO<Void>> createReport(@RequestBody ReportRequestDTO reportRequestDTO) {
         ReportCreateCommand command = new ReportCreateCommand(
