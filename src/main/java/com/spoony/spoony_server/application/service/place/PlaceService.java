@@ -40,4 +40,3 @@ public class PlaceService implements
         return exists;
     }
 }
-

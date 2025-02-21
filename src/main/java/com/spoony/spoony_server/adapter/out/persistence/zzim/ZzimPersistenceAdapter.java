@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -41,7 +40,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         return zzimPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }
 
-
     @Override
     public List<ZzimPost> findUserByUserId(Long userId) {
         return zzimPostRepository.findByUser_UserId(userId)
@@ -49,8 +47,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .map(ZzimMapper::toDomain)
                 .toList();
     }
-
-
 
     @Override
     public void saveZzimPost(User user, Post post) {
@@ -74,7 +70,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
     }
 
-
     @Override
     public List<Photo> findPhotoListById(Long postId) {
         return photoRepository.findByPost_PostId(postId)
@@ -86,13 +81,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
 
     @Override
     public void deleteByUserAndPost(User user, Post post) {
-        UserEntity userEntity = userRepository.findById(user.getUserId())
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-        PostEntity postEntity = postRepository.findById(post.getPostId())
-                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-
-        zzimPostRepository.deleteByUserAndPost(userEntity, postEntity);
+        zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
     }
-
 }
-

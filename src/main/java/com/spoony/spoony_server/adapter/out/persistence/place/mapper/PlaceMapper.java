@@ -6,7 +6,6 @@ import com.spoony.spoony_server.domain.place.Place;
 public class PlaceMapper {
 
     public static Place toDomain(PlaceEntity placeEntity) {
-
         return new Place(
                 placeEntity.getPlaceId(),
                 placeEntity.getPlaceName(),

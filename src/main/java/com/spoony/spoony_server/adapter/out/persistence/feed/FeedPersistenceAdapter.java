@@ -2,11 +2,13 @@ package com.spoony.spoony_server.adapter.out.persistence.feed;
 
 import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
 import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
+import com.spoony.spoony_server.adapter.out.persistence.feed.mapper.FeedMapper;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
+import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -26,8 +28,11 @@ public class FeedPersistenceAdapter implements FeedPort {
     private final PostRepository postRepository;
 
     @Override
-    public List<FeedEntity> findByUser(UserEntity userEntity) {
-        return feedRepository.findByUser(userEntity);
+    public List<Feed> findFeedByUserId(Long userId) {
+        return feedRepository.findByUser_UserId(userId)
+                .stream()
+                .map(FeedMapper::toDomain)
+                .toList();
     }
 
     @Override

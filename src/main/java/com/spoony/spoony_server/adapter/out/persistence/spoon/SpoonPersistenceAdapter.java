@@ -1,8 +1,5 @@
 package com.spoony.spoony_server.adapter.out.persistence.spoon;
 
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.ScoopPostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.mapper.ActivityMapper;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.mapper.SpoonBalanceMapper;
@@ -10,37 +7,25 @@ import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonBalancePort;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
-import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.PostErrorMessage;
 import com.spoony.spoony_server.global.message.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class SpoonPersistenceAdapter implements SpoonPort, SpoonBalancePort {
 
-    private final SpoonBalanceRepository balanceRepository;
-    private final SpoonHistoryRepository historyRepository;
     private final ActivityRepository activityRepository;
-    private final ScoopPostRepository scoopPostRepository;
     private final SpoonBalanceRepository spoonBalanceRepository;
     private final UserRepository userRepository;
     private final SpoonHistoryRepository spoonHistoryRepository;
-    private final PostRepository postRepository;
-
-    @Override
-    public Optional<SpoonBalanceEntity> findByUser(UserEntity user) {
-        return spoonBalanceRepository.findByUser(user);
-    }
 
     public Activity findActivityByActivityId(Long activityId) {
         ActivityEntity activityEntity = activityRepository.findById(activityId)

@@ -7,7 +7,6 @@ import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 public class SpoonBalanceMapper {
 
     public static SpoonBalance toDomain(SpoonBalanceEntity spoonBalanceEntity) {
-
         return new SpoonBalance(
                 spoonBalanceEntity.getSpoonBalanceId(),
                 UserMapper.toDomain(spoonBalanceEntity.getUser()),

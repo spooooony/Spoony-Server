@@ -1,7 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.mapper;
 
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
-import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 
 public class UserMapper {

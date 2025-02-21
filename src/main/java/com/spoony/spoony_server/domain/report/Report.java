@@ -1,14 +1,10 @@
 package com.spoony.spoony_server.domain.report;
 
-
 import com.spoony.spoony_server.adapter.dto.report.ReportType;
-import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor

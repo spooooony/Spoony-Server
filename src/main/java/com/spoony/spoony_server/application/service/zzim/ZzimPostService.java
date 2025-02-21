@@ -5,8 +5,6 @@ import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
 import com.spoony.spoony_server.application.port.out.location.LocationPort;
-import com.spoony.spoony_server.application.port.out.place.PlacePort;
-import com.spoony.spoony_server.application.port.out.post.CategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
@@ -18,21 +16,11 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.domain.zzim.ZzimPost;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.PlaceErrorMessage;
-import com.spoony.spoony_server.global.message.PostErrorMessage;
-import com.spoony.spoony_server.global.message.UserErrorMessage;
-import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
-import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PhotoEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PhotoRepository;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusResponseDTO;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,10 +41,7 @@ public class ZzimPostService implements
     private final PostCategoryPort postCategoryPort;
     private final PostPort postPort;
     private final UserPort userPort;
-    private final PhotoRepository photoRepository;
-    private final PlacePort placePort;
     private final LocationPort locationPort;
-    private final CategoryPort categoryPort;
 
     public void addZzimPost(ZzimAddCommand command) {
         Long postId = command.getPostId();
@@ -66,7 +51,6 @@ public class ZzimPostService implements
         User user = userPort.findUserById(userId);
         zzimPostPort.saveZzimPost(user,post);
     }
-
 
     //사용자 지도 리스트 조회
     public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
@@ -85,7 +69,6 @@ public class ZzimPostService implements
                 uniquePlacePostMap.put(placeId, zzimPost);
             }
         }
-
 
         List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
                 .map(zzimPost -> {
@@ -143,15 +126,10 @@ public class ZzimPostService implements
 
                     Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
 
-                    //Photo photo = zzimPostPort.findPhotoById(post.getPostId());
-
-
                     List<Photo> photoList = zzimPostPort.findPhotoListById(post.getPostId());
                     List<String> photoUrlList = photoList.stream()
                             .map(Photo::getPhotoUrl)
                             .toList();
-
-
 
                     return new ZzimFocusResponseDTO(
                             postPlace.getPlaceId(),
@@ -219,8 +197,6 @@ public class ZzimPostService implements
                     Place place = post.getPlace();
                     Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
 
-
-
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
                     CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
@@ -248,7 +224,6 @@ public class ZzimPostService implements
 
     private ZzimCardListResponseDTO getZzimByAreaDong(Long userId, Double longitude, Double latitude) {
         List<ZzimPost> zzimPostList = zzimPostPort.findUserByUserId(userId);
-
 
         Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
 

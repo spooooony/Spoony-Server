@@ -9,7 +9,6 @@ import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCas
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostScoopPostUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.PostCreateDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
 import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;

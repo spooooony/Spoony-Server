@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.adapter.dto.report;
 
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

@@ -3,10 +3,8 @@ package com.spoony.spoony_server.adapter.out.persistence.location;
 import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
 import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationRepository;
 import com.spoony.spoony_server.adapter.out.persistence.location.mapper.LocationMapper;
-import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.location.LocationPort;
 import com.spoony.spoony_server.domain.location.Location;
-import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +18,6 @@ import java.util.stream.Collectors;
 public class LocationPersistenceAdapter implements LocationPort {
 
     private final LocationRepository locationRepository;
-
-
 
     public Location findLocationById(Long locationId) {
         return locationRepository.findById(locationId)

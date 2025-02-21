@@ -19,8 +19,6 @@ import com.spoony.spoony_server.global.message.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.PostErrorMessage;
 import com.spoony.spoony_server.global.message.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
