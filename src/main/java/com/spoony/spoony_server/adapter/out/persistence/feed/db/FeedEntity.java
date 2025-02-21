@@ -26,8 +26,7 @@ public class FeedEntity {
     private PostEntity post;
 
     @Builder
-    public FeedEntity(Long feedId, UserEntity user, PostEntity post) {
-        this.feedId = feedId;
+    public FeedEntity(UserEntity user, PostEntity post) {
         this.user = user;
         this.post = post;
     }

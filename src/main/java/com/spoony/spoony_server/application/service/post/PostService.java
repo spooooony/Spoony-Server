@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.application.service.post;
 
+import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
 import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
 import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
@@ -32,6 +33,7 @@ import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -54,6 +56,8 @@ public class PostService implements
     private final PlacePort placePort;
     private final SpoonPort spoonPort;
     private final FeedPort feedPort;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
@@ -168,7 +172,10 @@ public class PostService implements
 
         // 작성자를 팔로우하는 사용자들의 피드에 게시물 추가
         List<Follow> followList = userPort.findFollowersByUserId(user.getUserId());
-        feedPort.saveFollowersFeed(followList, post);
+        List<Long> followerIds = followList.stream().map(follow -> follow.getFollower().getUserId()).toList();
+
+        // Event 발행
+        eventPublisher.publishEvent(new PostCreatedEvent(this, followerIds, post.getPostId()));
     }
 
     // 모든 카테고리 조회

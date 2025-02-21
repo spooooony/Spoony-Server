@@ -9,5 +9,6 @@ import java.util.List;
 public interface FeedPort {
     List<Feed> findFeedByUserId(Long userId);
     void saveFollowersFeed(List<Follow> followList, Post post);
+    void saveFollowerFeed(Long userId, Long postId);
     void deleteFeedByUserIdAndPostId(Long userId, Long postId);
 }
