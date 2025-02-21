@@ -28,6 +28,11 @@ public class FeedPersistenceAdapter implements FeedPort {
     private final PostRepository postRepository;
 
     @Override
+    public void saveFollowerFeed(Long userId, Long postId) {
+
+    }
+
+    @Override
     public List<Feed> findFeedByUserId(Long userId) {
         return feedRepository.findByUser_UserId(userId)
                 .stream()
