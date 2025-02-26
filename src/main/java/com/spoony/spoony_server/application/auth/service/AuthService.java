@@ -22,6 +22,7 @@ public class AuthService implements SignInUseCase {
 
     private final UserPort userPort;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AppleService appleService;
 
     @Override
     public UserTokenDTO signIn(String platformToken, UserLoginDTO userLoginDTO) {
@@ -33,10 +34,10 @@ public class AuthService implements SignInUseCase {
     }
 
     private PlatformUserDTO getPlatformInfo(String platformToken, UserLoginDTO userLoginDto) {
-        if (userLoginDto.platform().toString().equals("GOOGLE")){
+        if (userLoginDto.platform().toString().equals("KAKAO")){
             //TODO
         } else if (userLoginDto.platform().toString().equals("APPLE")){
-            //TODO
+            return appleService.getPlatformUserInfo(platformToken);
         } else {
             throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);
         }
