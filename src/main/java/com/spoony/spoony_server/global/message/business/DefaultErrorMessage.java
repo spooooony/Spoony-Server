@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.global.message;
+package com.spoony.spoony_server.global.message.business;
 
 import org.springframework.http.HttpStatus;
 

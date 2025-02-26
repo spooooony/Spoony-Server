@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.dto.report;
+package com.spoony.spoony_server.domain.report;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

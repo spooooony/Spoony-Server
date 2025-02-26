@@ -6,7 +6,7 @@ import com.spoony.spoony_server.adapter.out.persistence.place.mapper.PlaceMapper
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.PlaceErrorMessage;
+import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

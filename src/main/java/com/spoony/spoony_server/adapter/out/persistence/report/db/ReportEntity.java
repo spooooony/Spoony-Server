@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.report.db;
 
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
-import com.spoony.spoony_server.adapter.dto.report.ReportType;
+import com.spoony.spoony_server.domain.report.ReportType;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

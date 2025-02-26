@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.domain.report;
 
-import com.spoony.spoony_server.adapter.dto.report.ReportType;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.User;
 import lombok.AllArgsConstructor;

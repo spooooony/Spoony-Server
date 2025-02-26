@@ -2,10 +2,10 @@ package com.spoony.spoony_server.global.exception;
 
 import com.spoony.spoony_server.global.message.business.DefaultErrorMessage;
 
-public class BusinessException extends RuntimeException {
+public class AuthException extends RuntimeException {
     private final DefaultErrorMessage errorMessage;
 
-    public BusinessException(DefaultErrorMessage errorMessage) {
+    public AuthException(DefaultErrorMessage errorMessage) {
         this.errorMessage = errorMessage;
     }
 

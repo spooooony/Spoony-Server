@@ -7,7 +7,7 @@ import com.spoony.spoony_server.adapter.dto.place.PlaceResponseDTO;
 import com.spoony.spoony_server.application.port.out.place.PlaceSearchPort;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.PlaceErrorMessage;
+import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;

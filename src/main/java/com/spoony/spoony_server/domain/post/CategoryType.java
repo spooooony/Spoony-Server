@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.dto.post;
+package com.spoony.spoony_server.domain.post;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

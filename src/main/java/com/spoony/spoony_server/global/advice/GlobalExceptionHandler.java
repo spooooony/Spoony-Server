@@ -2,7 +2,7 @@ package com.spoony.spoony_server.global.advice;
 
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.BusinessErrorMessage;
+import com.spoony.spoony_server.global.message.business.BusinessErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

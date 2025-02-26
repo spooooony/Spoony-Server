@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.user;
 
+import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.FollowEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
@@ -7,9 +8,10 @@ import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.domain.user.Provider;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.UserErrorMessage;
+import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -34,6 +36,9 @@ public class UserPersistenceAdapter implements UserPort {
                 .map(FollowMapper::toDomain)
                 .toList();
     }
+
+    public User loadOrCreate(Provider provider, PlatformUserDTO platformUserDTO) {
+        //TODO
+        return null;
+    }
 }
-
-

@@ -15,7 +15,7 @@ import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.domain.zzim.ZzimPost;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.PlaceErrorMessage;
+import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardResponseDTO;

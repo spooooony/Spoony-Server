@@ -1,5 +1,7 @@
 package com.spoony.spoony_server.domain.user;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,8 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class User {
     private Long userId;
-    private String userEmail;
-    private String userPassword;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    private String providerId;
     private String userName;
     private String userImage;
     private Region region;

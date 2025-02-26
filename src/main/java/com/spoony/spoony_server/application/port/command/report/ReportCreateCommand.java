@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.application.port.command.report;
 
-import com.spoony.spoony_server.adapter.dto.report.ReportType;
+import com.spoony.spoony_server.domain.report.ReportType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

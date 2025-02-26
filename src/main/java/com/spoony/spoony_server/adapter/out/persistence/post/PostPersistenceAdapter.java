@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.post;
 
-import com.spoony.spoony_server.adapter.dto.post.CategoryType;
+import com.spoony.spoony_server.domain.post.CategoryType;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceRepository;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.*;
@@ -14,10 +14,10 @@ import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.CategoryErrorMessage;
-import com.spoony.spoony_server.global.message.PlaceErrorMessage;
-import com.spoony.spoony_server.global.message.PostErrorMessage;
-import com.spoony.spoony_server.global.message.UserErrorMessage;
+import com.spoony.spoony_server.global.message.business.CategoryErrorMessage;
+import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
+import com.spoony.spoony_server.global.message.business.PostErrorMessage;
+import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

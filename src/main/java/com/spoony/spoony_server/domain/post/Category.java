@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.domain.post;
 
-import com.spoony.spoony_server.adapter.dto.post.CategoryType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

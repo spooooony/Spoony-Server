@@ -11,8 +11,8 @@ import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.SpoonErrorMessage;
-import com.spoony.spoony_server.global.message.UserErrorMessage;
+import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
+import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.post.db;
 
-import com.spoony.spoony_server.adapter.dto.post.CategoryType;
+import com.spoony.spoony_server.domain.post.CategoryType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
