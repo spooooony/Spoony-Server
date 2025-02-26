@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
-import com.spoony.spoony_server.domain.user.Provider;
+import com.spoony.spoony_server.domain.user.Platform;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,8 +19,8 @@ public class UserEntity {
     private Long userId;
 
     @Enumerated(EnumType.STRING)
-    private Provider provider;
-    private String providerId;
+    private Platform platform;
+    private String platformId;
 
     private String userName;
     private String userImage;
@@ -34,16 +34,16 @@ public class UserEntity {
 
     @Builder
     public UserEntity(Long userId,
-                      Provider provider,
-                      String providerId,
+                      Platform platform,
+                      String platformId,
                       String userName,
                       String userImage,
                       RegionEntity region,
                       LocalDateTime createdAt,
                       LocalDateTime updatedAt) {
         this.userId = userId;
-        this.provider = provider;
-        this.providerId = providerId;
+        this.platform = platform;
+        this.platformId = platformId;
         this.userName = userName;
         this.userImage = userImage;
         this.region = region;

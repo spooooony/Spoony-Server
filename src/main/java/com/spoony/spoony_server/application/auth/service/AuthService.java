@@ -6,7 +6,7 @@ import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
 import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
-import com.spoony.spoony_server.domain.user.Provider;
+import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenProvider;
 import com.spoony.spoony_server.global.exception.AuthException;
@@ -24,26 +24,26 @@ public class AuthService implements SignInUseCase {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    public UserTokenDTO signIn(String providerToken, UserLoginDTO userLoginDTO) {
-        PlatformUserDTO platformUserDTO = getPlatformInfo(providerToken, userLoginDTO);
-        User user = userPort.loadOrCreate(userLoginDTO.provider(), platformUserDTO);
+    public UserTokenDTO signIn(String platformToken, UserLoginDTO userLoginDTO) {
+        PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userLoginDTO);
+        User user = userPort.loadOrCreate(userLoginDTO.platform(), platformUserDTO);
         JwtTokenDTO token = jwtTokenProvider.issueTokens(user.getUserId());
         saveToken(user.getUserId(), token);
         return UserTokenDTO.of(user, token);
     }
 
-    private PlatformUserDTO getPlatformInfo(String providerToken, UserLoginDTO userLoginDto) {
-        if (userLoginDto.provider().toString().equals("GOOGLE")){
+    private PlatformUserDTO getPlatformInfo(String platformToken, UserLoginDTO userLoginDto) {
+        if (userLoginDto.platform().toString().equals("GOOGLE")){
             //TODO
-        } else if (userLoginDto.provider().toString().equals("APPLE")){
+        } else if (userLoginDto.platform().toString().equals("APPLE")){
             //TODO
         } else {
-            throw new AuthException(AuthErrorMessage.PROVIDER_NOT_FOUND);
+            throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);
         }
         return null;
     }
 
-    private User loadOrCreate(Provider provider, PlatformUserDTO platformUserDTO) {
+    private User loadOrCreate(Platform platform, PlatformUserDTO platformUserDTO) {
         //TODO
         return null;
     }

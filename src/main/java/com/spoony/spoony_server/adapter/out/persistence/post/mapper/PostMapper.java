@@ -13,8 +13,8 @@ public class PostMapper {
                 postEntity.getPostId(),
                 new User(
                         postEntity.getUser().getUserId(),
-                        postEntity.getUser().getProvider(),
-                        postEntity.getUser().getProviderId(),
+                        postEntity.getUser().getPlatform(),
+                        postEntity.getUser().getPlatformId(),
                         postEntity.getUser().getUserName(),
                         postEntity.getUser().getUserImage(),
                         RegionMapper.toDomain(postEntity.getUser().getRegion()),

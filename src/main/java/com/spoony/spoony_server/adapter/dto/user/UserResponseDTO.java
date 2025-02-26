@@ -1,12 +1,12 @@
 package com.spoony.spoony_server.adapter.dto.user;
 
-import com.spoony.spoony_server.domain.user.Provider;
+import com.spoony.spoony_server.domain.user.Platform;
 
 import java.time.LocalDateTime;
 
 public record UserResponseDTO(long userId,
-                              Provider provider,
-                              String providerId,
+                              Platform platform,
+                              String platformId,
                               String userName,
                               String userImageUrl,
                               String regionName,

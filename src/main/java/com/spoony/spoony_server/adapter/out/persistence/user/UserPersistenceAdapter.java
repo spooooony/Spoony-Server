@@ -8,7 +8,7 @@ import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Follow;
-import com.spoony.spoony_server.domain.user.Provider;
+import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
@@ -37,7 +37,7 @@ public class UserPersistenceAdapter implements UserPort {
                 .toList();
     }
 
-    public User loadOrCreate(Provider provider, PlatformUserDTO platformUserDTO) {
+    public User loadOrCreate(Platform platform, PlatformUserDTO platformUserDTO) {
         //TODO
         return null;
     }

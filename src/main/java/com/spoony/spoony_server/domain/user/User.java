@@ -13,9 +13,9 @@ public class User {
     private Long userId;
 
     @Enumerated(EnumType.STRING)
-    private Provider provider;
+    private Platform platform;
 
-    private String providerId;
+    private String platformId;
     private String userName;
     private String userImage;
     private Region region;

@@ -21,9 +21,9 @@ public class AuthController {
 
     @PostMapping("/v1/auth/signin")
     public ResponseEntity<UserTokenDTO> signIn(
-            @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String providerToken,
+            @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @Valid @RequestBody final UserLoginDTO userLoginDTO
     ) {
-        return ResponseEntity.ok(signInUseCase.signIn(providerToken, userLoginDTO));
+        return ResponseEntity.ok(signInUseCase.signIn(platformToken, userLoginDTO));
     }
 }
