@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.global.dto;
 
-import com.spoony.spoony_server.global.message.DefaultErrorMessage;
+import com.spoony.spoony_server.global.message.business.DefaultErrorMessage;
 
 public record ResponseDTO<T> (
         boolean success,

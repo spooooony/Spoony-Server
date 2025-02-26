@@ -9,8 +9,8 @@ import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.report.Report;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.ReportErrorMessage;
-import com.spoony.spoony_server.adapter.dto.report.ReportType;
+import com.spoony.spoony_server.global.message.business.ReportErrorMessage;
+import com.spoony.spoony_server.domain.report.ReportType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -15,8 +15,8 @@ public class ZzimMapper {
                 zzimPostEntity.getZzimId(),
                 new User(
                         zzimPostEntity.getUser().getUserId(),
-                        zzimPostEntity.getUser().getUserEmail(),
-                        zzimPostEntity.getUser().getUserPassword(),
+                        zzimPostEntity.getUser().getProvider(),
+                        zzimPostEntity.getUser().getProviderId(),
                         zzimPostEntity.getUser().getUserName(),
                         zzimPostEntity.getUser().getUserImage(),
                         RegionMapper.toDomain(zzimPostEntity.getUser().getRegion()),

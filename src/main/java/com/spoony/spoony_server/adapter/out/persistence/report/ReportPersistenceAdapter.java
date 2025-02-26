@@ -8,8 +8,8 @@ import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.domain.report.Report;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.PostErrorMessage;
-import com.spoony.spoony_server.global.message.UserErrorMessage;
+import com.spoony.spoony_server.global.message.business.PostErrorMessage;
+import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

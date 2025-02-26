@@ -25,7 +25,7 @@ import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.SpoonErrorMessage;
+import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoResponseDTO;

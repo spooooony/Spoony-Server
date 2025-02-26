@@ -9,8 +9,8 @@ public class UserMapper {
 
         return new User(
                 userEntity.getUserId(),
-                userEntity.getUserEmail(),
-                userEntity.getUserPassword(),
+                userEntity.getProvider(),
+                userEntity.getProviderId(),
                 userEntity.getUserName(),
                 userEntity.getUserImage(),
                 RegionMapper.toDomain(userEntity.getRegion()),

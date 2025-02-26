@@ -19,7 +19,8 @@ public class UserService implements UserGetUseCase {
 
         return new UserResponseDTO(
                 user.getUserId(),
-                user.getUserEmail(),
+                user.getProvider(),
+                user.getProviderId(),
                 user.getUserName(),
                 user.getUserImage(),
                 user.getRegion().getRegionName(),
