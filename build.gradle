@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.1'
+    id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -30,6 +30,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.2'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'

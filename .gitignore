@@ -39,3 +39,4 @@ out/
 application.yml
 application-aws.yml
 application-naver.yml
+application-oath.yml
