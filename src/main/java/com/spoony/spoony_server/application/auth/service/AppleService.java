@@ -1,12 +1,12 @@
 package com.spoony.spoony_server.application.auth.service;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
-import com.spoony.spoony_server.adapter.auth.dto.validation.ApplePublicKeyListDTO;
-import com.spoony.spoony_server.adapter.auth.dto.validation.AppleTokenDTO;
+import com.spoony.spoony_server.adapter.auth.dto.validation.apple.ApplePublicKeyListDTO;
+import com.spoony.spoony_server.adapter.auth.dto.validation.apple.AppleTokenDTO;
 import com.spoony.spoony_server.adapter.auth.out.external.AppleFeignClient;
-import com.spoony.spoony_server.adapter.auth.validation.AppleClientSecretGenerator;
-import com.spoony.spoony_server.adapter.auth.validation.AppleJwtParser;
-import com.spoony.spoony_server.adapter.auth.validation.ApplePublicKeyGenerator;
+import com.spoony.spoony_server.adapter.auth.validation.apple.AppleClientSecretGenerator;
+import com.spoony.spoony_server.adapter.auth.validation.apple.AppleJwtParser;
+import com.spoony.spoony_server.adapter.auth.validation.apple.ApplePublicKeyGenerator;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;

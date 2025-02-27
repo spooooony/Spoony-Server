@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.auth.validation;
+package com.spoony.spoony_server.adapter.auth.validation.apple;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

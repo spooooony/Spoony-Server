@@ -10,6 +10,10 @@ public class AuthConstant {
     public static final String BEARER_TOKEN_PREFIX = "Bearer ";
     public static final String CHARACTER_ENCODING_UTF8 = "utf-8";
 
-    // Apple
+    // KAKAO
+    public static final String GRANT_TYPE = "KakaoAK ";
+    public static final String TARGET_ID_TYPE = "user_id";
+
+    // APPLE
     public static final String APPLE_WITHDRAW_HEADER = "X-Apple-Code";
 }

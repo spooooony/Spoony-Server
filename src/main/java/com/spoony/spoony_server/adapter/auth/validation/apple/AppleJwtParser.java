@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.auth.validation;
+package com.spoony.spoony_server.adapter.auth.validation.apple;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
