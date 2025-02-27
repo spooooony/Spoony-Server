@@ -19,7 +19,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider implements InitializingBean {
 
-    private static final String ANONYMOUS_USER = "anonymousUser";
+    private static final String ANONYMOUS_USER = "anonymous";
 
     @Value("${jwt.access_token_expiration_time}")
     private Long accessTokenExpirationTime;
@@ -36,7 +36,7 @@ public class JwtTokenProvider implements InitializingBean {
         this.singingKey = Keys.hmacShaKeyFor(encodedKey.getBytes());
     }
 
-    public JwtTokenDTO issueTokens(Long userId) {
+    public JwtTokenDTO generateTokenPair(Long userId) {
         return JwtTokenDTO.of(
                 generateToken(userId, true),
                 generateToken(userId, false));
@@ -65,7 +65,7 @@ public class JwtTokenProvider implements InitializingBean {
         return new Date(now.getTime() + refreshTokenExpirationTime);
     }
 
-    public Claims getBody(final String token) {
+    public Claims getClaims(final String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(singingKey)
                 .build()
@@ -73,12 +73,12 @@ public class JwtTokenProvider implements InitializingBean {
                 .getBody();
     }
 
-    public Long getUserIdFromJwt(String token) {
-        Claims claims = getBody(token);
+    public Long getUserIdFromToken(String token) {
+        Claims claims = getClaims(token);
         return Long.valueOf(claims.get(AuthConstant.USER_ID).toString());
     }
 
-    public static Object checkPrincipal(final Object principal) {
+    public static Object validatePrincipal(final Object principal) {
         if (ANONYMOUS_USER.equals(principal)) {
             throw new AuthException(AuthErrorMessage.UNAUTHORIZED);
         }

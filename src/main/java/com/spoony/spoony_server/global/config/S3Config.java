@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.config;
+package com.spoony.spoony_server.global.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
