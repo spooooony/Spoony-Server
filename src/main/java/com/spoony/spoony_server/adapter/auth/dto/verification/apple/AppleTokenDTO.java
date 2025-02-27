@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.auth.dto.validation.apple;
+package com.spoony.spoony_server.adapter.auth.dto.verification.apple;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

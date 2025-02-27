@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.auth.dto.validation.apple;
+package com.spoony.spoony_server.adapter.auth.dto.verification.apple;
 
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;

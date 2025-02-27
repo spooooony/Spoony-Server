@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.adapter.auth.out.external;
 
-import com.spoony.spoony_server.adapter.auth.dto.validation.kakao.KakaoUserDTO;
+import com.spoony.spoony_server.adapter.auth.dto.verification.kakao.KakaoUserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;

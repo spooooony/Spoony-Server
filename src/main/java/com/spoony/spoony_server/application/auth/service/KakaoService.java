@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.application.auth.service;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
-import com.spoony.spoony_server.adapter.auth.dto.validation.kakao.KakaoUserDTO;
+import com.spoony.spoony_server.adapter.auth.dto.verification.kakao.KakaoUserDTO;
 import com.spoony.spoony_server.adapter.auth.out.external.KakaoFeignClient;
 import com.spoony.spoony_server.global.constant.AuthConstant;
 import lombok.RequiredArgsConstructor;

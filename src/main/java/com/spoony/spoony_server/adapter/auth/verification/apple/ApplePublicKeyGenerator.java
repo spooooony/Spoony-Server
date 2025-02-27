@@ -1,7 +1,7 @@
-package com.spoony.spoony_server.adapter.auth.validation.apple;
+package com.spoony.spoony_server.adapter.auth.verification.apple;
 
-import com.spoony.spoony_server.adapter.auth.dto.validation.apple.ApplePublicKeyDTO;
-import com.spoony.spoony_server.adapter.auth.dto.validation.apple.ApplePublicKeyListDTO;
+import com.spoony.spoony_server.adapter.auth.dto.verification.apple.ApplePublicKeyDTO;
+import com.spoony.spoony_server.adapter.auth.dto.verification.apple.ApplePublicKeyListDTO;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import org.springframework.stereotype.Component;

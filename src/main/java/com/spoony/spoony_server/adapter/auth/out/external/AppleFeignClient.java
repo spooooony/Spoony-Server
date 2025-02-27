@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.adapter.auth.out.external;
 
-import com.spoony.spoony_server.adapter.auth.dto.validation.apple.ApplePublicKeyListDTO;
-import com.spoony.spoony_server.adapter.auth.dto.validation.apple.AppleTokenDTO;
+import com.spoony.spoony_server.adapter.auth.dto.verification.apple.ApplePublicKeyListDTO;
+import com.spoony.spoony_server.adapter.auth.dto.verification.apple.AppleTokenDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
