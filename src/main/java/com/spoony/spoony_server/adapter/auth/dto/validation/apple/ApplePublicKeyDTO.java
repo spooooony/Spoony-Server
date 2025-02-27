@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.auth.dto.validation;
+package com.spoony.spoony_server.adapter.auth.dto.validation.apple;
 
 public record ApplePublicKeyDTO(String kty,
                                 String kid,

@@ -23,6 +23,7 @@ public class AuthService implements SignInUseCase {
     private final UserPort userPort;
     private final JwtTokenProvider jwtTokenProvider;
     private final AppleService appleService;
+    private final KakaoService kakaoService;
 
     @Override
     public UserTokenDTO signIn(String platformToken, UserLoginDTO userLoginDTO) {
@@ -35,13 +36,12 @@ public class AuthService implements SignInUseCase {
 
     private PlatformUserDTO getPlatformInfo(String platformToken, UserLoginDTO userLoginDto) {
         if (userLoginDto.platform().toString().equals("KAKAO")){
-            //TODO
+            return kakaoService.getPlatformUserInfo(platformToken);
         } else if (userLoginDto.platform().toString().equals("APPLE")){
             return appleService.getPlatformUserInfo(platformToken);
         } else {
             throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);
         }
-        return null;
     }
 
     private User loadOrCreate(Platform platform, PlatformUserDTO platformUserDTO) {
