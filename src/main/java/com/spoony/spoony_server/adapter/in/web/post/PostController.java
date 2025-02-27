@@ -8,6 +8,7 @@ import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostScoopPostUseCase;
+import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
@@ -33,8 +34,8 @@ public class PostController {
     private final PostGetCategoriesUseCase postGetCategoriesUseCase;
     private final PostScoopPostUseCase postScoopPostUseCase;
 
-    @GetMapping("/{userId}/{postId}")
-    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@PathVariable long postId, @PathVariable long userId) {
+    @GetMapping("/{postId}")
+    public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(@UserId Long userId, @PathVariable long postId) {
         PostGetCommand command = new PostGetCommand(postId, userId);
         PostResponseDTO postResponse = postGetUseCase.getPostById(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));
