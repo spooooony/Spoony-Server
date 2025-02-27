@@ -17,18 +17,18 @@ public class KakaoService {
 
     private final KakaoFeignClient kakaoFeignClient;
 
-    public PlatformUserDTO getPlatformUserInfo(String providerToken) {
-        KakaoUserDTO kakaoUserDTO = kakaoFeignClient.getUserInformation(AuthConstant.BEARER_TOKEN_PREFIX + providerToken);
+    public PlatformUserDTO getPlatformUserInfo(String platformToken) {
+        KakaoUserDTO kakaoUserDTO = kakaoFeignClient.getUserInformation(AuthConstant.BEARER_TOKEN_PREFIX + platformToken);
         return PlatformUserDTO.of(
                 kakaoUserDTO.id().toString(),
                 kakaoUserDTO.kakaoAccount().email());
     }
 
-    public void unlinkKakaoUser(final String providerId) {
+    public void unlink(final String platformId) {
         kakaoFeignClient.unlinkUser(
                 AuthConstant.GRANT_TYPE + adminKey,
                 AuthConstant.TARGET_ID_TYPE,
-                Long.valueOf(providerId)
+                Long.valueOf(platformId)
         );
     }
 }
