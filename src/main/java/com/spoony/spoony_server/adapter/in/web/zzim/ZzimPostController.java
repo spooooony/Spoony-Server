@@ -4,6 +4,7 @@ import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
+import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimPostAddRequestDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
@@ -32,29 +33,29 @@ public class ZzimPostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimCardList(@PathVariable long userId) {
+    @GetMapping
+    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimCardList(@UserId Long userId) {
         ZzimGetCardCommand command = new ZzimGetCardCommand(userId);
         ZzimCardListResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimCardList(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 
-    @GetMapping("/{userId}/{placeId}")
-    public ResponseEntity<ResponseDTO<ZzimFocusListResponseDTO>> getZzimFocusList(@PathVariable long userId, @PathVariable long placeId) {
+    @GetMapping("/{placeId}")
+    public ResponseEntity<ResponseDTO<ZzimFocusListResponseDTO>> getZzimFocusList(@UserId Long userId, @PathVariable long placeId) {
         ZzimGetFocusCommand command = new ZzimGetFocusCommand(userId, placeId);
         ZzimFocusListResponseDTO zzimFocusListResponse = zzimGetUseCase.getZzimFocusList(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimFocusListResponse));
     }
 
-    @GetMapping("/location/{userId}/{locationId}")
-    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimLocationCardList(@PathVariable long userId, @PathVariable long locationId) {
+    @GetMapping("/location/{locationId}")
+    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimLocationCardList(@UserId Long userId, @PathVariable long locationId) {
         ZzimGetLocationCardCommand command = new ZzimGetLocationCardCommand(userId, locationId);
         ZzimCardListResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimByLocation(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 
-    @DeleteMapping("/{userId}/{postId}")
-    public ResponseEntity<ResponseDTO<Void>> deleteZzim(@PathVariable long userId, @PathVariable long postId) {
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ResponseDTO<Void>> deleteZzim(@UserId Long userId, @PathVariable long postId) {
         ZzimDeleteCommand command = new ZzimDeleteCommand(userId, postId);
         zzimRemoveUseCase.deleteZzim(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
