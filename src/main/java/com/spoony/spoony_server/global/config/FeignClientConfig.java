@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.config;
+package com.spoony.spoony_server.global.config;
 
 import com.spoony.spoony_server.SpoonyServerApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
