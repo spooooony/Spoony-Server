@@ -14,9 +14,15 @@ public class JwtTokenValidator {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    public boolean validateAccessToken(String accessToken) {
+    public void validateAccessToken(String accessToken) {
+        if (accessToken == null) {
+            throw new AuthException(AuthErrorMessage.EMPTY_TOKEN);
+        }
         try {
-            jwtTokenProvider.getClaims(accessToken);
+            boolean isAccessToken = jwtTokenProvider.getClaimFromToken(accessToken).isAccessToken();
+            if (!isAccessToken) {
+                throw new AuthException(AuthErrorMessage.INVALID_TOKEN_TYPE);
+            }
         } catch (MalformedJwtException ex) {
             throw new AuthException(AuthErrorMessage.INVALID_TOKEN);
         } catch (ExpiredJwtException ex) {
@@ -26,13 +32,17 @@ public class JwtTokenValidator {
         } catch (IllegalArgumentException ex) {
             throw new AuthException(AuthErrorMessage.EMPTY_TOKEN);
         }
-
-        return true;
     }
 
-    public boolean validateRefreshToken(String refreshToken) {
+    public void validateRefreshToken(String refreshToken) {
+        if (refreshToken == null) {
+            throw new AuthException(AuthErrorMessage.EMPTY_REFRESH_TOKEN);
+        }
         try {
-            jwtTokenProvider.getClaims(refreshToken);
+            boolean isAccessToken = jwtTokenProvider.getClaimFromToken(refreshToken).isAccessToken();
+            if (isAccessToken) {
+                throw new AuthException(AuthErrorMessage.INVALID_TOKEN_TYPE);
+            }
         } catch (MalformedJwtException ex) {
             throw new AuthException(AuthErrorMessage.INVALID_REFRESH_TOKEN);
         } catch (ExpiredJwtException ex) {
@@ -42,7 +52,5 @@ public class JwtTokenValidator {
         } catch (IllegalArgumentException ex) {
             throw new AuthException(AuthErrorMessage.EMPTY_REFRESH_TOKEN);
         }
-
-        return true;
     }
 }

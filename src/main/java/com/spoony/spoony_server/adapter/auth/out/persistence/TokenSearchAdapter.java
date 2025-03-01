@@ -18,6 +18,7 @@ public class TokenSearchAdapter implements TokenPort {
 
     private final TokenRepository tokenRepository;
 
+    @Override
     public void saveToken(Long userId, JwtTokenDTO token) {
         System.out.println("저장된 refresh token: " + token.refreshToken());
         TokenEntity tokenEntity = TokenEntity.builder()
@@ -27,19 +28,9 @@ public class TokenSearchAdapter implements TokenPort {
         tokenRepository.save(tokenEntity);
     }
 
-    public void validateRefreshToken(Long userId, String refreshToken) {
-//        System.out.println("현재 refresh token: " + refreshToken);
-
-        Iterable<TokenEntity> allTokens = tokenRepository.findAll();
-
-//        System.out.println("현재 token repository에 있는 모든 값:");
-//        for (TokenEntity token : allTokens) {
-//            System.out.println("Token : " + token.getRefreshToken());
-//        }
-
+    @Override
+    public void checkRefreshToken(String refreshToken, Long userId, boolean isAccessToken) {
         Optional<TokenEntity> tokenEntityOpt = tokenRepository.findByRefreshToken(refreshToken);
-
-//        System.out.println("DB에서 조회된 TokenEntity: " + tokenEntityOpt.orElse(null));
 
         // Refresh Token 만료 & 탈취 시나리오 동시 처리
         if (tokenEntityOpt.isEmpty()) {
@@ -55,6 +46,7 @@ public class TokenSearchAdapter implements TokenPort {
         }
     }
 
+    @Override
     public void deleteRefreshToken(String refreshToken) {
         tokenRepository.deleteByRefreshToken(refreshToken);
     }

@@ -31,7 +31,10 @@ public enum AuthErrorMessage implements DefaultErrorMessage {
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "Refresh 토큰이 만료되었습니다."),
     UNSUPPORTED_REFRESH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "지원하지 않는 Refresh 토큰 형식입니다."),
     EMPTY_REFRESH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh 토큰이 비어 있거나 잘못된 요청입니다."),
-    UNKNOWN_REFRESH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 출처의 Refresh 토큰입니다.");
+    UNKNOWN_REFRESH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 출처의 Refresh 토큰입니다."),
+
+    // JWT (ACCESS + REFRESH)
+    INVALID_TOKEN_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "올바르지 않은 토큰 타입입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

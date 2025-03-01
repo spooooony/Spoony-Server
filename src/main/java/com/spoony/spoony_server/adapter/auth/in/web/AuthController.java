@@ -5,7 +5,7 @@ import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
 import com.spoony.spoony_server.application.auth.port.in.RefreshUseCase;
 import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
-import com.spoony.spoony_server.global.constant.AuthConstant;
+import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.spoony.spoony_server.global.constant.AuthConstant.BEARER_TOKEN_PREFIX;
+import static com.spoony.spoony_server.global.auth.constant.AuthConstant.BEARER_TOKEN_PREFIX;
 
 @RestController
 @RequiredArgsConstructor
