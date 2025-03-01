@@ -27,15 +27,20 @@ public class CustomJwtAuthenticationEntryPoint implements AuthenticationEntryPoi
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
-        setResponse(response);
+        Object exceptionMessage = request.getAttribute("exception");
+        if (exceptionMessage instanceof AuthErrorMessage authError) {
+            setResponse(response, authError);
+        } else {
+            setResponse(response, AuthErrorMessage.UNAUTHORIZED);
+        }
     }
 
-    private void setResponse(HttpServletResponse response) throws IOException {
+    private void setResponse(HttpServletResponse response, AuthErrorMessage errorMessage) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(
-                objectMapper.writeValueAsString(ResponseDTO.fail(AuthErrorMessage.UNAUTHORIZED))
+                objectMapper.writeValueAsString(ResponseDTO.fail(errorMessage))
         );
     }
 }

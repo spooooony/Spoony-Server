@@ -1,7 +1,8 @@
 package com.spoony.spoony_server.global.auth.jwt;
 
 import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
-import com.spoony.spoony_server.global.constant.AuthConstant;
+import com.spoony.spoony_server.global.auth.constant.AuthConstant;
+import com.spoony.spoony_server.global.auth.dto.ClaimDTO;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import io.jsonwebtoken.security.SignatureException;
@@ -16,8 +17,6 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
-
-import static com.spoony.spoony_server.global.constant.AuthConstant.BEARER_TOKEN_PREFIX;
 
 @Component
 public class JwtTokenProvider implements InitializingBean {
@@ -54,6 +53,7 @@ public class JwtTokenProvider implements InitializingBean {
                 .setExpiration(expirationDate);
 
         claims.put(AuthConstant.USER_ID, userId);
+        claims.put(AuthConstant.TOKEN_TYPE, isAccessToken);
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -81,9 +81,12 @@ public class JwtTokenProvider implements InitializingBean {
         }
     }
 
-    public Long getUserIdFromToken(String token) {
+    public ClaimDTO getClaimFromToken(String token) {
         Claims claims = getClaims(token);
-        return Long.valueOf(claims.get(AuthConstant.USER_ID).toString());
+        return ClaimDTO.of(
+                Long.valueOf(claims.get(AuthConstant.USER_ID).toString()),
+                Boolean.parseBoolean(claims.get(AuthConstant.TOKEN_TYPE).toString())
+        );
     }
 
     public static Object validatePrincipal(final Object principal) {

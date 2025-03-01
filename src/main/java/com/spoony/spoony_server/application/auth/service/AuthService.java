@@ -20,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -54,8 +52,9 @@ public class AuthService implements
     @Transactional
     public JwtTokenDTO refreshAccessToken(final String refreshToken) {
         jwtTokenValidator.validateRefreshToken(refreshToken);
-        Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        tokenPort.validateRefreshToken(userId, refreshToken);
+        Long userId = jwtTokenProvider.getClaimFromToken(refreshToken).userId();
+        boolean isAccessToken = jwtTokenProvider.getClaimFromToken(refreshToken).isAccessToken();
+        tokenPort.checkRefreshToken(refreshToken, userId, isAccessToken);
 
         // 현재 refresh token 정보 삭제 (Refresh Token Rotation)
         tokenPort.deleteRefreshToken(refreshToken);

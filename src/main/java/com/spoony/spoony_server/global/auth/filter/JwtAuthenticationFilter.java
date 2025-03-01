@@ -2,7 +2,7 @@ package com.spoony.spoony_server.global.auth.filter;
 
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenProvider;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenValidator;
-import com.spoony.spoony_server.global.constant.AuthConstant;
+import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,14 +32,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = resolveToken(request);
+        jwtTokenValidator.validateAccessToken(token);
 
-        if (token != null && jwtTokenValidator.validateAccessToken(token)) {
-            Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userId, null, null);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+        Long userId = jwtTokenProvider.getClaimFromToken(token).userId();
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userId, null, null);
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         chain.doFilter(request, response);
     }
