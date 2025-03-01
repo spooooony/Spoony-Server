@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -27,14 +29,15 @@ public class SpoonHistoryEntity {
     private ActivityEntity activity;
 
     private Long balanceAfter;
+
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Builder
-    public SpoonHistoryEntity(Long historyId, UserEntity user, ActivityEntity activity, Long balanceAfter, LocalDateTime createdAt) {
+    public SpoonHistoryEntity(Long historyId, UserEntity user, ActivityEntity activity, Long balanceAfter) {
         this.historyId = historyId;
         this.user = user;
         this.activity = activity;
         this.balanceAfter = balanceAfter;
-        this.createdAt = createdAt;
     }
 }

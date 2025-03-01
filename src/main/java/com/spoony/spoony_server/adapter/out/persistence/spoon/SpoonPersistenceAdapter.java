@@ -55,7 +55,6 @@ public class SpoonPersistenceAdapter implements SpoonPort, SpoonBalancePort {
                 .user(userEntity)
                 .activity(activityEntity)
                 .balanceAfter(spoonBalanceEntity.getAmount())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         spoonHistoryRepository.save(spoonHistoryEntity);

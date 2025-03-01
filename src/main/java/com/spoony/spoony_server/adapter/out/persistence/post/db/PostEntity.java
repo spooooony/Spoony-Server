@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -32,17 +34,17 @@ public class PostEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @Builder
-    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String title, String description) {
         this.postId = postId;
         this.user = user;
         this.place = place;
         this.title = title;
         this.description = description;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 }

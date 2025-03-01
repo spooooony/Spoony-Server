@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -29,7 +31,9 @@ public class UserEntity {
     @JoinColumn(name = "region_id")
     private RegionEntity region;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @Builder
@@ -38,16 +42,12 @@ public class UserEntity {
                       String platformId,
                       String userName,
                       String userImage,
-                      RegionEntity region,
-                      LocalDateTime createdAt,
-                      LocalDateTime updatedAt) {
+                      RegionEntity region) {
         this.userId = userId;
         this.platform = platform;
         this.platformId = platformId;
         this.userName = userName;
         this.userImage = userImage;
         this.region = region;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 }

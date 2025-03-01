@@ -99,8 +99,6 @@ public class PostPersistenceAdapter implements
                 .place(placeEntity)
                 .title(post.getTitle())
                 .description(post.getDescription())
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
                 .build();
 
         postRepository.save(postEntity);

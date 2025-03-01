@@ -3,6 +3,8 @@ package com.spoony.spoony_server.adapter.out.persistence.spoon.db;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -20,13 +22,16 @@ public class SpoonBalanceEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
     private Long amount;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @Builder
-    public SpoonBalanceEntity(Long spoonBalanceId, UserEntity user, Long amount, LocalDateTime updatedAt) {
+    public SpoonBalanceEntity(Long spoonBalanceId, UserEntity user, Long amount) {
         this.spoonBalanceId = spoonBalanceId;
         this.user = user;
         this.amount = amount;
-        this.updatedAt = updatedAt;
     }
 }
