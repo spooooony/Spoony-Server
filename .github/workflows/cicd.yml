@@ -42,6 +42,11 @@ jobs:
           echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
           cat ./src/main/resources/application-naver.yml
 
+      - name: Generate application-oath.yml
+        run: |
+          echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
+          cat ./src/main/resources/application-oath.yml
+
       - name: Build Project
         run: ./gradlew clean build -x test
 
