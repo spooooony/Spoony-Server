@@ -10,6 +10,7 @@ import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
 import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.User;
+import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 
-@Repository
+@Adapter
 @RequiredArgsConstructor
 public class SpoonPersistenceAdapter implements SpoonPort, SpoonBalancePort {
 

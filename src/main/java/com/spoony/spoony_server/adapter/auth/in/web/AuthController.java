@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.spoony.spoony_server.global.constant.AuthConstant.BEARER_TOKEN_PREFIX;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
@@ -32,8 +34,12 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<ResponseDTO<JwtTokenDTO>> refreshAccessToken(
-            @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String refreshToken
+            @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) String refreshToken
     ) {
+        System.out.println("초기 요청 토큰 " + refreshToken);
+        if (refreshToken.startsWith(BEARER_TOKEN_PREFIX)) {
+            refreshToken = refreshToken.substring(BEARER_TOKEN_PREFIX.length());
+        }
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(refreshUseCase.refreshAccessToken(refreshToken)));
     }
 }

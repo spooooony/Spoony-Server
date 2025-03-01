@@ -9,6 +9,7 @@ import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.auth.port.in.RefreshUseCase;
 import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
+import com.spoony.spoony_server.application.auth.port.out.TokenPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenProvider;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -27,6 +30,7 @@ public class AuthService implements
         RefreshUseCase {
 
     private final UserPort userPort;
+    private final TokenPort tokenPort;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenValidator jwtTokenValidator;
     private final AppleService appleService;
@@ -42,16 +46,24 @@ public class AuthService implements
         User user = UserMapper.toDomain(userEntity);
 
         JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
+        tokenPort.saveToken(user.getUserId(), token);
         return UserTokenDTO.of(user, token);
     }
 
     @Override
-    public JwtTokenDTO refreshAccessToken(String refreshToken) {
-        if (!jwtTokenValidator.validateAccessToken(refreshToken)) {
-            throw new AuthException(AuthErrorMessage.INVALID_REFRESH_TOKEN);
-        }
+    @Transactional
+    public JwtTokenDTO refreshAccessToken(final String refreshToken) {
+        jwtTokenValidator.validateRefreshToken(refreshToken);
         Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        return jwtTokenProvider.generateTokenPair(userId);
+        tokenPort.validateRefreshToken(userId, refreshToken);
+
+        // 현재 refresh token 정보 삭제 (Refresh Token Rotation)
+        tokenPort.deleteRefreshToken(refreshToken);
+
+        JwtTokenDTO tokens = jwtTokenProvider.generateTokenPair(userId);
+        tokenPort.saveToken(userId, tokens);
+
+        return tokens;
     }
 
     private PlatformUserDTO getPlatformInfo(String platformToken, UserLoginDTO userLoginDto) {

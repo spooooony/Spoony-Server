@@ -5,6 +5,7 @@ import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationRepo
 import com.spoony.spoony_server.adapter.out.persistence.location.mapper.LocationMapper;
 import com.spoony.spoony_server.application.port.out.location.LocationPort;
 import com.spoony.spoony_server.domain.location.Location;
+import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Repository
+@Adapter
 @RequiredArgsConstructor
 public class LocationPersistenceAdapter implements LocationPort {
 

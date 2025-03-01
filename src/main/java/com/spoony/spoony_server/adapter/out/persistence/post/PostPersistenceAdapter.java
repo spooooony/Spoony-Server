@@ -13,6 +13,7 @@ import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.user.User;
+import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.CategoryErrorMessage;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Repository
+@Adapter
 @RequiredArgsConstructor
 public class PostPersistenceAdapter implements
         PostPort,
