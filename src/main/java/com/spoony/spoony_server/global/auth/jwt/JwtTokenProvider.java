@@ -4,6 +4,7 @@ import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.global.constant.AuthConstant;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,8 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+
+import static com.spoony.spoony_server.global.constant.AuthConstant.BEARER_TOKEN_PREFIX;
 
 @Component
 public class JwtTokenProvider implements InitializingBean {
@@ -39,7 +42,8 @@ public class JwtTokenProvider implements InitializingBean {
     public JwtTokenDTO generateTokenPair(Long userId) {
         return JwtTokenDTO.of(
                 generateToken(userId, true),
-                generateToken(userId, false));
+                generateToken(userId, false)
+        );
     }
 
     public String generateToken(Long userId, boolean isAccessToken) {
@@ -66,11 +70,15 @@ public class JwtTokenProvider implements InitializingBean {
     }
 
     public Claims getClaims(final String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(singingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(singingKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (SignatureException e) {
+            throw new AuthException(AuthErrorMessage.INVALID_TOKEN);
+        }
     }
 
     public Long getUserIdFromToken(String token) {

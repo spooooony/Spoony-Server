@@ -1,7 +1,9 @@
 package com.spoony.spoony_server.global.advice;
 
 import com.spoony.spoony_server.global.dto.ResponseDTO;
+import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import com.spoony.spoony_server.global.message.business.BusinessErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {BusinessException.class})
     public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleBusinessException(BusinessException e) {
+        return ResponseEntity
+                .status(e.getErrorMessage().getHttpStatus())
+                .body(ResponseDTO.fail(e.getErrorMessage()));
+    }
+
+    @ExceptionHandler(value = {AuthException.class})
+    public ResponseEntity<ResponseDTO<AuthErrorMessage>> handleAuthException(AuthException e) {
         return ResponseEntity
                 .status(e.getErrorMessage().getHttpStatus())
                 .body(ResponseDTO.fail(e.getErrorMessage()));

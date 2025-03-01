@@ -11,6 +11,7 @@ import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
+@Adapter
 @RequiredArgsConstructor
 public class FeedPersistenceAdapter implements FeedPort {
 
