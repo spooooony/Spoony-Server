@@ -35,7 +35,7 @@ public class TokenSearchAdapter implements TokenPort {
         // Refresh Token 만료 & 탈취 시나리오 동시 처리
         if (tokenEntityOpt.isEmpty()) {
             tokenRepository.deleteById(userId);
-            throw new AuthException(AuthErrorMessage.UNAUTHORIZED);
+            throw new AuthException(AuthErrorMessage.LOGIN_REQUIRED);
         }
 
         TokenEntity tokenEntity = tokenEntityOpt.get();
