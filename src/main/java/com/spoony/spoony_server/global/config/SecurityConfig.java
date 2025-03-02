@@ -26,7 +26,9 @@ public class SecurityConfig {
 
     private static final List<String> AUTH_WHITE_LIST = List.of(
             "/api/v1/auth/signin",
-            "/api/v1/auth/refresh"
+            "/api/v1/auth/refresh",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
     );
 
     @Bean

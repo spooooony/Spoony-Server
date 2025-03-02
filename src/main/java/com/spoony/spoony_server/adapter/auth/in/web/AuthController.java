@@ -7,6 +7,7 @@ import com.spoony.spoony_server.application.auth.port.in.RefreshUseCase;
 import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class AuthController {
     private final RefreshUseCase refreshUseCase;
 
     @PostMapping("/signin")
+    @Operation(summary = "회원가입 API", description = "소셜 로그인 회원가입 API, Token Set 발급")
     public ResponseEntity<ResponseDTO<UserTokenDTO>> signIn(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @Valid @RequestBody final UserLoginDTO userLoginDTO
@@ -33,6 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 통한 토큰 재발급 API, Token Set 발급")
     public ResponseEntity<ResponseDTO<JwtTokenDTO>> refreshAccessToken(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) String refreshToken
     ) {

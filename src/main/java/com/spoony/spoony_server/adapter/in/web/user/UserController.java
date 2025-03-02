@@ -5,6 +5,7 @@ import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,9 @@ public class UserController {
     private final UserGetUseCase userGetUseCase;
 
     @GetMapping
-    public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfo(@UserId Long userId) {
+    @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API")
+    public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfo(
+            @UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
         UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));

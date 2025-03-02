@@ -5,6 +5,7 @@ import com.spoony.spoony_server.application.port.in.spoon.SpoonGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.spoon.SpoonResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,9 @@ public class SpoonController {
     private final SpoonGetUseCase spoonGetUseCase;
 
     @GetMapping
-    public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(@UserId Long userId) {
+    @Operation(summary = "스푼 개수 조회 API", description = "특정 사용자의 스푼 개수를 조회하는 API")
+    public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(
+            @UserId Long userId) {
         SpoonGetCommand command = new SpoonGetCommand(userId);
         SpoonResponseDTO spoonResponseDTO = spoonGetUseCase.getAmountById(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(spoonResponseDTO));
