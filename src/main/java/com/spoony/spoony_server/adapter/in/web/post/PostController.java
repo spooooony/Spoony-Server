@@ -43,6 +43,7 @@ public class PostController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDTO<Void>> createPost(
+            @UserId Long userId,
             @RequestPart("data") PostCreateRequestDTO postCreateRequestDTO,
             @RequestPart("photos") List<MultipartFile> photos
     ) throws IOException {
@@ -50,7 +51,7 @@ public class PostController {
         List<String> photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
 
         PostCreateCommand command = new PostCreateCommand(
-                postCreateRequestDTO.userId(),
+                userId,
                 postCreateRequestDTO.title(),
                 postCreateRequestDTO.description(),
                 postCreateRequestDTO.placeName(),
