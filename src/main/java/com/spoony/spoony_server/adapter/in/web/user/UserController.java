@@ -29,4 +29,13 @@ public class UserController {
         UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API")
+    public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfoById(
+            @PathVariable Long userId) {
+        UserGetCommand command = new UserGetCommand(userId);
+        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
+    }
 }
