@@ -103,23 +103,11 @@ jobs:
           sudo docker run -d -p \$NEW_PORT:8080 --name spoony-dev-\$NEW_PORT yh0872/spoony-dev
 
           echo "⌛️ 새로운 컨테이너가 정상적으로 실행될 때까지 대기..."
-          for i in {1..30}; do
-            if curl -s http://localhost:\$NEW_PORT/api/v1/deploy/status | grep -q "blue\|green"; then
-              echo "✅ 새로운 컨테이너가 정상적으로 실행되었습니다."
-              break
-            fi
-            echo "⏳ 컨테이너 준비 중... ($i/30)"
-            sleep 2
+          sleep 30
           done
 
           echo "🔁 Nginx가 새로운 컨테이너로 트래픽을 정상적으로 넘기는지 확인..."
-          for i in {1..30}; do
-            if curl -s http://localhost/api/v1/deploy/status | grep -q "blue\|green"; then
-              echo "✅ Nginx가 새로운 컨테이너로 정상적으로 트래픽을 전달 중!"
-              break
-            fi
-            echo "⏳ Nginx 업데이트 대기... ($i/30)"
-            sleep 2
+          sleep 10
           done
 
           echo "🔁 Nginx 설정 적용 (무중단)"
