@@ -3,6 +3,10 @@ name: CI/CD
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Deployment Environment (dev or prod)'
+        required: true
+        default: 'dev'
       branch:
         description: 'Branch to deploy'
         required: true
@@ -21,7 +25,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -30,22 +34,18 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.CD_APPLICATION }}" > ./src/main/resources/application.yml
-          cat ./src/main/resources/application.yml
 
       - name: Generate application-aws.yml
         run: |
           echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
-          cat ./src/main/resources/application-aws.yml
 
       - name: Generate application-naver.yml
         run: |
           echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
-          cat ./src/main/resources/application-naver.yml
 
       - name: Generate application-oath.yml
         run: |
           echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
-          cat ./src/main/resources/application-oath.yml
 
       - name: Build Project
         run: ./gradlew clean build -x test
@@ -54,10 +54,23 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t yh0872/spoony-dev .
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            IMAGE_NAME="yh0872/spoony-prod"
+          else
+            IMAGE_NAME="yh0872/spoony-dev"
+          fi
+          docker build -t $IMAGE_NAME .
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$(date +%Y%m%d%H%M%S)
 
       - name: Publish Image to Docker Hub
-        run: docker push yh0872/spoony-dev:latest
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            IMAGE_NAME="yh0872/spoony-prod"
+          else
+            IMAGE_NAME="yh0872/spoony-dev"
+          fi
+          docker push $IMAGE_NAME:latest
 
   deploy:
     needs: build
@@ -66,16 +79,34 @@ jobs:
       - name: Install SSH Client
         run: sudo apt-get update && sudo apt-get install -y openssh-client
 
+      - name: Define Target Server
+        id: define-server
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "EC2_HOST=${{ secrets.PROD_EC2_PUBLIC_IP }}" >> $GITHUB_ENV
+            echo "SSH_KEY=${{ secrets.PROD_EC2_SSH_KEY }}" >> $GITHUB_ENV
+            echo "IMAGE_NAME=yh0872/spoony-prod" >> $GITHUB_ENV
+          else
+            echo "EC2_HOST=${{ secrets.DEV_EC2_PUBLIC_IP }}" >> $GITHUB_ENV
+            echo "SSH_KEY=${{ secrets.DEV_EC2_SSH_KEY }}" >> $GITHUB_ENV
+            echo "IMAGE_NAME=yh0872/spoony-dev" >> $GITHUB_ENV
+          fi
+
       - name: Create SSH Key File
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ssh_key.pem
+          echo "${SSH_KEY}" > ssh_key.pem
           chmod 600 ssh_key.pem
 
-      - name: SSH into EC2 and Deploy
+      - name: SSH into Target Server and Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${EC2_HOST} << 'EOF'
+
+          sudo docker stop spoony-container || true
+          sudo docker rm spoony-container || true
+
           sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          sudo docker pull yh0872/spoony-dev:latest
-          sudo docker rm -f spoony-dev-container || true
-          sudo docker run -d -p 8080:8080 --name spoony-dev-container yh0872/spoony-dev
+          sudo docker pull $IMAGE_NAME:latest
+
+          sudo docker run -d -p 8080:8080 --name spoony-container $IMAGE_NAME
+
           EOF
