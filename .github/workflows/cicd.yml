@@ -3,10 +3,6 @@ name: CI/CD
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Deployment Environment (dev or prod)'
-        required: true
-        default: 'dev'
       branch:
         description: 'Branch to deploy'
         required: true
@@ -58,10 +54,10 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t yh0872/spoony-${{ github.event.inputs.environment }} .
+        run: docker build -t yh0872/spoony-dev .
 
       - name: Publish Image to Docker Hub
-        run: docker push yh0872/spoony-${{ github.event.inputs.environment }}:latest
+        run: docker push yh0872/spoony-dev:latest
 
   deploy:
     needs: build
@@ -72,23 +68,14 @@ jobs:
 
       - name: Create SSH Key File
         run: |
-          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
-            EC2_HOST="${{ secrets.PROD_EC2_PUBLIC_IP }}"
-            IMAGE_NAME="yh0872/spoony-prod"
-          else
-            echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
-            EC2_HOST="${{ secrets.DEV_EC2_PUBLIC_IP }}"
-            IMAGE_NAME="yh0872/spoony-dev"
-          fi
-          echo "EC2_HOST=${EC2_HOST}"
+          echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
           chmod 600 ssh_key.pem
 
       - name: SSH into EC2 and Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${EC2_HOST} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@${{ secrets.DEV_EC2_PUBLIC_IP }} << 'EOF'
           sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          sudo docker pull $IMAGE_NAME:latest
-          sudo docker rm -f spoony-container || true
-          sudo docker run -d -p 8080:8080 --name spoony-container $IMAGE_NAME
+          sudo docker pull yh0872/spoony-dev:latest
+          sudo docker rm -f spoony-dev-container || true
+          sudo docker run -d -p 8080:8080 --name spoony-dev-container yh0872/spoony-dev
           EOF
