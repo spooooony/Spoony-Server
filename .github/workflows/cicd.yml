@@ -82,14 +82,16 @@ jobs:
           #!/bin/bash
 
           echo "🔍 현재 실행 중인 포트 확인"
-          ACTIVE_PORT=\$(docker ps --filter "name=spoony-dev-*" --format "{{.Names}}" | grep -oE '808[12]')
+          ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
+
+          if [[ -z "\$ACTIVE_PORT" ]]; then
+            echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8081)으로 설정합니다."
+            ACTIVE_PORT="8081"
+          fi
 
           if [[ "\$ACTIVE_PORT" == "8081" ]]; then
             NEW_PORT="8082"
-          elif [[ "\$ACTIVE_PORT" == "8082" ]]; then
-            NEW_PORT="8081"
           else
-            echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8081)으로 설정합니다."
             NEW_PORT="8081"
           fi
           echo "🔄 새로운 컨테이너를 \$NEW_PORT 포트에서 실행"
@@ -102,6 +104,21 @@ jobs:
 
           echo "⌛️ 새로운 컨테이너가 정상적으로 실행될 때까지 대기..."
           sleep 10
+
+          echo "🔁 Nginx 설정 업데이트"
+          sudo bash -c 'cat > /etc/nginx/sites-available/default <<EOL
+          server {
+              listen 80;
+              server_name www.spoony.o-r.kr;
+
+              location / {
+                  proxy_pass http://127.0.0.1:$NEW_PORT;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+              }
+          }
+          EOL'
 
           echo "🔁 Nginx 재시작하여 트래픽 변경"
           sudo nginx -t && sudo systemctl restart nginx
