@@ -103,32 +103,31 @@ jobs:
           sudo docker run -d -p \$NEW_PORT:8080 --name spoony-dev-\$NEW_PORT yh0872/spoony-dev
 
           echo "⌛️ 새로운 컨테이너가 정상적으로 실행될 때까지 대기..."
-          sleep 10
+          for i in {1..30}; do
+            if curl -s http://localhost:\$NEW_PORT/api/v1/deploy/status | grep -q "blue\|green"; then
+              echo "✅ 새로운 컨테이너가 정상적으로 실행되었습니다."
+              break
+            fi
+            echo "⏳ 컨테이너 준비 중... ($i/30)"
+            sleep 2
+          done
 
-          echo "🔁 Nginx 설정 업데이트"
-          sudo bash -c 'cat > /etc/nginx/sites-available/default <<EOL
-          server {
-              listen 80;
-              server_name www.spoony.o-r.kr;
+          echo "🔁 Nginx가 새로운 컨테이너로 트래픽을 정상적으로 넘기는지 확인..."
+          for i in {1..30}; do
+            if curl -s http://localhost/api/v1/deploy/status | grep -q "blue\|green"; then
+              echo "✅ Nginx가 새로운 컨테이너로 정상적으로 트래픽을 전달 중!"
+              break
+            fi
+            echo "⏳ Nginx 업데이트 대기... ($i/30)"
+            sleep 2
+          done
 
-              location / {
-                  proxy_pass http://127.0.0.1:$NEW_PORT;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Real-IP \$remote_addr;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-              }
-          }
-          EOL'
-
-          echo "🔁 Nginx 재시작하여 트래픽 변경"
+          echo "🔁 Nginx 설정 적용 (무중단)"
           sudo nginx -t && sudo nginx -s reload
 
           echo "🗑️ 이전 컨테이너 제거"
-          if [[ "\$ACTIVE_PORT" == "8081" || "\$ACTIVE_PORT" == "8082" ]]; then
-            echo "이전 컨테이너 spoony-dev-\$ACTIVE_PORT 종료 및 삭제"
-            sudo docker stop spoony-dev-\$ACTIVE_PORT
-            sudo docker rm spoony-dev-\$ACTIVE_PORT
-          fi
+          sudo docker stop spoony-dev-\$ACTIVE_PORT
+          sudo docker rm spoony-dev-\$ACTIVE_PORT
 
           echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
           EOF
