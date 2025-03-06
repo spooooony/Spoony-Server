@@ -121,7 +121,7 @@ jobs:
           EOL'
 
           echo "🔁 Nginx 재시작하여 트래픽 변경"
-          sudo nginx -t && sudo systemctl restart nginx
+          sudo nginx -t && sudo nginx -s reload
 
           echo "🗑️ 이전 컨테이너 제거"
           if [[ "\$ACTIVE_PORT" == "8081" || "\$ACTIVE_PORT" == "8082" ]]; then
