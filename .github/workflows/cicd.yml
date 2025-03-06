@@ -78,10 +78,11 @@ jobs:
         run: |
           EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
 
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << EOF
+          #!/bin/bash
 
           echo "🔍 현재 실행 중인 포트 확인"
-          ACTIVE_PORT=\$(docker ps --format "{{.Ports}}" | grep -oE '808[12]' | head -n 1)
+          ACTIVE_PORT=$(docker ps --format "{{.Ports}}" | grep -oE '808[12]' | head -n 1)
 
           if [ "\$ACTIVE_PORT" == "8081" ]; then
             NEW_PORT=8082
@@ -111,3 +112,4 @@ jobs:
 
           echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
           EOF
+      
