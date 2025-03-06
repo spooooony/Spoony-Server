@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/deploy")
+@RequestMapping("/api/v1/deploy")
 public class BlueGreenController {
 
     private final Environment environment;
