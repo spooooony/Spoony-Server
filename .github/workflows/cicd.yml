@@ -81,6 +81,7 @@ jobs:
             EC2_HOST="${{ secrets.DEV_EC2_PUBLIC_IP }}"
             IMAGE_NAME="yh0872/spoony-dev"
           fi
+          echo "EC2_HOST=${EC2_HOST}"
           chmod 600 ssh_key.pem
 
       - name: SSH into EC2 and Deploy
