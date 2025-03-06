@@ -1,20 +1,22 @@
 package com.spoony.spoony_server.adapter.test;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/deploy")
 public class BlueGreenController {
 
-    @Value("${server.port}")
-    private int serverPort;
+    private final Environment environment;
 
     @GetMapping("/status")
     public String getDeploymentStatus() {
-        String status = (serverPort == 8081) ? "blue" : (serverPort == 8082) ? "green" : "unknown";
-        return "Current deployment: " + status;
+        String port = environment.getProperty("local.server.port", "8080");
+        String status = port.equals("8081") ? "blue" : port.equals("8082") ? "green" : "unknown";
+        return "Current Port: " + status;
     }
 }
