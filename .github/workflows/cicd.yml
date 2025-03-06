@@ -1,92 +1,54 @@
-name: CI/CD
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Install SSH Client
+      run: sudo apt-get update && sudo apt-get install -y openssh-client
 
-on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'main'
-      environment:
-        description: 'Environment to deploy (dev or prod)'
-        required: true
-        default: 'dev'
+    - name: Create SSH Key File
+      run: |
+        if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+          echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
+          echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+        else
+          echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
+          echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+        fi
+        chmod 600 ssh_key.pem
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
-      - name: Generate application.yml
-        run: |
-          mkdir -p ./src/main/resources
-          echo "${{ secrets.CD_APPLICATION }}" > ./src/main/resources/application.yml
-          cat ./src/main/resources/application.yml
-
-      - name: Generate application-aws.yml
-        run: |
-          echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
-          cat ./src/main/resources/application-aws.yml
-
-      - name: Generate application-naver.yml
-        run: |
-          echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
-          cat ./src/main/resources/application-naver.yml
-
-      - name: Generate application-oath.yml
-        run: |
-          echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
-          cat ./src/main/resources/application-oath.yml
-
-      - name: Build Project
-        run: ./gradlew clean build -x test
-
-      - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build Docker Image
-        run: docker build -t yh0872/spoony-dev .
-
-      - name: Publish Image to Docker Hub
-        run: docker push yh0872/spoony-dev:latest
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install SSH Client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
-
-      - name: Create SSH Key File
-        run: |
-          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-            echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
-            echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
-          else
-            echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
-            echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
-          fi
-          chmod 600 ssh_key.pem
-
-      - name: SSH into EC2 and Deploy
-        run: |
-          EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
-          sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          sudo docker pull yh0872/spoony-dev:latest
-          sudo docker rm -f spoony-dev-container || true
-          sudo docker run -d -p 8080:8080 --name spoony-dev-container yh0872/spoony-dev
-          EOF
+    - name: SSH into EC2 and Deploy
+      run: |
+        EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
+        
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
+        
+        # 현재 실행 중인 포트를 확인
+        ACTIVE_PORT=$(docker ps --format "{{.Ports}}" | grep -oE '808[12]' | head -n 1)
+        echo "현재 활성 포트: $ACTIVE_PORT"
+        
+        if [ "$ACTIVE_PORT" == "8081" ]; then
+          NEW_PORT=8082
+        else
+          NEW_PORT=8081
+        fi
+        
+        echo "새 컨테이너를 $NEW_PORT 포트에서 실행"
+        
+        # 새 컨테이너 실행
+        sudo docker pull yh0872/spoony-dev:latest
+        sudo docker run -d -p $NEW_PORT:8080 --name spoony-dev-$NEW_PORT yh0872/spoony-dev
+        
+        echo "컨테이너 실행 완료. Nginx 재시작"
+        
+        # Nginx를 재시작하여 새 컨테이너로 트래픽 전환
+        sudo systemctl restart nginx
+        
+        # 이전 컨테이너 종료 및 삭제
+        if [ "$ACTIVE_PORT" != "" ]; then
+          echo "이전 컨테이너 spoony-dev-$ACTIVE_PORT 종료 및 삭제"
+          sudo docker stop spoony-dev-$ACTIVE_PORT
+          sudo docker rm spoony-dev-$ACTIVE_PORT
+        fi
+        
+        echo "배포 완료. 현재 활성 포트: $NEW_PORT"
+        EOF
