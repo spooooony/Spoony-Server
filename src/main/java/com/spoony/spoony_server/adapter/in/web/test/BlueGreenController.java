@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.test;
+package com.spoony.spoony_server.adapter.in.web.test;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
