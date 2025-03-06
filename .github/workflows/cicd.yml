@@ -102,13 +102,13 @@ jobs:
           echo "🔧 새로운 컨테이너 실행 (포트 \$NEW_PORT)"
           sudo docker run -d -p \$NEW_PORT:8080 --name spoony-dev-\$NEW_PORT yh0872/spoony-dev
 
-          echo "⌛️ 새로운 컨테이너가 정상적으로 실행될 때까지 대기..."
+          echo "⌛️ 컨테이너 실행 대기 (30 sec)"
           sleep 30
 
-          echo "🔁 Nginx가 새로운 컨테이너로 트래픽을 정상적으로 넘기는지 확인..."
+          echo "🔁 Nginx 트래픽 대기 (10 sec)..."
           sleep 10
 
-          echo "🔁 Nginx 설정 적용 (무중단)"
+          echo "🔁 Nginx 설정 적용"
           sudo nginx -t && sudo nginx -s reload
 
           echo "🗑️ 이전 컨테이너 제거"
