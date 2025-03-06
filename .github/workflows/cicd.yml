@@ -104,11 +104,9 @@ jobs:
 
           echo "⌛️ 새로운 컨테이너가 정상적으로 실행될 때까지 대기..."
           sleep 30
-          done
 
           echo "🔁 Nginx가 새로운 컨테이너로 트래픽을 정상적으로 넘기는지 확인..."
           sleep 10
-          done
 
           echo "🔁 Nginx 설정 적용 (무중단)"
           sudo nginx -t && sudo nginx -s reload
