@@ -62,7 +62,9 @@ public class PostService implements
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
 
-        Post post = postPort.findPostById(command.getPostId());
+        //Post post = postPort.findPostById(command.getPostId());
+        Post post = postPort.findPostWithPhotosAndCategoriesByPostId(command.getPostId());
+
         User user = userPort.findUserById(command.getUserId());
 
         PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());

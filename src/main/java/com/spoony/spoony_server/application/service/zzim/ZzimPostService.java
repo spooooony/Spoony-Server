@@ -52,7 +52,6 @@ public class ZzimPostService implements
         zzimPostPort.saveZzimPost(user,post);
     }
 
-    //사용자 지도 리스트 조회
     public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
         List<ZzimPost> zzimPostList = zzimPostPort.findUserByUserId(command.getUserId());
 
@@ -70,12 +69,20 @@ public class ZzimPostService implements
             }
         }
 
+        // 🔥 N+1 문제 해결: 한 번에 모든 postId의 첫 번째 사진을 조회
+        List<Long> postIds = uniquePlacePostMap.values().stream()
+                .map(zzimPost -> zzimPost.getPost().getPostId())
+                .toList();
+
+        Map<Long, Photo> firstPhotos = zzimPostPort.findFirstPhotosByPostIds(postIds);
+        Map<Long, PostCategory> postCategories = postPort.findPostCategoriesByPostIds(postIds);
         List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
                     Place place = post.getPlace();
-                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
-                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+                    Photo photo = firstPhotos.get(post.getPostId()); // 🔥 Batch 조회된 결과 사용
+                    PostCategory postCategory = postCategories.get(post.getPostId());
+                    //PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
                     CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
                             postCategory.getCategory().getCategoryId(),
@@ -84,13 +91,12 @@ public class ZzimPostService implements
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
 
-
                     return new ZzimCardResponseDTO(
-                            place.getPlaceId(),  // placeId 추가
+                            place.getPlaceId(),
                             place.getPlaceName(),
                             place.getPlaceAddress(),
                             post.getTitle(),
-                            photo.getPhotoUrl(),
+                            photo != null ? photo.getPhotoUrl() : null, // 사진이 없을 경우 null 처리
                             place.getLatitude(),
                             place.getLongitude(),
                             categoryColorResponse
@@ -100,6 +106,56 @@ public class ZzimPostService implements
 
         return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
+
+
+//    //사용자 지도 리스트 조회
+//    public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
+//        List<ZzimPost> zzimPostList = zzimPostPort.findUserByUserId(command.getUserId());
+//
+//        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
+//
+//        for (ZzimPost zzimPost : zzimPostList) {
+//            Place place = zzimPost.getPost().getPlace();
+//            if (place == null) {
+//                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
+//            }
+//
+//            Long placeId = place.getPlaceId();
+//            if (!uniquePlacePostMap.containsKey(placeId)) {
+//                uniquePlacePostMap.put(placeId, zzimPost);
+//            }
+//        }
+//
+//        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
+//                .map(zzimPost -> {
+//                    Post post = zzimPost.getPost();
+//                    Place place = post.getPlace();
+//                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
+//                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+//
+//                    CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
+//                            postCategory.getCategory().getCategoryId(),
+//                            postCategory.getCategory().getCategoryName(),
+//                            postCategory.getCategory().getIconUrlColor(),
+//                            postCategory.getCategory().getTextColor(),
+//                            postCategory.getCategory().getBackgroundColor());
+//
+//
+//                    return new ZzimCardResponseDTO(
+//                            place.getPlaceId(),  // placeId 추가
+//                            place.getPlaceName(),
+//                            place.getPlaceAddress(),
+//                            post.getTitle(),
+//                            photo.getPhotoUrl(),
+//                            place.getLatitude(),
+//                            place.getLongitude(),
+//                            categoryColorResponse
+//                    );
+//                })
+//                .collect(Collectors.toList());
+//
+//        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
+//    }
 
     public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) {
         User user = userPort.findUserById(command.getUserId());

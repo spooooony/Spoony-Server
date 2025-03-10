@@ -20,9 +20,9 @@ import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Adapter
@@ -48,6 +48,11 @@ public class PostPersistenceAdapter implements
                 .map(PostMapper::toDomain)
                 .collect(Collectors.toList());
     }
+    public Post findPostWithPhotosAndCategoriesByPostId(Long postId) {
+        return postRepository.findPostWithPhotosAndCategories(postId)
+                .map(PostMapper::toDomain)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+    }
 
     public Post findPostById(Long postId) {
         return postRepository.findById(postId)
@@ -59,6 +64,18 @@ public class PostPersistenceAdapter implements
         return postCategoryRepository.findByPost_PostId(postId)
                 .map(PostCategoryMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
+    }
+    @Override
+    public Map<Long, PostCategory> findPostCategoriesByPostIds(List<Long> postIds) {
+        List<PostCategoryEntity> postCategoryEntities = postCategoryRepository.findPostCategoriesByPostIds(postIds);
+
+        return postCategoryEntities.stream()
+                .map(PostCategoryMapper::toDomain) // PostCategoryEntity -> PostCategory 변환
+                .collect(Collectors.toMap(
+                        postCategory -> postCategory.getPost().getPostId(),
+                        postCategory -> postCategory,
+                        (existing, replacement) -> existing // 중복 방지
+                ));
     }
 
     public Category findCategoryById(Long categoryId) {

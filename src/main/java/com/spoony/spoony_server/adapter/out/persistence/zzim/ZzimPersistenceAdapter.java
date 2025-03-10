@@ -21,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,7 +41,20 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     public boolean existsByUserIdAndPostId(Long userId, Long postId) {
         return zzimPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }
+    @Override
+    public Map<Long, Photo> findFirstPhotosByPostIds(List<Long> postIds) {
+        List<Photo> photos = photoRepository.findFirstPhotosByPostIds(postIds)
+                .stream()
+                .map(PhotoMapper::toDomain)
+                .toList();
 
+        return photos.stream()
+                .collect(Collectors.toMap(
+                        photo -> photo.getPost().getPostId(),
+                        photo -> photo,
+                        (existing, replacement) -> existing // 중복 방지
+                ));
+    }
     @Override
     public List<ZzimPost> findUserByUserId(Long userId) {
         return zzimPostRepository.findByUser_UserId(userId)
@@ -63,12 +78,14 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         zzimPostRepository.save(zzimPostEntity);
     }
 
+    // postId별로 개별적인 조회가 발생하여 N+1 문제 발생!
     @Override
     public Photo findFistPhotoById(Long postId) {
         return photoRepository.findByPost_PostId(postId)
                 .map(list -> PhotoMapper.toDomain(list.get(0))) // 첫 번째 요소만 매핑
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND));
     }
+
 
     @Override
     public List<Photo> findPhotoListById(Long postId) {
