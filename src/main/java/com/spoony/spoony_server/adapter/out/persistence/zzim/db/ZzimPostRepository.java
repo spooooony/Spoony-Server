@@ -13,6 +13,8 @@ import java.util.List;
 public interface ZzimPostRepository extends JpaRepository<ZzimPostEntity, Long> {
     Long countByPost_PostId(Long postId);
     boolean existsByUser_UserIdAndPost_PostId(Long userId, Long postId);
+
+
     List<ZzimPostEntity> findByUser_UserId(Long userId);
     void deleteByUser_UserIdAndPost_PostId(Long userId, Long postId);
 }

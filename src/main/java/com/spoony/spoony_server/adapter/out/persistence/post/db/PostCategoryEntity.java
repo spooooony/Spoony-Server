@@ -5,11 +5,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "post_category")
+@BatchSize(size = 10)
 public class PostCategoryEntity {
 
     @Id
@@ -31,4 +33,5 @@ public class PostCategoryEntity {
         this.post = post;
         this.category = category;
     }
+
 }
