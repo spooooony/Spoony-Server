@@ -17,8 +17,8 @@ public class User {
 
     private String platformId;
     private String userName;
-    private String userImage;
     private Region region;
+    private String introduction;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

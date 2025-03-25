@@ -16,8 +16,8 @@ public class PostMapper {
                         postEntity.getUser().getPlatform(),
                         postEntity.getUser().getPlatformId(),
                         postEntity.getUser().getUserName(),
-                        postEntity.getUser().getUserImage(),
                         RegionMapper.toDomain(postEntity.getUser().getRegion()),
+                        postEntity.getUser().getIntroduction(),
                         postEntity.getUser().getCreatedAt(),
                         postEntity.getUser().getUpdatedAt()
                 ),

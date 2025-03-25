@@ -27,11 +27,12 @@ public class UserEntity {
     private String platformId;
 
     private String userName;
-    private String userImage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private RegionEntity region;
+
+    private String introduction;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -43,13 +44,13 @@ public class UserEntity {
                       Platform platform,
                       String platformId,
                       String userName,
-                      String userImage,
-                      RegionEntity region) {
+                      RegionEntity region,
+                      String introduction) {
         this.userId = userId;
         this.platform = platform;
         this.platformId = platformId;
         this.userName = userName;
-        this.userImage = userImage;
         this.region = region;
+        this.introduction = introduction;
     }
 }

@@ -57,6 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         return requestURI.startsWith("/api/v1/auth/signin")
                 || requestURI.startsWith("/api/v1/auth/refresh")
+                || requestURI.startsWith("/api/v1/user/exists")
                 || requestURI.startsWith("/swagger-ui")
                 || requestURI.startsWith("/v3/api-docs");
     }
