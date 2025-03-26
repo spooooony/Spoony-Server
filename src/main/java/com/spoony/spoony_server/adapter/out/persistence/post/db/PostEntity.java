@@ -31,10 +31,11 @@ public class PostEntity {
     @JoinColumn(name = "place_id")
     private PlaceEntity place;
 
-    private String title;
-
     @Column(columnDefinition = "TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String description;
+
+    private Double value;
+    private String cons;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -42,11 +43,12 @@ public class PostEntity {
     private LocalDateTime updatedAt;
 
     @Builder
-    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String title, String description) {
+    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String description, Double value, String cons) {
         this.postId = postId;
         this.user = user;
         this.place = place;
-        this.title = title;
         this.description = description;
+        this.value = value;
+        this.cons = cons;
     }
 }

@@ -90,7 +90,6 @@ public class PostService implements
         return new PostResponseDTO(command.getPostId(),
                 post.getUser().getUserId(),
                 photoUrlList,
-                post.getTitle(),
                 latestDate,
                 menuNameList,
                 post.getDescription(),
@@ -136,8 +135,9 @@ public class PostService implements
         Post post = new Post(
                 user,
                 place,
-                command.getTitle(),
                 command.getDescription(),
+                command.getValue(),
+                command.getCons(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );

@@ -9,8 +9,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostCreateCommand {
     private final Long userId;
-    private final String title;
     private final String description;
+    private final Double value;
+    private final String cons;
     private final String placeName;
     private final String placeAddress;
     private final String placeRoadAddress;

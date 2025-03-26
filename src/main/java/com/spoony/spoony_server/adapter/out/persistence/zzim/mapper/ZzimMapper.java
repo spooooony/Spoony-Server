@@ -25,10 +25,11 @@ public class ZzimMapper {
              ),
                 new Post(
                         zzimPostEntity.getPost().getPostId(),
-                        UserMapper.toDomain(zzimPostEntity.getPost().getUser()), // `getUser()`로 수정
-                        PlaceMapper.toDomain(zzimPostEntity.getPost().getPlace()), // `Place` 객체 매핑
-                        zzimPostEntity.getPost().getTitle(),
+                        UserMapper.toDomain(zzimPostEntity.getPost().getUser()),
+                        PlaceMapper.toDomain(zzimPostEntity.getPost().getPlace()),
                         zzimPostEntity.getPost().getDescription(),
+                        zzimPostEntity.getPost().getValue(),
+                        zzimPostEntity.getPost().getCons(),
                         zzimPostEntity.getPost().getCreatedAt(),
                         zzimPostEntity.getPost().getUpdatedAt()
                 )

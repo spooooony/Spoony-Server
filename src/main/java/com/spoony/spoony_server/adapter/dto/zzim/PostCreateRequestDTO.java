@@ -4,6 +4,8 @@ import java.util.List;
 
 public record PostCreateRequestDTO(String title,
                                    String description,
+                                   Double value,
+                                   String cons,
                                    String placeName,
                                    String placeAddress,
                                    String placeRoadAddress,
