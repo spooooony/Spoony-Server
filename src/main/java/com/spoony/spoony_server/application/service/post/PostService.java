@@ -162,10 +162,10 @@ public class PostService implements
 
         // 작성자 스푼 개수 조정
         Activity activity = spoonPort.findActivityByActivityId(2L);
-        spoonPort.updateSpoonBalance(user, activity);
+        spoonPort.updateSpoonBalanceByActivity(user, activity);
 
         // 스푼 히스토리 기록
-        spoonPort.updateSpoonHistory(user, activity);
+        spoonPort.updateSpoonHistoryByActivity(user, activity);
 
         // 작성자 지도 리스트에 게시물 추가
         zzimPort.saveZzimPost(user, post);
@@ -224,10 +224,10 @@ public class PostService implements
 
         // 작성자 스푼 개수 조정
         Activity activity = spoonPort.findActivityByActivityId(3L);
-        spoonPort.updateSpoonBalance(user, activity);
+        spoonPort.updateSpoonBalanceByActivity(user, activity);
 
         // 스푼 히스토리 기록
-        spoonPort.updateSpoonHistory(user, activity);
+        spoonPort.updateSpoonHistoryByActivity(user, activity);
 
         // 사용자의 피드에서 게시물 삭제
         feedPort.deleteFeedByUserIdAndPostId(command.getUserId(), command.getPostId());
