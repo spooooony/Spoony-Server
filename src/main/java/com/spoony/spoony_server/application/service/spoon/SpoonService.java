@@ -8,6 +8,7 @@ import com.spoony.spoony_server.application.port.in.spoon.SpoonDrawUseCase;
 import com.spoony.spoony_server.application.port.in.spoon.SpoonGetUseCase;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonDrawPort;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonBalancePort;
+import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonTypePort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
@@ -15,6 +16,7 @@ import com.spoony.spoony_server.adapter.dto.spoon.SpoonResponseDTO;
 
 import com.spoony.spoony_server.domain.spoon.SpoonDraw;
 import com.spoony.spoony_server.domain.spoon.SpoonType;
+import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import jakarta.transaction.Transactional;
@@ -24,7 +26,9 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,8 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
     private final SpoonBalancePort spoonBalancePort;
     private final SpoonDrawPort spoonDrawPort;
     private final SpoonTypePort spoonTypePort;
+    private final UserPort userPort;
+    private final SpoonPort spoonPort;
 
     @Transactional
     public SpoonResponseDTO getAmountById(SpoonGetCommand command){
@@ -44,10 +50,9 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
     public SpoonDrawResponseDTO createDrawById(SpoonDrawCommand command){
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
-        Long userId = command.getUserId();
 
         // 중복 뽑기 확인
-        boolean alreadyDrawn = spoonDrawPort.existsByUserIdAndDrawDate(userId, today);
+        boolean alreadyDrawn = spoonDrawPort.existsByUserIdAndDrawDate(command.getUserId(), today);
         if (alreadyDrawn) {
             throw new BusinessException(SpoonErrorMessage.ALREADY_DRAWN);
         }
@@ -76,18 +81,46 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
         }
 
         // 스푼 뽑기 결과 저장
-        Long drawId = spoonDrawPort.save(userId, selectedType, today, weekStart);
+        Long drawId = spoonDrawPort.save(command.getUserId(), selectedType, today, weekStart);
         SpoonDraw spoonDraw = spoonDrawPort.findById(drawId);
 
-        return new SpoonDrawResponseDTO(spoonDraw);
+        // 사용자 스푼 정보 변경
+        User user = userPort.findUserById(command.getUserId());
+        int amount = selectedType.getSpoonAmount();
+        spoonPort.updateSpoonBalance(user, amount);
+        spoonPort.updateSpoonHistory(user, amount);
+
+        return new SpoonDrawResponseDTO(
+                spoonDraw.getDrawId(),
+                spoonDraw.getSpoonType(),
+                spoonDraw.getDrawDate(),
+                spoonDraw.getWeekStartDate(),
+                spoonDraw.getCreatedAt());
     }
 
     @Transactional
     public SpoonDrawListResponseDTO getDrawById(SpoonDrawCommand command) {
-        Long userId = command.getUserId();
         LocalDate weekStart = LocalDate.now().with(DayOfWeek.MONDAY);
-        List<SpoonDraw> spoonDrawList = spoonDrawPort.findAllByUserIdAndWeekStartDate(userId, weekStart);
+        List<SpoonDraw> spoonDrawList = spoonDrawPort.findAllByUserIdAndWeekStartDate(command.getUserId(), weekStart);
 
-        return new SpoonDrawListResponseDTO(spoonDrawList);
+        AtomicLong weeklyBalance = new AtomicLong(0L);
+
+        List<SpoonDrawResponseDTO> spoonDrawResponseDTOList = spoonDrawList.stream()
+                .map(spoonDraw -> {
+                    weeklyBalance.addAndGet(spoonDraw.getSpoonType().getSpoonAmount());
+                    return new SpoonDrawResponseDTO(
+                            spoonDraw.getDrawId(),
+                            spoonDraw.getSpoonType(),
+                            spoonDraw.getDrawDate(),
+                            spoonDraw.getWeekStartDate(),
+                            spoonDraw.getCreatedAt()
+                    );
+                })
+                .toList();
+
+        SpoonBalance spoonBalance = spoonBalancePort.findBalanceByUserId(command.getUserId());
+        Long weeklyBalanceValue = weeklyBalance.get();
+
+        return new SpoonDrawListResponseDTO(spoonDrawResponseDTOList, spoonBalance.getAmount(), weeklyBalanceValue);
     }
 }

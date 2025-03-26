@@ -1,6 +1,13 @@
 package com.spoony.spoony_server.adapter.dto.spoon;
 
-import com.spoony.spoony_server.domain.spoon.SpoonDraw;
+import com.spoony.spoony_server.domain.spoon.SpoonType;
 
-public record SpoonDrawResponseDTO(SpoonDraw spoonDraw) {
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+public record SpoonDrawResponseDTO(Long drawId,
+                                   SpoonType spoonType,
+                                   LocalDate localDate,
+                                   LocalDate weekStartDate,
+                                   LocalDateTime createdAt) {
 }

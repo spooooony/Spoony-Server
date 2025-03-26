@@ -49,7 +49,34 @@ public class SpoonPersistenceAdapter implements
     }
 
     @Override
-    public void updateSpoonBalance(User user, Activity activity) {
+    public void updateSpoonBalance(User user, int amount) {
+        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser_UserId(user.getUserId())
+                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
+        spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + amount);
+        spoonBalanceEntity.setUpdatedAt(LocalDateTime.now());
+        spoonBalanceRepository.save(spoonBalanceEntity);
+    }
+
+    @Override
+    public void updateSpoonHistory(User user, int amount) {
+        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser_UserId(user.getUserId())
+                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
+        UserEntity userEntity = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        ActivityEntity activityEntity = activityRepository.findById(1L)
+                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.ACTIVITY_NOT_FOUND));
+
+        SpoonHistoryEntity spoonHistoryEntity = SpoonHistoryEntity.builder()
+                .user(userEntity)
+                .activity(activityEntity)
+                .balanceAfter(spoonBalanceEntity.getAmount())
+                .build();
+
+        spoonHistoryRepository.save(spoonHistoryEntity);
+    }
+
+    @Override
+    public void updateSpoonBalanceByActivity(User user, Activity activity) {
         SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser_UserId(user.getUserId())
                 .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
         spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + activity.getChangeAmount());
@@ -58,7 +85,7 @@ public class SpoonPersistenceAdapter implements
     }
 
     @Override
-    public void updateSpoonHistory(User user, Activity activity) {
+    public void updateSpoonHistoryByActivity(User user, Activity activity) {
         SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser_UserId(user.getUserId())
                 .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
         UserEntity userEntity = userRepository.findById(user.getUserId())
