@@ -7,7 +7,6 @@ public record FeedResponseDTO(
         String userName,
         String userRegion,
         long postId,
-        String title,
         CategoryColorResponseDTO categoryColorResponse,
         Long zzimCount,
         LocalDateTime createdAt

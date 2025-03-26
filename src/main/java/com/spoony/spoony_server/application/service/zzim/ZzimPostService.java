@@ -89,7 +89,6 @@ public class ZzimPostService implements
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
-                            post.getTitle(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),
                             place.getLongitude(),
@@ -138,7 +137,6 @@ public class ZzimPostService implements
                             post.getUser().getUserName(),
                             post.getUser().getRegion().getRegionName(),
                             post.getPostId(),
-                            post.getTitle(),
                             zzimCount,
                             photoUrlList
                     );
@@ -210,7 +208,6 @@ public class ZzimPostService implements
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
-                            post.getTitle(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),
                             place.getLongitude(),
@@ -266,7 +263,6 @@ public class ZzimPostService implements
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
-                            post.getTitle(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),
                             place.getLongitude(),
@@ -324,7 +320,6 @@ public class ZzimPostService implements
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
-                            post.getTitle(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),
                             place.getLongitude(),

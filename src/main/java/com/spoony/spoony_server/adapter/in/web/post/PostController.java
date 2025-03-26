@@ -62,8 +62,9 @@ public class PostController {
 
         PostCreateCommand command = new PostCreateCommand(
                 userId,
-                postCreateRequestDTO.title(),
                 postCreateRequestDTO.description(),
+                postCreateRequestDTO.value(),
+                postCreateRequestDTO.cons(),
                 postCreateRequestDTO.placeName(),
                 postCreateRequestDTO.placeAddress(),
                 postCreateRequestDTO.placeRoadAddress(),

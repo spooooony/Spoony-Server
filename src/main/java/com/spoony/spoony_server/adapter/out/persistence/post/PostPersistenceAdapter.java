@@ -97,8 +97,9 @@ public class PostPersistenceAdapter implements
         PostEntity postEntity = PostEntity.builder()
                 .user(userEntity)
                 .place(placeEntity)
-                .title(post.getTitle())
                 .description(post.getDescription())
+                .value(post.getValue())
+                .cons(post.getCons())
                 .build();
 
         postRepository.save(postEntity);

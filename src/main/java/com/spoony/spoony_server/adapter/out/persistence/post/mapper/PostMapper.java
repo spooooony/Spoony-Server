@@ -29,8 +29,9 @@ public class PostMapper {
                         postEntity.getPlace().getLatitude(),
                         postEntity.getPlace().getLongitude()
                 ),
-                postEntity.getTitle(),
                 postEntity.getDescription(),
+                postEntity.getValue(),
+                postEntity.getCons(),
                 postEntity.getCreatedAt(),
                 postEntity.getUpdatedAt()
         );

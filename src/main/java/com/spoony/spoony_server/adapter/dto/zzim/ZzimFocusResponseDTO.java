@@ -10,7 +10,6 @@ public record ZzimFocusResponseDTO(long placeId,
                                    String authorName,
                                    String authorRegionName,
                                    long postId,
-                                   String postTitle,
                                    Long zzimCount,
                                    List<String> photoUrlList
 ) {

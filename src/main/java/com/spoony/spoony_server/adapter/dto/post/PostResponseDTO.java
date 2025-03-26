@@ -6,7 +6,6 @@ import java.util.List;
 public record PostResponseDTO(long postId,
                               long userId,
                               List<String> photoUrlList,
-                              String title,
                               LocalDateTime date,
                               List<String> menuList,
                               String description,

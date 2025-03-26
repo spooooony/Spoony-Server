@@ -57,7 +57,6 @@ public class FeedService implements FeedGetUseCase {
                             author.getUserName(),
                             author.getRegion().getRegionName(),
                             post.getPostId(),
-                            post.getTitle(),
                             new CategoryColorResponseDTO(
                                     category.getCategoryId(),
                                     category.getCategoryName(),
