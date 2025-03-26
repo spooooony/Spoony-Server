@@ -3,6 +3,7 @@ package com.spoony.spoony_server.adapter.out.persistence.user;
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserLoginDTO;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
@@ -10,6 +11,7 @@ import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,6 +25,9 @@ public class UserPersistenceAdapter implements UserPort {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final RegionRepository regionRepository;
+    private final SpoonBalanceRepository spoonBalanceRepository;
+    private final ActivityRepository activityRepository;
+    private final SpoonHistoryRepository spoonHistoryRepository;
 
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
@@ -56,6 +61,22 @@ public class UserPersistenceAdapter implements UserPort {
                     .introduction(userLoginDTO.introduction())
                     .build();
             userRepository.save(userEntity);
+
+            SpoonBalanceEntity spoonBalanceEntity = SpoonBalanceEntity.builder()
+                    .user(userEntity)
+                    .amount(5L)
+                    .build();
+            spoonBalanceRepository.save(spoonBalanceEntity);
+
+            ActivityEntity activity = activityRepository.findById(1L)
+                    .orElseThrow(() -> new BusinessException(SpoonErrorMessage.ACTIVITY_NOT_FOUND));
+
+            SpoonHistoryEntity spoonHistoryEntity = SpoonHistoryEntity.builder()
+                    .user(userEntity)
+                    .activity(activity)
+                    .balanceAfter(5L)
+                    .build();
+            spoonHistoryRepository.save(spoonHistoryEntity);
         }
 
         return userRepository.findByPlatformAndPlatformId(userLoginDTO.platform(), platformUserDTO.platformId())

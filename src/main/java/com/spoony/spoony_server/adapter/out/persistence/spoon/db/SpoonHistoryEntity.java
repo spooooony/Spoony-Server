@@ -36,8 +36,7 @@ public class SpoonHistoryEntity {
     private LocalDateTime createdAt;
 
     @Builder
-    public SpoonHistoryEntity(Long historyId, UserEntity user, ActivityEntity activity, Long balanceAfter) {
-        this.historyId = historyId;
+    public SpoonHistoryEntity(UserEntity user, ActivityEntity activity, Long balanceAfter) {
         this.user = user;
         this.activity = activity;
         this.balanceAfter = balanceAfter;

@@ -31,8 +31,7 @@ public class SpoonBalanceEntity {
     private LocalDateTime updatedAt;
 
     @Builder
-    public SpoonBalanceEntity(Long spoonBalanceId, UserEntity user, Long amount) {
-        this.spoonBalanceId = spoonBalanceId;
+    public SpoonBalanceEntity(UserEntity user, Long amount) {
         this.user = user;
         this.amount = amount;
     }

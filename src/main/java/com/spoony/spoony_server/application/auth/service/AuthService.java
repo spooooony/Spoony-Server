@@ -37,10 +37,10 @@ public class AuthService implements
     @Override
     public UserTokenDTO signIn(String platformToken, UserLoginDTO userLoginDTO) {
 
-         PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userLoginDTO);
+//         PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userLoginDTO);
 
 //         소셜 로그인 테스트 전, 회원가입 테스트 코드
-//         PlatformUserDTO platformUserDTO = new PlatformUserDTO("test_id", "test_email");
+         PlatformUserDTO platformUserDTO = new PlatformUserDTO("test_id", "test_email");
 
         User user = userPort.loadOrCreate(platformUserDTO, userLoginDTO);
         JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
