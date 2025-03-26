@@ -33,16 +33,16 @@ public class AuthService implements
     private final JwtTokenValidator jwtTokenValidator;
     private final AppleService appleService;
     private final KakaoService kakaoService;
-    private final UserRepository userRepository;
 
     @Override
     public UserTokenDTO signIn(String platformToken, UserLoginDTO userLoginDTO) {
-//        PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userLoginDTO);
-//        User user = userPort.loadOrCreate(platformUserDTO, userLoginDTO);
 
-        UserEntity userEntity = userRepository.findById(1L).orElse(null);
-        User user = UserMapper.toDomain(userEntity);
+         PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userLoginDTO);
 
+//         소셜 로그인 테스트 전, 회원가입 테스트 코드
+//         PlatformUserDTO platformUserDTO = new PlatformUserDTO("test_id", "test_email");
+
+        User user = userPort.loadOrCreate(platformUserDTO, userLoginDTO);
         JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
         tokenPort.saveToken(user.getUserId(), token);
         return UserTokenDTO.of(user, token);

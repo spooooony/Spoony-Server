@@ -30,6 +30,10 @@ public class UserPersistenceAdapter implements UserPort {
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
     }
 
+    public boolean existsByUserName(String userName) {
+        return userRepository.existsByUserName(userName);
+    }
+
     public List<Follow> findFollowersByUserId(Long userId) {
         List<FollowEntity> followerList = followRepository.findByFollowing_UserId(userId);
         return followerList.stream()
@@ -48,8 +52,8 @@ public class UserPersistenceAdapter implements UserPort {
                     .platform(userLoginDTO.platform())
                     .platformId(platformUserDTO.platformId())
                     .userName(userLoginDTO.userName())
-                    .userImage(userLoginDTO.userImage())
                     .region(regionEntity)
+                    .introduction(userLoginDTO.introduction())
                     .build();
             userRepository.save(userEntity);
         }

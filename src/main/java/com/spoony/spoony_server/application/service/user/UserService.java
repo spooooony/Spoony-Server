@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.application.service.user;
 
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
+import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.User;
@@ -22,10 +23,14 @@ public class UserService implements UserGetUseCase {
                 user.getPlatform(),
                 user.getPlatformId(),
                 user.getUserName(),
-                user.getUserImage(),
                 user.getRegion().getRegionName(),
+                user.getIntroduction(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
+    }
+
+    public Boolean isUsernameDuplicate(UserNameCheckCommand command) {
+        return userPort.existsByUserName(command.getUsername());
     }
 }
