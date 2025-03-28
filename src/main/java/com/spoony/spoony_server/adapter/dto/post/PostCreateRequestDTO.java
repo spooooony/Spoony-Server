@@ -1,4 +1,4 @@
-package com.spoony.spoony_server.adapter.dto.zzim;
+package com.spoony.spoony_server.adapter.dto.post;
 
 import java.util.List;
 

@@ -1,19 +1,14 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
-import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
-import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
-import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
-import com.spoony.spoony_server.application.port.command.post.PostScoopPostCommand;
-import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
-import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
-import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
-import com.spoony.spoony_server.application.port.in.post.PostScoopPostUseCase;
+import com.spoony.spoony_server.adapter.dto.post.PostUpdateRequestDTO;
+import com.spoony.spoony_server.application.port.command.post.*;
+import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
 import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
-import com.spoony.spoony_server.adapter.dto.zzim.PostCreateRequestDTO;
+import com.spoony.spoony_server.adapter.dto.post.PostCreateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +30,8 @@ public class PostController {
     private final PostCreateUseCase postCreateUseCase;
     private final PostGetCategoriesUseCase postGetCategoriesUseCase;
     private final PostScoopPostUseCase postScoopPostUseCase;
+    private final PostDeleteUseCase postDeleteUseCase;
+    private final PostUpdateUseCase postUpdateUseCase;
 
     @GetMapping("/{postId}")
     @Operation(summary = "게시물 조회 API", description = "특정 게시물의 상세 정보를 조회하는 API")
@@ -102,5 +99,44 @@ public class PostController {
         PostScoopPostCommand command = new PostScoopPostCommand(userId, scoopPostRequestDTO.postId());
         postScoopPostUseCase.scoopPost(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
+    }
+
+    @DeleteMapping("/{postId}")
+    @Operation(summary = "게시물 삭제 API", description = "게시물을 삭제하는 API")
+    public ResponseEntity<ResponseDTO<Void>> deletePost(
+            @UserId Long userId,
+            @PathVariable long postId) {
+        PostDeleteCommand command = new PostDeleteCommand(postId);
+        postDeleteUseCase.deletePost(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
+    }
+
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "게시물 수정 API", description = "게시물을 수정하는 API")
+    public ResponseEntity<ResponseDTO<Void>> updatePost(
+            @UserId Long userId,
+            @RequestPart("data")
+            @Parameter(description = "게시물 수정 요청 데이터 (JSON 형식)")
+            PostUpdateRequestDTO postUpdateRequestDTO,
+            @RequestPart("photos")
+            @Parameter(description = "게시물 수정 사진 리스트 (이미지 파일)")
+            List<MultipartFile> photos
+    ) throws IOException {
+        PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
+        List<String> photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
+
+        PostUpdateCommand command = new PostUpdateCommand(
+                postUpdateRequestDTO.postId(),
+                postUpdateRequestDTO.description(),
+                postUpdateRequestDTO.value(),
+                postUpdateRequestDTO.cons(),
+                postUpdateRequestDTO.categoryId(),
+                postUpdateRequestDTO.menuList(),
+                photoUrlList
+        );
+
+        postUpdateUseCase.updatePost(command);
+
+        return ResponseEntity.ok(ResponseDTO.success(null));
     }
 }

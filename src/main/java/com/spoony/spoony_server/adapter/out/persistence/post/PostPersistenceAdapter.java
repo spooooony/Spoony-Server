@@ -21,6 +21,7 @@ import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class PostPersistenceAdapter implements
     private final UserRepository userRepository;
     private final PlaceRepository placeRepository;
 
-    @Override
+    @Transactional
     public List<Post> findUserByUserId(Long userId) {
         return postRepository.findByUser_UserId(userId)
                 .stream()
@@ -49,28 +50,33 @@ public class PostPersistenceAdapter implements
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Post findPostById(Long postId) {
         return postRepository.findById(postId)
                 .map(PostMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
     }
 
+    @Transactional
     public PostCategory findPostCategoryByPostId(Long postId) {
         return postCategoryRepository.findByPost_PostId(postId)
                 .map(PostCategoryMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
     }
 
+    @Transactional
     public Category findCategoryById(Long categoryId) {
         return categoryRepository.findById(categoryId)
                 .map(CategoryMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
     }
 
+    @Transactional
     public boolean existsByUserIdAndPostId(Long userId, Long postId) {
         return scoopPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }
 
+    @Transactional
     public List<Photo> findPhotoById(Long postId) {
         return photoRepository.findByPost_PostId(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.PHOTO_NOT_FOUND))
@@ -79,6 +85,7 @@ public class PostPersistenceAdapter implements
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<Menu> findMenuById(Long postId) {
         return menuRepository.findByPost_PostId(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.MENU_NOT_FOUND))
@@ -87,6 +94,7 @@ public class PostPersistenceAdapter implements
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Long savePost(Post post) {
         UserEntity userEntity = userRepository.findById(post.getUser().getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
@@ -107,6 +115,7 @@ public class PostPersistenceAdapter implements
         return postEntity.getPostId();
     }
 
+    @Transactional
     public void savePostCategory(PostCategory postCategory) {
         PostEntity postEntity = postRepository.findById(postCategory.getPost().getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
@@ -122,6 +131,7 @@ public class PostPersistenceAdapter implements
         postCategoryRepository.save(postCategoryEntity);
     }
 
+    @Transactional
     public void saveMenu(Menu menu) {
         PostEntity postEntity = postRepository.findById(menu.getPost().getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
@@ -134,6 +144,7 @@ public class PostPersistenceAdapter implements
         menuRepository.save(menuEntity);
     }
 
+    @Transactional
     public void savePhoto(Photo photo) {
         PostEntity postEntity = postRepository.findById(photo.getPost().getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
@@ -146,19 +157,21 @@ public class PostPersistenceAdapter implements
         photoRepository.save(photoEntity);
     }
 
+    @Transactional
     public List<Category> findAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(CategoryMapper::toDomain)
                 .toList();
     }
 
+    @Transactional
     public List<Category> findFoodCategories() {
         return categoryRepository.findByCategoryType(CategoryType.FOOD).stream()
                 .map(CategoryMapper::toDomain)
                 .toList();
     }
 
-
+    @Transactional
     public void saveScoopPost(User user, Post post) {
         UserEntity userEntity = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
@@ -172,5 +185,36 @@ public class PostPersistenceAdapter implements
                 .build();
 
         scoopPostRepository.save(scoopPostEntity);
+    }
+
+    @Transactional
+    public void deleteById(Long postId) {
+        postRepository.deleteById(postId);
+    }
+
+    @Transactional
+    public void updatePost(Long postId, String description, Double value, String cons) {
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+
+        postEntity.updatePostContent(description, value, cons);
+    }
+
+    @Transactional
+    public void deleteAllPostCategoryByPostId(Long postId) {
+        List<PostCategoryEntity> postCategories = postCategoryRepository.findAllByPost_PostId(postId);
+        postCategoryRepository.deleteAll(postCategories);
+    }
+
+    @Transactional
+    public void deleteAllMenusByPostId(Long postId) {
+        List<MenuEntity> menus = menuRepository.findAllByPost_PostId(postId);
+        menuRepository.deleteAll(menus);
+    }
+
+    @Transactional
+    public void deleteAllPhotosByPostId(Long postId) {
+        List<PhotoEntity> photos = photoRepository.findAllByPost_PostId(postId);
+        photoRepository.deleteAll(photos);
     }
 }

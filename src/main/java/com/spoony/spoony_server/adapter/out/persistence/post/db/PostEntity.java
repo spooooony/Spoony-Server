@@ -1,7 +1,10 @@
 package com.spoony.spoony_server.adapter.out.persistence.post.db;
 
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
+import com.spoony.spoony_server.adapter.out.persistence.report.db.ReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,6 +15,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,11 +47,36 @@ public class PostEntity {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    // Cascade 설정
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MenuEntity> menus = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PhotoEntity> photos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostCategoryEntity> postCategories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportEntity> reports = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FeedEntity> feeds = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ZzimPostEntity> zzims = new ArrayList<>();
+
     @Builder
     public PostEntity(Long postId, UserEntity user, PlaceEntity place, String description, Double value, String cons) {
         this.postId = postId;
         this.user = user;
         this.place = place;
+        this.description = description;
+        this.value = value;
+        this.cons = cons;
+    }
+
+    public void updatePostContent(String description, Double value, String cons) {
         this.description = description;
         this.value = value;
         this.cons = cons;

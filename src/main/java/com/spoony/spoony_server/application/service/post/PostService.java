@@ -1,14 +1,8 @@
 package com.spoony.spoony_server.application.service.post;
 
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
-import com.spoony.spoony_server.application.port.command.post.PostCreateCommand;
-import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
-import com.spoony.spoony_server.application.port.command.post.PostPhotoSaveCommand;
-import com.spoony.spoony_server.application.port.command.post.PostScoopPostCommand;
-import com.spoony.spoony_server.application.port.in.post.PostCreateUseCase;
-import com.spoony.spoony_server.application.port.in.post.PostGetCategoriesUseCase;
-import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
-import com.spoony.spoony_server.application.port.in.post.PostScoopPostUseCase;
+import com.spoony.spoony_server.application.port.command.post.*;
+import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.application.port.out.post.CategoryPort;
@@ -45,7 +39,9 @@ public class PostService implements
         PostGetUseCase,
         PostCreateUseCase,
         PostGetCategoriesUseCase,
-        PostScoopPostUseCase {
+        PostScoopPostUseCase,
+        PostDeleteUseCase,
+        PostUpdateUseCase {
 
     private final PostPort postPort;
     private final PostCreatePort postCreatePort;
@@ -231,5 +227,34 @@ public class PostService implements
 
         // 사용자의 피드에서 게시물 삭제
         feedPort.deleteFeedByUserIdAndPostId(command.getUserId(), command.getPostId());
+    }
+
+    @Transactional
+    public void deletePost(PostDeleteCommand command) {
+        postPort.deleteById(command.getPostId());
+    }
+
+    @Transactional
+    public void updatePost(PostUpdateCommand command) {
+        postPort.updatePost(command.getPostId(), command.getDescription(), command.getValue(), command.getCons());
+        Post post = postPort.findPostById(command.getPostId());
+
+        postPort.deleteAllPostCategoryByPostId(command.getPostId());
+        postPort.deleteAllMenusByPostId(command.getPostId());
+        postPort.deleteAllPhotosByPostId(command.getPostId());
+
+        Category category = categoryPort.findCategoryById(command.getCategoryId());
+        PostCategory postCategory = new PostCategory(post, category);
+        postPort.savePostCategory(postCategory);
+
+        command.getMenuList().forEach(menuName -> {
+            Menu menu = new Menu(post, menuName);
+            postPort.saveMenu(menu);
+        });
+
+        command.getPhotoUrlList().forEach(photoUrl -> {
+            Photo photo = new Photo(post, photoUrl);
+            postPort.savePhoto(photo);
+        });
     }
 }

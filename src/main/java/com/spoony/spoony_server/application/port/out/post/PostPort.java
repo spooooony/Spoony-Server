@@ -19,4 +19,9 @@ public interface PostPort {
     void saveMenu(Menu menu);
     void savePhoto(Photo photo);
     void saveScoopPost(User user, Post post);
+    void deleteById(Long postId);
+    void updatePost(Long postId, String description, Double value, String cons);
+    void deleteAllPostCategoryByPostId(Long postId);
+    void deleteAllMenusByPostId(Long postId);
+    void deleteAllPhotosByPostId(Long postId);
 }
