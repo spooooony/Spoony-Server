@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.spoony.spoony_server.application.port.out.post.PostCreatePort;
+import com.spoony.spoony_server.application.port.out.post.PostDeletePort;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.S3ErrorMessage;
@@ -26,7 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class S3Adapter implements PostCreatePort {
+public class S3Adapter implements PostCreatePort, PostDeletePort {
 
     private final AmazonS3Client amazonS3Client;
 
@@ -98,5 +99,21 @@ public class S3Adapter implements PostCreatePort {
 
     public void createDir(String bucketName, String folderName) {
         amazonS3Client.putObject(bucketName, folderName + "/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
+    }
+
+    public void deleteImagesFromS3(List<String> imageUrls) {
+        for (String imageUrl : imageUrls) {
+            String key = extractKeyFromUrl(imageUrl);
+            log.info("Deleting image from S3 with key: {}", key);
+            amazonS3Client.deleteObject(bucket, key);
+        }
+    }
+
+    private String extractKeyFromUrl(String imageUrl) {
+        int index = imageUrl.indexOf(".com/");
+        if (index == -1) {
+            throw new IllegalArgumentException("Invalid S3 URL format: " + imageUrl);
+        }
+        return imageUrl.substring(index + 5);
     }
 }
