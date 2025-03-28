@@ -122,6 +122,10 @@ public class PostController {
             @Parameter(description = "게시물 수정 사진 리스트 (이미지 파일)")
             List<MultipartFile> photos
     ) throws IOException {
+        // 사진 삭제 후 재업로드
+        PostDeleteCommand deleteCommand = new PostDeleteCommand(postUpdateRequestDTO.postId());
+        postDeleteUseCase.deletePhotos(deleteCommand);
+
         PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
         List<String> photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
 

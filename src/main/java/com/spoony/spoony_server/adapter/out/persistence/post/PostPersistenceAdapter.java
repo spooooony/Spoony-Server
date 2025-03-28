@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.post;
 
+import com.spoony.spoony_server.application.port.out.post.PhotoPort;
 import com.spoony.spoony_server.domain.post.CategoryType;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceRepository;
@@ -31,7 +32,8 @@ import java.util.stream.Collectors;
 public class PostPersistenceAdapter implements
         PostPort,
         PostCategoryPort,
-        CategoryPort {
+        CategoryPort,
+        PhotoPort {
 
     private final PostRepository postRepository;
     private final PostCategoryRepository postCategoryRepository;
@@ -216,5 +218,12 @@ public class PostPersistenceAdapter implements
     public void deleteAllPhotosByPostId(Long postId) {
         List<PhotoEntity> photos = photoRepository.findAllByPost_PostId(postId);
         photoRepository.deleteAll(photos);
+    }
+
+    @Transactional
+    public List<String> getPhotoUrls(Long postId) {
+        return photoRepository.findAllByPost_PostId(postId).stream()
+                .map(PhotoEntity::getPhotoUrl)
+                .toList();
     }
 }

@@ -5,10 +5,7 @@ import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
-import com.spoony.spoony_server.application.port.out.post.CategoryPort;
-import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
-import com.spoony.spoony_server.application.port.out.post.PostCreatePort;
-import com.spoony.spoony_server.application.port.out.post.PostPort;
+import com.spoony.spoony_server.application.port.out.post.*;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
@@ -52,6 +49,8 @@ public class PostService implements
     private final PlacePort placePort;
     private final SpoonPort spoonPort;
     private final FeedPort feedPort;
+    private final PostDeletePort postDeletePort;
+    private final PhotoPort photoPort;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -231,11 +230,19 @@ public class PostService implements
 
     @Transactional
     public void deletePost(PostDeleteCommand command) {
+        //S3 삭제 로직
+        List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
+        postDeletePort.deleteImagesFromS3(imageUrls);
+
         postPort.deleteById(command.getPostId());
     }
 
     @Transactional
     public void updatePost(PostUpdateCommand command) {
+        //S3 삭제 로직
+        List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
+        postDeletePort.deleteImagesFromS3(imageUrls);
+
         postPort.updatePost(command.getPostId(), command.getDescription(), command.getValue(), command.getCons());
         Post post = postPort.findPostById(command.getPostId());
 
@@ -256,5 +263,10 @@ public class PostService implements
             Photo photo = new Photo(post, photoUrl);
             postPort.savePhoto(photo);
         });
+    }
+
+    public void deletePhotos(PostDeleteCommand command) {
+        List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
+        postDeletePort.deleteImagesFromS3(imageUrls);
     }
 }
