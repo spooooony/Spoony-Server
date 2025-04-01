@@ -8,8 +8,8 @@ public record UserResponseDTO(long userId,
                               Platform platform,
                               String platformId,
                               String userName,
-                              String userImageUrl,
                               String regionName,
+                              String introduction,
                               LocalDateTime createdAt,
                               LocalDateTime updatedAt) {
 }
