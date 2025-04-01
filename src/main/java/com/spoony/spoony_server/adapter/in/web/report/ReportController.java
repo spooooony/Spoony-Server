@@ -33,4 +33,11 @@ public class ReportController {
         reportCreateUseCase.createReport(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
+
+    @PostMapping("/post")
+    @Operation(summary = "게시물 신고 API", description = "특정 게시물을 신고하는 API")
+    public ResponseEntity<Void> createPostReport(@RequestBody ReportRequestDTO reportRequestDTO) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
 }

@@ -5,6 +5,7 @@ import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
 import com.spoony.spoony_server.application.auth.port.in.RefreshUseCase;
 import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
+import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,4 +46,19 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(refreshUseCase.refreshAccessToken(refreshToken)));
     }
+
+    @PostMapping("/signout")
+    @Operation(summary = "로그아웃 API", description = "마이페이지 > 설정에서 로그아웃하는 API")
+    public ResponseEntity<Void> signOut(@UserId Long userId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @PostMapping("/withdraw")
+    @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴하는 API")
+    public ResponseEntity<Void> withdraw(@UserId Long userId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+
+
 }
