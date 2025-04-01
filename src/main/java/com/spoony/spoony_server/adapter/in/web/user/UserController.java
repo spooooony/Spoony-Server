@@ -45,4 +45,57 @@ public class UserController {
         boolean isDuplicate = userGetUseCase.isUsernameDuplicate(command);
         return ResponseEntity.ok(ResponseDTO.success(isDuplicate));
     }
+
+    @GetMapping("/{userId}/detail")
+    @Operation(summary = "타인 마이페이지용 사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (소개글 포함 여부 선택)")
+    public ResponseEntity<Void> getOtherUserDetailWithIntro(
+            @PathVariable Long userId,
+            @RequestParam(required = false, defaultValue = "false") boolean includeIntro
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+
+    @GetMapping("/detail")
+    @Operation(summary = "내 마이페이지용 사용자 정보 조회 API", description = "자신의 상세 정보를 조회하는 API (소개글 포함 여부 선택)")
+    public ResponseEntity<Void> getUserDetailWithIntro(
+            @UserId Long userId,
+            @RequestParam(required = false, defaultValue = "false") boolean includeIntro
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+
+
+    @GetMapping("/user/followers")
+    @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API")
+    public ResponseEntity<Void> getFollowers(@UserId Long userId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @GetMapping("/user/followings")
+    @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API")
+    public ResponseEntity<Void> getFollowings(@UserId Long userId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @PatchMapping("/profile")
+    @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정하는 API")
+    public ResponseEntity<Void> updateUserProfile(
+            @UserId Long userId,
+            @RequestBody Object profileUpdateRequestDTO
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @PostMapping("/block")
+    @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API")
+    public ResponseEntity<Void> blockUser(
+            @UserId Long requesterId,
+            @RequestBody Object requestDTO //신고할 유저의 userId 포함
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+
 }

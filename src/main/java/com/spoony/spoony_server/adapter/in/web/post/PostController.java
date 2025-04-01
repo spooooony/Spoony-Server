@@ -143,4 +143,17 @@ public class PostController {
 
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
+    @GetMapping
+    @Operation(summary = "내가 작성한 리뷰 전체 조회 API", description = "마이페이지에서 사용자가 작성한 리뷰 목록을 조회하는 API")
+    public ResponseEntity<Void> getAllMyPosts(@UserId Long userId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "특정 사용자 리뷰 전체 조회 API", description = "다른 사용자의 마이페이지에서 해당 사용자가 작성한 리뷰 목록을 조회하는 API")
+    public ResponseEntity<Void> getAllPostsByUserId(@PathVariable Long userId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+
 }
