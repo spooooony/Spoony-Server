@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.in.web.user;
 
+import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
@@ -47,22 +48,44 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/detail")
-    @Operation(summary = "타인 마이페이지용 사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (소개글 포함 여부 선택)")
-    public ResponseEntity<Void> getOtherUserDetailWithIntro(
-            @PathVariable Long userId,
-            @RequestParam(required = false, defaultValue = "false") boolean includeIntro
+    @Operation(
+            summary = "타인 마이페이지용 사용자 정보 조회 API",
+            description = """
+        특정 사용자의 마이페이지 상세 정보를 조회하는 API입니다.
+
+        - 응답에는 항상 **introduction** 필드가 포함됩니다.
+        - 사용자가 소개글을 작성하지 않은 경우, 서버에서 기본 소개글("안녕! 나는 어떤 스푼이냐면...")을 대신 제공합니다.
+        - **introduction** 필드를 그대로 마이페이지에 활용하면 됩니다!
+        """
+    )
+    public ResponseEntity<ResponseDTO<UserDetailResponseDTO>> getOtherUserDetail(
+            @PathVariable Long userId
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        UserGetCommand command = new UserGetCommand(userId);
+        UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command);
+        return ResponseEntity.ok(ResponseDTO.success(userDetailResponseDTO));
     }
 
 
+
     @GetMapping("/detail")
-    @Operation(summary = "내 마이페이지용 사용자 정보 조회 API", description = "자신의 상세 정보를 조회하는 API (소개글 포함 여부 선택)")
-    public ResponseEntity<Void> getUserDetailWithIntro(
-            @UserId Long userId,
-            @RequestParam(required = false, defaultValue = "false") boolean includeIntro
+    @Operation(
+            summary = "내 마이페이지용 사용자 정보 조회 API",
+            description = """
+        자기 자신의 마이페이지 상세 정보를 조회하는 API입니다.
+
+        - 응답에는 항상 **introduction** 필드가 포함됩니다.
+        - 사용자가 소개글을 작성하지 않은 경우, 서버에서 기본 소개글("안녕! 나는 어떤 스푼이냐면...")을 대신 제공합니다.
+        - **introduction** 필드를 그대로 마이페이지에 활용하면 됩니다!
+        """
+    )
+    public ResponseEntity<ResponseDTO<UserDetailResponseDTO>> getUserDetail(
+            @UserId Long userId
+
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        UserGetCommand command = new UserGetCommand(userId);
+        UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command);
+        return ResponseEntity.ok(ResponseDTO.success(userDetailResponseDTO));
     }
 
 

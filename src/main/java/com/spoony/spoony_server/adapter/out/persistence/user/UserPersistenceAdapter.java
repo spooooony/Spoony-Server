@@ -3,6 +3,7 @@ package com.spoony.spoony_server.adapter.out.persistence.user;
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserLoginDTO;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
@@ -13,6 +14,9 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -29,16 +33,19 @@ public class UserPersistenceAdapter implements UserPort {
     private final ActivityRepository activityRepository;
     private final SpoonHistoryRepository spoonHistoryRepository;
 
+    @Override
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .map(UserMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
     }
 
+    @Override
     public boolean existsByUserName(String userName) {
         return userRepository.existsByUserName(userName);
     }
 
+    @Override
     public List<Follow> findFollowersByUserId(Long userId) {
         List<FollowEntity> followerList = followRepository.findByFollowing_UserId(userId);
         return followerList.stream()
@@ -46,6 +53,7 @@ public class UserPersistenceAdapter implements UserPort {
                 .toList();
     }
 
+    @Override
     public User loadOrCreate(PlatformUserDTO platformUserDTO, UserLoginDTO userLoginDTO) {
         boolean isRegistered = userRepository.existsByPlatformAndPlatformId(userLoginDTO.platform(), platformUserDTO.platformId());
 
@@ -83,4 +91,22 @@ public class UserPersistenceAdapter implements UserPort {
                 .map(UserMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.PLATFORM_USER_NOT_FOUND));
     }
+
+//    @Override
+//    public Long countPostByUserId(Long userId){
+//        return postRepository.countByUser_UserId(userId);
+//
+//    }
+
+    @Override
+    public Long countFollowerByUserId(Long userId){
+        return followRepository.countByFollowing_UserId(userId);
+    }
+
+    @Override
+    public Long countFollowingByUserId(Long userId){
+        return followRepository.countByFollower_UserId(userId);
+    }
+
+
 }

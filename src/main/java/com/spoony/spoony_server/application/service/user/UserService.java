@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.application.service.user;
 
+import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
@@ -30,7 +31,26 @@ public class UserService implements UserGetUseCase {
         );
     }
 
+    public UserDetailResponseDTO getUserDetailInfo(UserGetCommand command){
+        User user = userPort.findUserById(command.getUserId());
+        String introduction = (user.getIntroduction() == null ? "안녕! 나는 어떤 스푼이냐면..." : user.getIntroduction());
+        //Long reviewCount = userPort.countPostByUserId(user.getUserId());
+        Long followerCount = userPort.countFollowerByUserId(user.getUserId());
+        Long followingCount = userPort.countFollowingByUserId(user.getUserId());
+        return new UserDetailResponseDTO(
+                user.getUserName(),
+                user.getRegion().getRegionName(),
+                introduction,
+                followerCount,
+                followingCount
+        );
+    }
+
+
+
     public Boolean isUsernameDuplicate(UserNameCheckCommand command) {
         return userPort.existsByUserName(command.getUsername());
     }
+
+
 }

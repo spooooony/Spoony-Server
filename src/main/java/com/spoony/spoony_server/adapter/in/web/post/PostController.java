@@ -1,14 +1,16 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
-import com.spoony.spoony_server.adapter.dto.post.PostUpdateRequestDTO;
+import com.spoony.spoony_server.adapter.dto.post.*;
+import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
+import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.command.post.*;
+import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
+import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
 import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
-import com.spoony.spoony_server.adapter.dto.post.PostCreateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -143,17 +145,57 @@ public class PostController {
 
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
+
+
+
     @GetMapping
-    @Operation(summary = "내가 작성한 리뷰 전체 조회 API", description = "마이페이지에서 사용자가 작성한 리뷰 목록을 조회하는 API")
-    public ResponseEntity<Void> getAllMyPosts(@UserId Long userId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    @Operation(
+            summary = "내가 작성한 리뷰 전체 조회 API",
+            description = """
+    마이페이지에서 **자신이 작성한 리뷰 목록**을 조회하는 API입니다.
+    - 서버는 로그인된 사용자 정보를 기준으로 게시글을 조회합니다.
+    
+    """
+    )
+    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
+        UserGetCommand command = new UserGetCommand(userId); //user 객체
+
+        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
+
     @GetMapping("/{userId}")
-    @Operation(summary = "특정 사용자 리뷰 전체 조회 API", description = "다른 사용자의 마이페이지에서 해당 사용자가 작성한 리뷰 목록을 조회하는 API")
-    public ResponseEntity<Void> getAllPostsByUserId(@PathVariable Long userId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    @Operation(
+            summary = "특정 사용자 리뷰 전체 조회 API",
+            description = """
+    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 목록**을 조회하는 API입니다.
+    - **userId**는 path parameter로 전달받습니다.
+   
+    """
+    )
+    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId) {
+        UserGetCommand command = new UserGetCommand(userId);
+        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
 
 }
+//public interface FeedGetUseCase {
+//    FeedListResponseDTO getFeedListByUserId(FeedGetCommand command);
+//}
+
+
+//UserGetCommand command = new UserGetCommand(userId);
+//UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command);
+//        return ResponseEntity.ok(ResponseDTO.success(userDetailResponseDTO));
+
+
+//public interface UserGetUseCase {
+//    UserResponseDTO getUserInfo(UserGetCommand command);
+//    UserDetailResponseDTO getUserDetailInfo(UserGetCommand command);
+//    //UserDetailResponseDTO getOtherUserDetailInfo(UserGetCommand command);
+//    Boolean isUsernameDuplicate(UserNameCheckCommand command);
+//
+//}

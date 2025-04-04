@@ -45,7 +45,7 @@ public class PostPersistenceAdapter implements
     private final PlaceRepository placeRepository;
 
     @Transactional
-    public List<Post> findUserByUserId(Long userId) {
+    public List<Post> findPostsByUserId (Long userId) {
         return postRepository.findByUser_UserId(userId)
                 .stream()
                 .map(PostMapper::toDomain)

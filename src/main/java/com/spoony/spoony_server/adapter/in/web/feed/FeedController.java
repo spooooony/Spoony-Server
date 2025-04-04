@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.in.web.feed;
 
 import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
+import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
@@ -29,4 +30,5 @@ public class FeedController {
         FeedListResponseDTO feedListResponse = feedGetUseCase.getFeedListByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
+
 }

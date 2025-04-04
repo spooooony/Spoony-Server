@@ -9,7 +9,7 @@ import com.spoony.spoony_server.domain.user.User;
 import java.util.List;
 
 public interface PostPort {
-    List<Post> findUserByUserId(Long userId);
+    List<Post> findPostsByUserId (Long userId);
     boolean existsByUserIdAndPostId(Long userId, Long postId);
     Post findPostById(Long postId);
     List<Photo> findPhotoById(Long postId);
@@ -24,4 +24,6 @@ public interface PostPort {
     void deleteAllPostCategoryByPostId(Long postId);
     void deleteAllMenusByPostId(Long postId);
     void deleteAllPhotosByPostId(Long postId);
+
+    //List<Post> findPostsByUserId(Long userId);
 }
