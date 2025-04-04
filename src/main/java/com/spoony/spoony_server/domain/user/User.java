@@ -14,7 +14,6 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Platform platform;
-
     private String platformId;
     private String userName;
     private Region region;

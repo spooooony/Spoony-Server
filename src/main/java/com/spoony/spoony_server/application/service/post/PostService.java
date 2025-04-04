@@ -1,7 +1,9 @@
 package com.spoony.spoony_server.application.service.post;
 
+import com.spoony.spoony_server.adapter.dto.post.*;
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
+import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
@@ -17,10 +19,6 @@ import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
-import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.CategoryMonoListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.CategoryMonoResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.PostResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +27,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class PostService implements
     private final PostCategoryPort postCategoryPort;
     private final CategoryPort categoryPort;
     private final UserPort userPort;
-    private final ZzimPostPort zzimPort;
+    private final ZzimPostPort zzimPostPort;
     private final PlacePort placePort;
     private final SpoonPort spoonPort;
     private final FeedPort feedPort;
@@ -67,9 +66,9 @@ public class PostService implements
         Place place = post.getPlace();
         LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt()) ? post.getUpdatedAt() : post.getCreatedAt();
 
-        Long zzimCount = zzimPort.countZzimByPostId(post.getPostId());
+        Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
         boolean isMine = post.getUser().getUserId().equals(command.getUserId());
-        boolean isZzim = zzimPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
+        boolean isZzim = zzimPostPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
         boolean isScoop = postPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
 
         List<Photo> photoList = postPort.findPhotoById(post.getPostId());
@@ -104,7 +103,37 @@ public class PostService implements
                         category.getBackgroundColor())
         );
     }
+    public FeedListResponseDTO getPostsByUserId(UserGetCommand command){
+        Long userId = command.getUserId();
 
+        //1. 유저가 작성한 게시물 모두 조회
+        List<Post> postList = postPort.findPostsByUserId(userId)
+;
+        //2. 각 Post -> Feed
+        List<FeedResponseDTO> feedResponseList = postList.stream().map(post -> {
+                    User author = post.getUser();
+                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+                    Category category = postCategory.getCategory();
+
+                    return new FeedResponseDTO(
+                            author.getUserId(),
+                            author.getUserName(),
+                            author.getRegion().getRegionName(),
+                            post.getPostId(),
+                            new CategoryColorResponseDTO(category.getCategoryId(),
+                                    category.getCategoryName(),
+                                    category.getIconUrlColor(),
+                                    category.getTextColor(),
+                                    category.getBackgroundColor()
+
+                    ),
+                            zzimPostPort.countZzimByPostId(post.getPostId()),
+                            post.getCreatedAt()
+                    );
+                })
+                .collect(Collectors.toList());
+        return new FeedListResponseDTO(feedResponseList);
+    }
     public List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException {
         List<String> photoUrlList = postCreatePort.savePostImages(photoSaveCommand.getPhotos());
         return photoUrlList;
@@ -163,7 +192,7 @@ public class PostService implements
         spoonPort.updateSpoonHistoryByActivity(user, activity);
 
         // 작성자 지도 리스트에 게시물 추가
-        zzimPort.saveZzimPost(user, post);
+        zzimPostPort.saveZzimPost(user, post);
 
         // 작성자를 팔로우하는 사용자들의 피드에 게시물 추가
         List<Follow> followList = userPort.findFollowersByUserId(user.getUserId());
