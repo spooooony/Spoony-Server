@@ -12,7 +12,7 @@ public interface UserPort {
     boolean existsByUserName(String userName);
     List<Follow> findFollowersByUserId(Long userId);
     User loadOrCreate(PlatformUserDTO platformUserDTO, UserLoginDTO userLoginDTO);
-
+    boolean existsFollowRelation(Long fromUserId, Long toUserId);
 
     //Long countPostByUserId(Long userId);
 

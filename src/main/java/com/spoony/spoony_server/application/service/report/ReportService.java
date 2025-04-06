@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.application.service.report;
 
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
+import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
@@ -43,5 +44,10 @@ public class ReportService implements ReportCreateUseCase {
 
         Report report = new Report(reportType,command.getReportDetail(),post,user);
         reportPort.saveReport(report);
+    }
+
+    @Override
+    public void createUserReport(UserReportCreateCommand command) {
+
     }
 }
