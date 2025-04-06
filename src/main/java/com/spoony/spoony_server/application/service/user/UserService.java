@@ -1,6 +1,8 @@
 package com.spoony.spoony_server.application.service.user;
 
 import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.UserSearchHistoryResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.UserSimpleResponseDTO;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
@@ -9,6 +11,8 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,10 +50,19 @@ public class UserService implements UserGetUseCase {
         );
     }
 
+    @Override
+    public List<UserSimpleResponseDTO> getUserSimpleInfo(UserGetCommand command) {
+        return null;
+    }
 
 
     public Boolean isUsernameDuplicate(UserNameCheckCommand command) {
         return userPort.existsByUserName(command.getUsername());
+    }
+
+    @Override
+    public UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command) {
+        return null;
     }
 
 

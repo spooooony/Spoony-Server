@@ -31,4 +31,10 @@ public class FeedController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 
+    @GetMapping("/search/user")
+    @Operation(summary = "유저 검색 API", description = " 검색어를 통해 유저를 검색하는 API")
+
+    public ResponseEntity<ResponseDTO<UserSearchResultListDTO>> searchUsers(){
+
+    }
 }

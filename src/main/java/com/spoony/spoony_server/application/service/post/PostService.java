@@ -134,6 +134,12 @@ public class PostService implements
                 .collect(Collectors.toList());
         return new FeedListResponseDTO(feedResponseList);
     }
+
+    @Override
+    public PostSearchHistoryResponseDTO getReviewSearchHistory(UserGetCommand command) {
+        return null;
+    }
+
     public List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException {
         List<String> photoUrlList = postCreatePort.savePostImages(photoSaveCommand.getPhotos());
         return photoUrlList;

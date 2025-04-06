@@ -3,6 +3,7 @@ package com.spoony.spoony_server.adapter.in.web.post;
 import com.spoony.spoony_server.adapter.dto.post.*;
 import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.UserSearchHistoryResponseDTO;
 import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
@@ -180,22 +181,14 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
+    @GetMapping("search/history")
+    @Operation(summary = "리뷰 검색 기록 조회 API",description = "**탐색>검색 버튼** 누른 뒤, **리뷰 탭**에서의 최근 검색 기록을 조회하는 API")
+    public ResponseEntity<ResponseDTO<PostSearchHistoryResponseDTO>> getUserSearchHistory(@UserId Long userId) {
+        UserGetCommand command = new UserGetCommand(userId);
+        PostSearchHistoryResponseDTO history = postGetUseCase.getReviewSearchHistory(command);
+        return ResponseEntity.ok(ResponseDTO.success(history));
+    }
+
 
 }
-//public interface FeedGetUseCase {
-//    FeedListResponseDTO getFeedListByUserId(FeedGetCommand command);
-//}
 
-
-//UserGetCommand command = new UserGetCommand(userId);
-//UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command);
-//        return ResponseEntity.ok(ResponseDTO.success(userDetailResponseDTO));
-
-
-//public interface UserGetUseCase {
-//    UserResponseDTO getUserInfo(UserGetCommand command);
-//    UserDetailResponseDTO getUserDetailInfo(UserGetCommand command);
-//    //UserDetailResponseDTO getOtherUserDetailInfo(UserGetCommand command);
-//    Boolean isUsernameDuplicate(UserNameCheckCommand command);
-//
-//}
