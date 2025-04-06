@@ -5,7 +5,8 @@ public record UserDetailResponseDTO(
         String region,
         String introduction,
         Long followerCount,
-        Long followingCount
+        Long followingCount,
+        boolean isFollowing
 ) {
 
 

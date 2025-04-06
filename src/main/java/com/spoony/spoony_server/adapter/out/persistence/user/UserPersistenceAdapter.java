@@ -92,11 +92,11 @@ public class UserPersistenceAdapter implements UserPort {
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.PLATFORM_USER_NOT_FOUND));
     }
 
-//    @Override
-//    public Long countPostByUserId(Long userId){
-//        return postRepository.countByUser_UserId(userId);
-//
-//    }
+    @Override
+    public boolean existsFollowRelation(Long fromUserId, Long toUserId) {
+        return false;
+    }
+
 
     @Override
     public Long countFollowerByUserId(Long userId){

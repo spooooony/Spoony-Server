@@ -114,7 +114,10 @@ public class PostService implements
                     User author = post.getUser();
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = postCategory.getCategory();
-
+                    List<Photo> photoList = postPort.findPhotoById(post.getPostId());
+                    List<String> photoUrlList = photoList.stream()
+                            .map(Photo::getPhotoUrl)
+                            .toList();
                     return new FeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
@@ -128,12 +131,14 @@ public class PostService implements
 
                     ),
                             zzimPostPort.countZzimByPostId(post.getPostId()),
+                            photoUrlList,
                             post.getCreatedAt()
                     );
                 })
                 .collect(Collectors.toList());
         return new FeedListResponseDTO(feedResponseList);
     }
+
 
     @Override
     public PostSearchHistoryResponseDTO getReviewSearchHistory(UserGetCommand command) {

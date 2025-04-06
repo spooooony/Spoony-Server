@@ -4,6 +4,7 @@ import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.application.port.command.user.UserFollowCommand;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
+import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
@@ -62,10 +63,12 @@ public class UserController {
                     """
     )
     public ResponseEntity<ResponseDTO<UserDetailResponseDTO>> getOtherUserDetail(
-            @PathVariable Long userId
+            @UserId Long userId,
+            @PathVariable Long targetUserId
     ) {
-        UserGetCommand command = new UserGetCommand(userId);
-        UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command);
+        UserGetCommand userGetCommand = new UserGetCommand(targetUserId);
+        UserFollowCommand userFollowCommand = new UserFollowCommand(userId,targetUserId);
+        UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(userGetCommand,userFollowCommand);
         return ResponseEntity.ok(ResponseDTO.success(userDetailResponseDTO));
     }
 
@@ -86,13 +89,13 @@ public class UserController {
 
     ) {
         UserGetCommand command = new UserGetCommand(userId);
-        UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command);
+        UserDetailResponseDTO userDetailResponseDTO = userGetUseCase.getUserDetailInfo(command,null);
         return ResponseEntity.ok(ResponseDTO.success(userDetailResponseDTO));
     }
 
 
     @GetMapping("/user/followers")
-    @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API")
+    @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> getFollowers(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
         List<UserSimpleResponseDTO> followers = userGetUseCase.getUserSimpleInfo(command);
@@ -100,7 +103,7 @@ public class UserController {
     }
 
     @GetMapping("/user/followings")
-    @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API")
+    @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> getFollowings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
 
@@ -109,7 +112,7 @@ public class UserController {
     }
 
     @PatchMapping("/profile")
-    @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정하는 API")
+    @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> updateUserProfile(
             @UserId Long userId,
             @RequestBody UserUpdateRequestDTO userUpdateRequestDTO
@@ -137,7 +140,7 @@ public class UserController {
     @DeleteMapping("/user/unfollow")
     @Operation(
             summary = "유저 팔로우 취소 API",
-            description = "다른 사용자에 대한 팔로우를 취소하는 API."
+            description = "다른 사용자에 대한 팔로우를 취소하는 API입니다."
     )
     public ResponseEntity<ResponseDTO<Void>> unfollowUser(
             @UserId Long userId,
@@ -152,12 +155,21 @@ public class UserController {
 
 
     @PostMapping("/block")
-    @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API")
+    @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> blockUser(
             @UserId Long requesterId,
             @RequestBody UserBlockRequestDTO userBlockRequestDTO
     ) {
         return ResponseEntity.ok(ResponseDTO.success(null));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "유저 검색 API", description = "**탐색>검색**에서 **유저 검색 결과**를 보여주는  API입니다")
+    public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> searchUsers(@RequestParam String query) {
+        UserSearchCommand command = new UserSearchCommand(query);
+        List<UserSimpleResponseDTO> result = userGetUseCase.getUserSimpleInfoBySearch(command);
+
+        return ResponseEntity.ok(ResponseDTO.success(result));
     }
 
     @GetMapping("search/history")

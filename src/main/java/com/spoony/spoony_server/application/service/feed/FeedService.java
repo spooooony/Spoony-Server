@@ -1,12 +1,15 @@
 package com.spoony.spoony_server.application.service.feed;
 
 import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
+import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
+import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Category;
+import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.post.PostCategory;
 import com.spoony.spoony_server.domain.user.User;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 public class FeedService implements FeedGetUseCase {
 
     private final FeedPort feedPort;
+    private  final PostPort postPort;
     private final PostCategoryPort postCategoryPort;
     private final ZzimPostPort zzimPostPort;
 
@@ -52,6 +56,12 @@ public class FeedService implements FeedGetUseCase {
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = postCategory.getCategory();
 
+
+
+                    List<Photo> photoList = postPort.findPhotoById(post.getPostId());
+                    List<String> photoUrlList = photoList.stream()
+                            .map(Photo::getPhotoUrl)
+                            .toList();
                     return new FeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
@@ -65,6 +75,7 @@ public class FeedService implements FeedGetUseCase {
                                     category.getBackgroundColor()
                             ),
                             zzimPostPort.countZzimByPostId(post.getPostId()),
+                            photoUrlList,
                             post.getCreatedAt()
                     );
                 })
@@ -78,4 +89,16 @@ public class FeedService implements FeedGetUseCase {
 
         return new FeedListResponseDTO(feedResponseList);
     }
+
+    @Override
+    public FeedListResponseDTO getAllPosts() {
+        return null;
+    }
+
+    @Override
+    public FeedListResponseDTO getPostsFromFollowingUsers(UserGetCommand command) {
+        return null;
+    }
+
+
 }
