@@ -3,7 +3,6 @@ package com.spoony.spoony_server.adapter.out.persistence.user;
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserLoginDTO;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
@@ -12,14 +11,13 @@ import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.RegionErrorMessage;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -126,6 +124,37 @@ public class UserPersistenceAdapter implements UserPort {
 
     }
 
+    @Override
+    public void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDateTime birth) {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(()-> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        RegionEntity region = regionRepository.findById(regionId).orElseThrow(() -> new BusinessException(RegionErrorMessage.REGION_NOT_FOUND));;
+
+        userEntity.updateProfile(userName,region,introduction,birth);
+    }
+
+//    @Override
+//    public void saveFollowRelation(Long fromUserId, Long toUserId) {
+//        // 1. 사용자 존재 여부 검증 (예외 던짐)
+//        UserEntity fromUserEntity = userRepository.findById(fromUserId)
+//                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+//
+//        UserEntity toUserEntity = userRepository.findById(toUserId)
+//                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+//
+//        FollowEntity followEntity = FollowEntity.builder().follower(fromUserEntity)
+//                .following(toUserEntity)
+//                .build();
+//
+//        followRepository.save(followEntity);
+//    }
+//@Transactional
+//public void updatePost(Long postId, String description, Double value, String cons) {
+//    PostEntity postEntity = postRepository.findById(postId)
+//            .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+//
+//    postEntity.updatePostContent(description, value, cons);
+//}
 
     @Override
     public Long countFollowerByUserId(Long userId){

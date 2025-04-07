@@ -1,18 +1,17 @@
 package com.spoony.spoony_server.application.service.user;
 
-import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserSearchHistoryResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserSimpleResponseDTO;
-import com.spoony.spoony_server.application.port.command.user.UserFollowCommand;
-import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
-import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
-import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
+import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.UserUpdateUseCase;
+import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
-import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
+import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserGetUseCase, UserFollowUseCase {
+public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpdateUseCase {
 
     private final UserPort userPort;
 
@@ -64,6 +63,17 @@ public class UserService implements UserGetUseCase, UserFollowUseCase {
                 followerCount,
                 followingCount,
                 isFollowing
+        );
+    }
+
+    @Override
+    public UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand command) {
+        User user = userPort.findUserById(command.getUserId());
+        return new UserProfileUpdateResponseDTO(
+                user.getUserName(),
+                user.getRegion().getRegionName(),
+                user.getIntroduction(),
+                user.getBirth()
         );
     }
 
@@ -117,6 +127,7 @@ public class UserService implements UserGetUseCase, UserFollowUseCase {
 
     }
 
+
     @Transactional
     @Override
     public void createFollow(UserFollowCommand command) {
@@ -130,4 +141,13 @@ public class UserService implements UserGetUseCase, UserFollowUseCase {
         userPort.deleteFollowRelation(command.getUserId(),command.getTargetUserId());
 
     }
+
+    @Transactional
+    @Override
+    public  void updateUserProfile(UserUpdateCommand command){
+        userPort.updateUser(command.getUserId(),command.getUserName(),command.getRegionId(),command.getIntroduction(),command.getBirth());
+    }
+
+
 }
+

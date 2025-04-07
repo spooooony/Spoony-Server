@@ -18,6 +18,7 @@ public class PostMapper {
                         postEntity.getUser().getUserName(),
                         RegionMapper.toDomain(postEntity.getUser().getRegion()),
                         postEntity.getUser().getIntroduction(),
+                        postEntity.getUser().getBirth(),
                         postEntity.getUser().getCreatedAt(),
                         postEntity.getUser().getUpdatedAt()
                 ),
