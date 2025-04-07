@@ -152,37 +152,37 @@ public class PostController {
 
 
 
-    @GetMapping
-    @Operation(
-            summary = "내가 작성한 리뷰 전체 조회 API",
-            description = """
-    마이페이지에서 **자신이 작성한 리뷰 목록**을 조회하는 API입니다.
-    - 서버는 로그인된 사용자 정보를 기준으로 게시글을 조회합니다.
-    
-    """
-    )
-    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
-        UserGetCommand command = new UserGetCommand(userId); //user 객체
-
-        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
-    }
-
-
-    @GetMapping("/{userId}")
-    @Operation(
-            summary = "특정 사용자 리뷰 전체 조회 API",
-            description = """
-    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 목록**을 조회하는 API입니다.
-    - **userId**는 path parameter로 전달받습니다.
-   
-    """
-    )
-    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId) {
-        UserGetCommand command = new UserGetCommand(userId);
-        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
-    }
+//    @GetMapping("")
+//    @Operation(
+//            summary = "내가 작성한 리뷰 전체 조회 API",
+//            description = """
+//    마이페이지에서 **자신이 작성한 리뷰 목록**을 조회하는 API입니다.
+//    - 서버는 로그인된 사용자 정보를 기준으로 게시글을 조회합니다.
+//
+//    """
+//    )
+//    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
+//        UserGetCommand command = new UserGetCommand(userId); //user 객체
+//
+//        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
+//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
+//    }
+//
+//
+//    @GetMapping("/{userId}")
+//    @Operation(
+//            summary = "특정 사용자 리뷰 전체 조회 API",
+//            description = """
+//    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 목록**을 조회하는 API입니다.
+//    - **userId**는 path parameter로 전달받습니다.
+//
+//    """
+//    )
+//    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId) {
+//        UserGetCommand command = new UserGetCommand(userId);
+//        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
+//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
+//    }
 
     @GetMapping("search/history")
     @Operation(summary = "리뷰 검색 기록 조회 API",description = "**탐색>검색 버튼** 누른 뒤, **리뷰 탭**에서의 최근 검색 기록을 조회하는 API")
