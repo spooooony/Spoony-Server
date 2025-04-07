@@ -54,6 +54,13 @@ public class UserPersistenceAdapter implements UserPort {
     }
 
     @Override
+    public List<Follow> findFollowingsByUserId(Long userId) {
+        List<FollowEntity> followingList = followRepository.findByFollower_UserId(userId);
+        return followingList.stream()
+                .map(FollowMapper::toDomain).toList();
+    }
+
+    @Override
     public User loadOrCreate(PlatformUserDTO platformUserDTO, UserLoginDTO userLoginDTO) {
         boolean isRegistered = userRepository.existsByPlatformAndPlatformId(userLoginDTO.platform(), platformUserDTO.platformId());
 
@@ -95,6 +102,28 @@ public class UserPersistenceAdapter implements UserPort {
     @Override
     public boolean existsFollowRelation(Long fromUserId, Long toUserId) {
         return false;
+    }
+
+    @Override
+    public void saveFollowRelation(Long fromUserId, Long toUserId) {
+        // 1. 사용자 존재 여부 검증 (예외 던짐)
+        UserEntity fromUserEntity = userRepository.findById(fromUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        UserEntity toUserEntity = userRepository.findById(toUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        FollowEntity followEntity = FollowEntity.builder().follower(fromUserEntity)
+                .following(toUserEntity)
+                .build();
+
+        followRepository.save(followEntity);
+    }
+
+    @Override
+    public void deleteFollowRelation(Long fromUserId, Long toUserId) {
+        followRepository.deleteByFollower_UserIdAndFollowing_UserId(fromUserId, toUserId);
+
     }
 
 

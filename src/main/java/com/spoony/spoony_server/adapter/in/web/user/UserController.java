@@ -5,6 +5,7 @@ import com.spoony.spoony_server.application.port.command.user.UserFollowCommand;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
+import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
@@ -22,7 +23,7 @@ import java.util.List;
 public class UserController {
 
     private final UserGetUseCase userGetUseCase;
-
+    private  final UserFollowUseCase userFollowUseCase;
 
     @GetMapping
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
@@ -94,21 +95,21 @@ public class UserController {
     }
 
 
-    @GetMapping("/user/followers")
+    @GetMapping("/followers")
     @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> getFollowers(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
-        List<UserSimpleResponseDTO> followers = userGetUseCase.getUserSimpleInfo(command);
+        List<UserSimpleResponseDTO> followers = userGetUseCase.getFollowers(command.getUserId());
         return ResponseEntity.ok(ResponseDTO.success(followers));
     }
 
-    @GetMapping("/user/followings")
+    @GetMapping("/followings")
     @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> getFollowings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
 
-        List<UserSimpleResponseDTO> followers = userGetUseCase.getUserSimpleInfo(command);
-        return ResponseEntity.ok(ResponseDTO.success(followers));
+        List<UserSimpleResponseDTO> followings = userGetUseCase.getFollowings(command.getUserId());
+        return ResponseEntity.ok(ResponseDTO.success(followings));
     }
 
     @PatchMapping("/profile")
@@ -120,7 +121,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 
-    @PostMapping("/user/follow")
+    @PostMapping("/follow")
     @Operation(
             summary = "유저 팔로우 API",
             description = "다른 사용자를 팔로우하는 API."
@@ -134,10 +135,12 @@ public class UserController {
                 userId,
                 requestDTO.targetUserId()
         );
+        userFollowUseCase.createFollow(command);
+
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-    @DeleteMapping("/user/unfollow")
+    @DeleteMapping("/unfollow")
     @Operation(
             summary = "유저 팔로우 취소 API",
             description = "다른 사용자에 대한 팔로우를 취소하는 API입니다."
@@ -150,6 +153,7 @@ public class UserController {
                 userId,
                 requestDTO.targetUserId()
         );
+        userFollowUseCase.deleteFollow(command);
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
