@@ -2,13 +2,11 @@ package com.spoony.spoony_server.adapter.in.web.user;
 
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
-import com.spoony.spoony_server.application.port.command.user.UserFollowCommand;
-import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
-import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
-import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
+import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.UserUpdateUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +24,7 @@ public class UserController {
 
     private final UserGetUseCase userGetUseCase;
     private  final UserFollowUseCase userFollowUseCase;
+    private final UserUpdateUseCase userUpdateUseCase;
     private final PostGetUseCase postGetUseCase;
 
     @GetMapping
@@ -115,14 +114,48 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(followings));
     }
 
+    @GetMapping("/profile")
+    @Operation(
+            summary = "프로필 수정 진입 시 사용자 기본 정보 조회 API",
+            description = """
+        프로필 수정 페이지 진입 시, 사용자의 기존 입력 정보를 조회합니다.
+        
+        - 닉네임, 생일, 활동지역 등 프로필 구성 필드를 반환합니다.
+        - 생일과 활동지역은 사용자가 스킵할 수 있기 때문에, 기본값이 포함되어 반환됩니다.
+        """
+    )
+    public ResponseEntity<ResponseDTO<UserProfileUpdateResponseDTO>> getUserEditInfo(
+            @UserId Long userId
+    ) {
+        UserGetCommand command = new UserGetCommand(userId);
+
+        UserProfileUpdateResponseDTO responseDTO = userGetUseCase.getUserProfileInfo(command);
+        return ResponseEntity.ok(ResponseDTO.success(responseDTO));
+    }
     @PatchMapping("/profile")
     @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> updateUserProfile(
             @UserId Long userId,
-            @RequestBody UserUpdateRequestDTO userUpdateRequestDTO
+            @RequestBody UserProfileUpdateRequestDTO userUpdateRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+
+        UserUpdateCommand command = new UserUpdateCommand(userId,userUpdateRequestDTO.userName(),userUpdateRequestDTO.regionId(),userUpdateRequestDTO.introduction(),userUpdateRequestDTO.birth());
+        userUpdateUseCase.updateUserProfile(command);
+        return ResponseEntity.ok(ResponseDTO.success(null));
     }
+
+//    public ResponseEntity<ResponseDTO<Void>> followUser(
+//            @UserId Long userId,
+//            @RequestBody UserFollowRequestDTO requestDTO
+//    ) {
+//        UserFollowCommand command = new UserFollowCommand(
+//                userId,
+//                requestDTO.targetUserId()
+//        );
+//        userFollowUseCase.createFollow(command);
+//
+//        return ResponseEntity.ok(ResponseDTO.success(null));
+//    }
 
     @GetMapping("/me/posts")
     @Operation(

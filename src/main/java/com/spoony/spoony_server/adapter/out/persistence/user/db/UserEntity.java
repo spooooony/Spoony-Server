@@ -27,12 +27,14 @@ public class UserEntity {
     private String platformId;
 
     private String userName;
-
+    private LocalDateTime birth;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private RegionEntity region;
 
     private String introduction;
+
+
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -45,12 +47,22 @@ public class UserEntity {
                       String platformId,
                       String userName,
                       RegionEntity region,
-                      String introduction) {
+                      String introduction,
+                      LocalDateTime birth) {
         this.userId = userId;
         this.platform = platform;
         this.platformId = platformId;
         this.userName = userName;
         this.region = region;
         this.introduction = introduction;
+        this.birth = birth;
     }
+
+    public void updateProfile(String userName, RegionEntity region, String introduction, LocalDateTime birth) {
+        this.userName = userName;
+        this.region = region;
+        this.introduction = introduction;
+        this.birth = birth;
+    }
+
 }

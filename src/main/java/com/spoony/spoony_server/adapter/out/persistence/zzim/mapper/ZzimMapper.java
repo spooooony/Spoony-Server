@@ -20,6 +20,7 @@ public class ZzimMapper {
                         zzimPostEntity.getUser().getUserName(),
                         RegionMapper.toDomain(zzimPostEntity.getUser().getRegion()),
                         zzimPostEntity.getUser().getIntroduction(),
+                        zzimPostEntity.getUser().getBirth(),
                         zzimPostEntity.getUser().getCreatedAt(),
                         zzimPostEntity.getUser().getUpdatedAt()
              ),

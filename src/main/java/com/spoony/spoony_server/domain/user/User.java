@@ -18,6 +18,7 @@ public class User {
     private String userName;
     private Region region;
     private String introduction;
+    private LocalDateTime birth;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
