@@ -2,6 +2,7 @@ package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,4 +22,11 @@ public class FollowEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id")
     private UserEntity following;
+
+    @Builder
+    public FollowEntity(Long followId,UserEntity follower, UserEntity following){
+        this.followId = followId;
+        this.follower = follower;
+        this.following = following;
+    }
 }

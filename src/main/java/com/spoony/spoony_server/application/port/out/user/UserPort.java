@@ -11,9 +11,12 @@ public interface UserPort {
     User findUserById(Long userId);
     boolean existsByUserName(String userName);
     List<Follow> findFollowersByUserId(Long userId);
+    List<Follow> findFollowingsByUserId(Long userId);
     User loadOrCreate(PlatformUserDTO platformUserDTO, UserLoginDTO userLoginDTO);
     boolean existsFollowRelation(Long fromUserId, Long toUserId);
+    void saveFollowRelation(Long fromUserId, Long toUserId);
 
+    void deleteFollowRelation(Long fromUserId, Long toUserId);
     //Long countPostByUserId(Long userId);
 
     // 내가 팔로우한 사람 수 (팔로잉 수)

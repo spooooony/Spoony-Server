@@ -19,4 +19,6 @@ public interface UserGetUseCase {
     List<UserSimpleResponseDTO> getUserSimpleInfoBySearch(UserSearchCommand command);
     Boolean isUsernameDuplicate(UserNameCheckCommand command);
     UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command);
+    List<UserSimpleResponseDTO> getFollowers(Long userId);
+    List<UserSimpleResponseDTO> getFollowings(Long userId);
 }
