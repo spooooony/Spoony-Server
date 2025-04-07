@@ -139,6 +139,14 @@ public class PostService implements
         return new FeedListResponseDTO(feedResponseList);
     }
 
+    @Override
+    public ReviewAmountResponseDTO getPostAmountByUserId(UserGetCommand command) {
+        Long userId = command.getUserId();
+        Long reviewCount = postPort.countPostsByUserId(userId);
+        return new ReviewAmountResponseDTO(reviewCount);
+
+    }
+
 
     @Override
     public PostSearchHistoryResponseDTO getReviewSearchHistory(UserGetCommand command) {

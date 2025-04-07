@@ -220,6 +220,12 @@ public class PostPersistenceAdapter implements
         photoRepository.deleteAll(photos);
     }
 
+    @Override
+    public Long countPostsByUserId(Long userId) {
+        return postRepository.countByUser_UserId(userId);
+
+    }
+
     @Transactional
     public List<String> getPhotoUrls(Long postId) {
         return photoRepository.findAllByPost_PostId(postId).stream()

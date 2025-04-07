@@ -24,6 +24,7 @@ public interface PostPort {
     void deleteAllPostCategoryByPostId(Long postId);
     void deleteAllMenusByPostId(Long postId);
     void deleteAllPhotosByPostId(Long postId);
+    Long countPostsByUserId(Long userId);
 
     //List<Post> findPostsByUserId(Long userId);
 }

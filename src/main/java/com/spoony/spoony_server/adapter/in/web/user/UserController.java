@@ -1,7 +1,10 @@
 package com.spoony.spoony_server.adapter.in.web.user;
 
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.SpoonResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.application.port.command.spoon.SpoonGetCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
@@ -157,12 +160,12 @@ public class UserController {
 //        return ResponseEntity.ok(ResponseDTO.success(null));
 //    }
 
-    @GetMapping("/me/posts")
+    @GetMapping("/me/reviews")
     @Operation(
             summary = "내가 작성한 리뷰 전체 조회 API",
             description = """
     마이페이지에서 **자신이 작성한 리뷰 목록**을 조회하는 API입니다.
-    - 서버는 로그인된 사용자 정보를 기준으로 게시글을 조회합니다.
+    - 서버는 로그인된 사용자 정보를 기준으로 리뷰 목록을 조회합니다.
     
     """
     )
@@ -173,8 +176,21 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
+    @GetMapping("/me/review-amount")
+    @Operation(
+            summary = "내가 작성한 리뷰 개수 조회 API",
+            description = """
+    마이페이지에서 **해당 사용자가 작성한 리뷰 개수**를 조회하는 API입니다.
 
-    @GetMapping("/{userId}/posts")
+    """
+    )
+    public ResponseEntity<ResponseDTO<ReviewAmountResponseDTO>> getMyReviewAmount(@UserId Long userId) {
+        UserGetCommand command = new UserGetCommand(userId);
+        ReviewAmountResponseDTO reviewAmountResponse = postGetUseCase.getPostAmountByUserId(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(reviewAmountResponse));
+    }
+
+    @GetMapping("/{userId}/reviews")
     @Operation(
             summary = "특정 사용자 리뷰 전체 조회 API",
             description = """
@@ -189,6 +205,31 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
+    @GetMapping("/{userId}/review-amount")
+    @Operation(
+            summary = "특정 사용자 리뷰 개수 조회 API",
+            description = """
+    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 개수**를 조회하는 API입니다.
+    - **userId**는 path parameter로 전달받습니다.
+   
+    """
+    )
+    public ResponseEntity<ResponseDTO<ReviewAmountResponseDTO>> getReviewAmountByUserId(@PathVariable Long userId) {
+        UserGetCommand command = new UserGetCommand(userId);
+        ReviewAmountResponseDTO reviewAmountResponse = postGetUseCase.getPostAmountByUserId(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(reviewAmountResponse));
+    }
+
+
+//    @GetMapping
+//    @Operation(summary = "스푼 개수 조회 API", description = "특정 사용자의 스푼 개수를 조회하는 API")
+//    public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(
+//            @UserId Long userId) {
+//        SpoonGetCommand command = new SpoonGetCommand(userId);
+//        SpoonResponseDTO spoonResponseDTO = spoonGetUseCase.getAmountById(command);
+//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(spoonResponseDTO));
+//    }
+//
     @PostMapping("/follow")
     @Operation(
             summary = "유저 팔로우 API",
