@@ -2,12 +2,15 @@ package com.spoony.spoony_server.adapter.out.persistence.user;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserLoginDTO;
+import com.spoony.spoony_server.adapter.out.persistence.location.db.LocationEntity;
+import com.spoony.spoony_server.adapter.out.persistence.location.mapper.LocationMapper;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.domain.location.Location;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -133,28 +137,12 @@ public class UserPersistenceAdapter implements UserPort {
         userEntity.updateProfile(userName,region,introduction,birth);
     }
 
-//    @Override
-//    public void saveFollowRelation(Long fromUserId, Long toUserId) {
-//        // 1. 사용자 존재 여부 검증 (예외 던짐)
-//        UserEntity fromUserEntity = userRepository.findById(fromUserId)
-//                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-//
-//        UserEntity toUserEntity = userRepository.findById(toUserId)
-//                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-//
-//        FollowEntity followEntity = FollowEntity.builder().follower(fromUserEntity)
-//                .following(toUserEntity)
-//                .build();
-//
-//        followRepository.save(followEntity);
-//    }
-//@Transactional
-//public void updatePost(Long postId, String description, Double value, String cons) {
-//    PostEntity postEntity = postRepository.findById(postId)
-//            .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-//
-//    postEntity.updatePostContent(description, value, cons);
-//}
+    @Override
+    public List<User> findByUserNameContaining(String query) {
+        List<UserEntity> userEntityList = userRepository.findByUserNameContaining(query);
+        return userEntityList.stream().map(UserMapper::toDomain).collect(Collectors.toList());
+    }
+
 
     @Override
     public Long countFollowerByUserId(Long userId){

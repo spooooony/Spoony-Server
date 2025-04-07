@@ -1,9 +1,12 @@
 package com.spoony.spoony_server.application.service.post;
 
 import com.spoony.spoony_server.adapter.dto.post.*;
+import com.spoony.spoony_server.adapter.dto.user.UserSearchResultDTO;
+import com.spoony.spoony_server.adapter.dto.user.UserSearchResultListDTO;
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
+import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
@@ -37,7 +40,9 @@ public class PostService implements
         PostGetCategoriesUseCase,
         PostScoopPostUseCase,
         PostDeleteUseCase,
-        PostUpdateUseCase {
+        PostUpdateUseCase,
+        PostSearchUseCase
+         {
 
     private final PostPort postPort;
     private final PostCreatePort postCreatePort;
@@ -123,6 +128,7 @@ public class PostService implements
                             author.getUserName(),
                             author.getRegion().getRegionName(),
                             post.getPostId(),
+                            post.getDescription(),
                             new CategoryColorResponseDTO(category.getCategoryId(),
                                     category.getCategoryName(),
                                     category.getIconUrlColor(),
@@ -145,6 +151,44 @@ public class PostService implements
         Long reviewCount = postPort.countPostsByUserId(userId);
         return new ReviewAmountResponseDTO(reviewCount);
 
+    }
+    @Override
+    public PostSearchResultListDTO searchReviewsByQuery(PostSearchCommand command){
+        List<Post> postList = postPort.findByPostDescriptionContaining(command.getQuery());
+
+        List<FeedResponseDTO> postSearchResultList = postList.stream()
+                .map(post -> {
+                        List<String> phothUrlList = postPort.findPhotoById(post.getPostId()).stream()
+                                .map(Photo::getPhotoUrl).toList();
+                        PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+                        Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
+                    Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
+                    String userRegion = post.getUser().getRegion().getRegionName();
+
+                    LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())
+                            ? post.getUpdatedAt() : post.getCreatedAt();
+
+                    return new FeedResponseDTO(
+                            post.getUser().getUserId(),
+                            post.getUser().getUserName(),
+                            userRegion,
+                            post.getPostId(),
+                            post.getDescription(),
+                            new CategoryColorResponseDTO(
+                                    category.getCategoryId(),
+                                    category.getCategoryName(),
+                                    category.getIconUrlColor(),
+                                    category.getTextColor(),
+                                    category.getBackgroundColor()
+                            ),
+                            zzimCount,
+                            phothUrlList,
+                            latestDate
+                    );
+                })
+                .toList();
+
+        return new PostSearchResultListDTO(postSearchResultList);
     }
 
 
@@ -317,4 +361,6 @@ public class PostService implements
         List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
         postDeletePort.deleteImagesFromS3(imageUrls);
     }
+
+
 }

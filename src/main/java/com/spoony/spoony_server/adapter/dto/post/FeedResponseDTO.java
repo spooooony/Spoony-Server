@@ -10,6 +10,7 @@ public record FeedResponseDTO(
         String userName,
         String userRegion,
         Long postId,
+        String description,
         CategoryColorResponseDTO categoryColorResponse,
         Long zzimCount,
         List<String> photoUrlList,
