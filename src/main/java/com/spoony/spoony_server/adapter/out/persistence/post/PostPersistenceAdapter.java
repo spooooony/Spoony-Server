@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.post;
 
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.post.PhotoPort;
 import com.spoony.spoony_server.domain.post.CategoryType;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
@@ -220,6 +221,11 @@ public class PostPersistenceAdapter implements
         photoRepository.deleteAll(photos);
     }
 
+    @Override
+    public List<Post> findByPostDescriptionContaining(String query) {
+        List<PostEntity> postEntityList = postRepository.findByDescriptionContaining(query);
+        return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
+    }
     @Override
     public Long countPostsByUserId(Long userId) {
         return postRepository.countByUser_UserId(userId);

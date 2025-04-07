@@ -1,14 +1,18 @@
 package com.spoony.spoony_server.adapter.in.web.user;
 
+import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.spoon.SpoonResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.command.spoon.SpoonGetCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
+import com.spoony.spoony_server.application.port.in.location.LocationSearchUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.UserSearchUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserUpdateUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
@@ -28,6 +32,7 @@ public class UserController {
     private final UserGetUseCase userGetUseCase;
     private  final UserFollowUseCase userFollowUseCase;
     private final UserUpdateUseCase userUpdateUseCase;
+    private final UserSearchUseCase userSearchUseCase;
     private final PostGetUseCase postGetUseCase;
 
     @GetMapping
@@ -221,15 +226,6 @@ public class UserController {
     }
 
 
-//    @GetMapping
-//    @Operation(summary = "스푼 개수 조회 API", description = "특정 사용자의 스푼 개수를 조회하는 API")
-//    public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(
-//            @UserId Long userId) {
-//        SpoonGetCommand command = new SpoonGetCommand(userId);
-//        SpoonResponseDTO spoonResponseDTO = spoonGetUseCase.getAmountById(command);
-//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(spoonResponseDTO));
-//    }
-//
     @PostMapping("/follow")
     @Operation(
             summary = "유저 팔로우 API",
@@ -276,21 +272,23 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "유저 검색 API", description = "**탐색>검색**에서 **유저 검색 결과**를 보여주는  API입니다")
-    public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> searchUsers(@RequestParam String query) {
-        UserSearchCommand command = new UserSearchCommand(query);
-        List<UserSimpleResponseDTO> result = userGetUseCase.getUserSimpleInfoBySearch(command);
-
-        return ResponseEntity.ok(ResponseDTO.success(result));
-    }
-
-//    @GetMapping("search/history")
-//    @Operation(summary = "유저 검색 기록 조회 API",description = "**탐색>검색 버튼** 누른 뒤, **유저 탭**에서의 최근 검색 기록을 조회하는 API입니다.")
-//    public ResponseEntity<ResponseDTO<UserSearchHistoryResponseDTO>> getUserSearchHistory(@UserId Long userId) {
-//        UserGetCommand command = new UserGetCommand(userId);
-//        UserSearchHistoryResponseDTO history = userGetUseCase.getUserSearchHistory(command);
-//        return ResponseEntity.ok(ResponseDTO.success(history));
+//    @GetMapping("/search")
+//    @Operation(summary = "유저 검색 API", description = "**탐색>검색**에서 **유저 검색 결과**를 보여주는  API입니다")
+//    public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> searchUsers(@RequestParam String query) {
+//        UserSearchCommand command = new UserSearchCommand(query);
+//        List<UserSimpleResponseDTO> result = userGetUseCase.getUserSimpleInfoBySearch(command);
+//
+//        return ResponseEntity.ok(ResponseDTO.success(result));
 //    }
+
+    @GetMapping("/search")
+    @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색하는 API")
+    public ResponseEntity<ResponseDTO<UserSearchResultListDTO>> searchLocations(
+                @RequestParam String query) {
+            UserSearchCommand command = new UserSearchCommand(query);
+            UserSearchResultListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userSearchList));
+        }
+
 
 }

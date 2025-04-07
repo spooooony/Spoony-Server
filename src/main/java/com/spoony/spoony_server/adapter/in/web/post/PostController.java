@@ -1,10 +1,7 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
 import com.spoony.spoony_server.adapter.dto.post.*;
-import com.spoony.spoony_server.adapter.dto.user.UserDetailResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserSearchHistoryResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserSimpleResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
@@ -38,6 +35,7 @@ public class PostController {
     private final PostScoopPostUseCase postScoopPostUseCase;
     private final PostDeleteUseCase postDeleteUseCase;
     private final PostUpdateUseCase postUpdateUseCase;
+    private final PostSearchUseCase postSearchUseCase;
 
     @GetMapping("/{postId}")
     @Operation(summary = "게시물 조회 API", description = "특정 게시물의 상세 정보를 조회하는 API")
@@ -150,46 +148,13 @@ public class PostController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-
-
-//    @GetMapping("")
-//    @Operation(
-//            summary = "내가 작성한 리뷰 전체 조회 API",
-//            description = """
-//    마이페이지에서 **자신이 작성한 리뷰 목록**을 조회하는 API입니다.
-//    - 서버는 로그인된 사용자 정보를 기준으로 게시글을 조회합니다.
-//
-//    """
-//    )
-//    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
-//        UserGetCommand command = new UserGetCommand(userId); //user 객체
-//
-//        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
-//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
-//    }
-//
-//
-//    @GetMapping("/{userId}")
-//    @Operation(
-//            summary = "특정 사용자 리뷰 전체 조회 API",
-//            description = """
-//    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 목록**을 조회하는 API입니다.
-//    - **userId**는 path parameter로 전달받습니다.
-//
-//    """
-//    )
-//    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId) {
-//        UserGetCommand command = new UserGetCommand(userId);
-//        FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
-//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
-//    }
-
-    @GetMapping("search/history")
-    @Operation(summary = "리뷰 검색 기록 조회 API",description = "**탐색>검색 버튼** 누른 뒤, **리뷰 탭**에서의 최근 검색 기록을 조회하는 API")
-    public ResponseEntity<ResponseDTO<PostSearchHistoryResponseDTO>> getUserSearchHistory(@UserId Long userId) {
-        UserGetCommand command = new UserGetCommand(userId);
-        PostSearchHistoryResponseDTO history = postGetUseCase.getReviewSearchHistory(command);
-        return ResponseEntity.ok(ResponseDTO.success(history));
+    @GetMapping("/search")
+    @Operation(summary = "리뷰 검색 API", description = "검색어를 통해 리뷰를 검색하는 API")
+    public ResponseEntity<ResponseDTO<PostSearchResultListDTO>> searchLocations(
+            @RequestParam String query) {
+        PostSearchCommand command = new PostSearchCommand(query);
+        PostSearchResultListDTO postSearchList = postSearchUseCase.searchReviewsByQuery(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postSearchList));
     }
 
 

@@ -1,13 +1,19 @@
 package com.spoony.spoony_server.application.service.user;
 
+import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
+import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
+import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.UserSearchUseCase;
 import com.spoony.spoony_server.application.port.in.user.UserUpdateUseCase;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.domain.location.Location;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -20,7 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpdateUseCase {
+public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpdateUseCase , UserSearchUseCase {
 
     private final UserPort userPort;
 
@@ -147,6 +153,18 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
     public  void updateUserProfile(UserUpdateCommand command){
         userPort.updateUser(command.getUserId(),command.getUserName(),command.getRegionId(),command.getIntroduction(),command.getBirth());
     }
+
+
+    @Override
+    public UserSearchResultListDTO searchUsersByQuery(UserSearchCommand command){
+        List<User> userList = userPort.findByUserNameContaining(command.getQuery());
+
+        List<UserSearchResultDTO> userSearchResultList = userList.stream()
+                .map(user -> new UserSearchResultDTO(user.getUserName(),user.getRegion().getRegionName())).toList();
+
+        return new UserSearchResultListDTO(userSearchResultList);
+    }
+
 
 
 }
