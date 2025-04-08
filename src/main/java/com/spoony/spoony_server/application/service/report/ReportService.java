@@ -8,6 +8,8 @@ import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.report.Report;
+import com.spoony.spoony_server.domain.report.UserReport;
+import com.spoony.spoony_server.domain.report.UserReportType;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.ReportErrorMessage;
@@ -48,6 +50,35 @@ public class ReportService implements ReportCreateUseCase {
 
     @Override
     public void createUserReport(UserReportCreateCommand command) {
+        if (command.getReportDetail().trim().isEmpty()){
+            throw  new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_MISSING);
+        }
+        if (command.getReportDetail().length()>300){
+            throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_TOO_LONG);
+        }
+        UserReportType userReportType = command.getUserReportType();
+        if (userReportType == null){
+            userReportType = UserReportType.ADVERTISEMENT;
+        }
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
 
+        User user = userPort.findUserById(userId);
+        User targetUser = userPort.findUserById(targetUserId);
+
+        UserReport userReport = new UserReport(userReportType, command.getReportDetail(),user,targetUser);
+        reportPort.saveUserReport(userReport);
     }
 }
+
+
+//
+//    Long postId = command.getPostId();
+//    Long userId = command.getUserId();
+//
+//    Post post = postPort.findPostById(postId);
+//    User user = userPort.findUserById(userId);
+//
+//    Report report = new Report(reportType,command.getReportDetail(),post,user);
+//    reportPort.saveReport(report);
+//}
