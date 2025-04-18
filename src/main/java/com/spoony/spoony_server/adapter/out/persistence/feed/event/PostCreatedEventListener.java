@@ -10,11 +10,13 @@ import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 @Adapter
+@Async
 @RequiredArgsConstructor
 public class PostCreatedEventListener {
 
@@ -23,32 +25,29 @@ public class PostCreatedEventListener {
     private final FeedRepository feedRepository;
 
     @EventListener
+    @Transactional
     public void handlePostCreatedEvent(PostCreatedEvent event) {
+        System.out.println("🔥 이벤트 리스너 실행 스레드: " + Thread.currentThread());
+
         List<Long> followerIds = event.getFollowerIds();
         Long postId = event.getPostId();
 
         PostEntity postEntity = postRepository.findById(postId)
                 .orElseThrow();
 
-        int batchSize = 10_000;
-
-        var executor = Executors.newVirtualThreadPerTaskExecutor();
-        for (int i = 0; i < followerIds.size(); i += batchSize) {
+        for (int i = 0; i < followerIds.size(); i += 10_000) {
             int fromIndex = i;
-            int toIndex = Math.min(i + batchSize, followerIds.size());
+            int toIndex = Math.min(i + 10_000, followerIds.size());
 
-            executor.submit(() -> {
-                List<FeedEntity> feedList = followerIds.subList(fromIndex, toIndex).stream()
-                        .map(followerId -> {
-                            UserEntity userEntity = userRepository.findById(followerId)
-                                    .orElseThrow();
-                            return new FeedEntity(userEntity, postEntity);
-                        })
-                        .toList();
+            List<FeedEntity> feedList = followerIds.subList(fromIndex, toIndex).stream()
+                    .map(followerId -> {
+                        UserEntity userEntity = userRepository.findById(followerId)
+                                .orElseThrow();
+                        return new FeedEntity(userEntity, postEntity);
+                    })
+                    .toList();
 
-                feedRepository.saveAll(feedList);
-            });
+            feedRepository.saveAll(feedList);
         }
-        executor.shutdown();
     }
 }

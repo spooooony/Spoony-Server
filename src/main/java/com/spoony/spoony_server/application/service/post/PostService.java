@@ -262,6 +262,7 @@ public class PostService implements
         List<Long> followerIds = followList.stream().map(follow -> follow.getFollower().getUserId()).toList();
 
         // Event 발행
+        System.out.println("🔥 이벤트 발행 스레드: " + Thread.currentThread().getName());
         eventPublisher.publishEvent(new PostCreatedEvent(this, followerIds, post.getPostId()));
     }
 
