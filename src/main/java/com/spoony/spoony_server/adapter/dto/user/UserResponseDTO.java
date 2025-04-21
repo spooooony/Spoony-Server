@@ -11,5 +11,9 @@ public record UserResponseDTO(long userId,
                               String regionName,
                               String introduction,
                               LocalDateTime createdAt,
-                              LocalDateTime updatedAt) {
+                              LocalDateTime updatedAt,
+                              Long followerCount,
+                              Long followingCount,
+                              boolean isFollowing,
+                              Long reviewCount) {
 }
