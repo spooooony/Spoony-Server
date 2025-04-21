@@ -3,6 +3,7 @@ package com.spoony.spoony_server.application.service.user;
 import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
+import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
@@ -29,30 +30,13 @@ import java.util.List;
 public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpdateUseCase , UserSearchUseCase {
 
     private final UserPort userPort;
+    private final PostPort postPort;
 
-    public UserResponseDTO getUserInfo(UserGetCommand command) {
-        User user = userPort.findUserById(command.getUserId());
-
-        return new UserResponseDTO(
-                user.getUserId(),
-                user.getPlatform(),
-                user.getPlatformId(),
-                user.getUserName(),
-                user.getRegion().getRegionName(),
-                user.getIntroduction(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
-    }
-
-
-
-    public UserDetailResponseDTO getUserDetailInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand ){
+    public UserResponseDTO getUserInfo(UserGetCommand userGetCommand,UserFollowCommand userFollowCommand) {
         User user = userPort.findUserById(userGetCommand.getUserId());
-        String introduction = (user.getIntroduction() == null ? "안녕! 나는 어떤 스푼이냐면..." : user.getIntroduction());
-        //Long reviewCount = userPort.countPostByUserId(user.getUserId());
         Long followerCount = userPort.countFollowerByUserId(user.getUserId());
         Long followingCount = userPort.countFollowingByUserId(user.getUserId());
+        Long reviewCount = postPort.countPostsByUserId(userGetCommand.getUserId());
 
         // 🔥 로그인한 사용자가 이 유저를 팔로우 중인지 확인
         boolean isFollowing = false;
@@ -62,15 +46,48 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
                     userFollowCommand.getTargetUserId()
             );
         }
-        return new UserDetailResponseDTO(
+        return new UserResponseDTO(
+                user.getUserId(),
+                user.getPlatform(),
+                user.getPlatformId(),
                 user.getUserName(),
                 user.getRegion().getRegionName(),
-                introduction,
+                user.getIntroduction(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
                 followerCount,
                 followingCount,
-                isFollowing
+                isFollowing,
+                reviewCount
         );
     }
+
+
+
+//    public UserDetailResponseDTO getUserDetailInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand){
+//        User user = userPort.findUserById(userGetCommand.getUserId());
+//        String introduction = (user.getIntroduction() == null ? "안녕! 나는 어떤 스푼이냐면..." : user.getIntroduction());
+//        //Long reviewCount = userPort.countPostByUserId(user.getUserId());
+//        Long followerCount = userPort.countFollowerByUserId(user.getUserId());
+//        Long followingCount = userPort.countFollowingByUserId(user.getUserId());
+//
+//        // 🔥 로그인한 사용자가 이 유저를 팔로우 중인지 확인
+//        boolean isFollowing = false;
+//        if (userFollowCommand != null) {
+//            isFollowing = userPort.existsFollowRelation(
+//                    userFollowCommand.getUserId(),
+//                    userFollowCommand.getTargetUserId()
+//            );
+//        }
+//        return new UserDetailResponseDTO(
+//                user.getUserName(),
+//                user.getRegion().getRegionName(),
+//                introduction,
+//                followerCount,
+//                followingCount,
+//                isFollowing
+//        );
+//    }
 
     @Override
     public UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand command) {
@@ -104,33 +121,41 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
     }
 
     @Override
-    public List<UserSimpleResponseDTO> getFollowers(Long userId) {
+    public FollowListResponseDTO getFollowers(Long userId) {
         List<Follow> followers = userPort.findFollowersByUserId(userId);
-        return followers.stream()
-                .map(follow -> {
-                    User followerUser = follow.getFollower(); //나를 팔로우한 사람
-                    boolean isFollowing = userPort.existsFollowRelation(userId,followerUser.getUserId());
 
-                    return new UserSimpleResponseDTO(followerUser.getUserId(),followerUser.getUserName(),followerUser.getRegion().getRegionName(),isFollowing);
-                }).toList();
+        List<UserSimpleResponseDTO> userDTOList = followers.stream().map(follow -> {
+            User followerUser = follow.getFollower();
+            boolean isFollowing = userPort.existsFollowRelation(userId,followerUser.getUserId());
+            return new UserSimpleResponseDTO(
+                    followerUser.getUserId(),
+                    followerUser.getUserName(),
+                    followerUser.getRegion().getRegionName(),
+                    isFollowing
+            );
+
+        }).toList();
+
+       return new FollowListResponseDTO(userDTOList.size(),userDTOList);
 
     }
 
     @Override
-    public List<UserSimpleResponseDTO> getFollowings(Long userId) {
+    public FollowListResponseDTO getFollowings(Long userId) {
         List<Follow> followings = userPort.findFollowingsByUserId(userId);
 
-        return followings.stream()
-                .map(follow -> {
-                    User followingUser = follow.getFollowing();
-                    return new UserSimpleResponseDTO(
-                            followingUser.getUserId(),
-                            followingUser.getUserName(),
-                            followingUser.getRegion().getRegionName(),
-                            true  // 내가 팔로우한 사람이므로 true
-                    );
-                }).toList();
+        List<UserSimpleResponseDTO> userDTOList = followings.stream().map(follow -> {
+            User followingUser = follow.getFollowing();
+            boolean isFollowing = userPort.existsFollowRelation(userId,followingUser.getUserId());
+            return new UserSimpleResponseDTO(
+                    followingUser.getUserId(),
+                    followingUser.getUserName(),
+                    followingUser.getRegion().getRegionName(),
+                    isFollowing
+            );
 
+        }).toList();
+        return new FollowListResponseDTO(userDTOList.size(),userDTOList);
     }
 
 

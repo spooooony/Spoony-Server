@@ -137,6 +137,7 @@ public class ZzimPostService implements
                             post.getUser().getUserName(),
                             post.getUser().getRegion().getRegionName(),
                             post.getPostId(),
+                            post.getDescription(),
                             zzimCount,
                             photoUrlList
                     );
