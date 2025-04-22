@@ -14,7 +14,11 @@ public class PostMapper {
                 new User(
                         postEntity.getUser().getUserId(),
                         postEntity.getUser().getPlatform(),
+
                         postEntity.getUser().getPlatformId(),
+                        postEntity.getUser().getProfileImageLevel(),
+                        postEntity.getUser().getLevel(),
+
                         postEntity.getUser().getUserName(),
                         RegionMapper.toDomain(postEntity.getUser().getRegion()),
                         postEntity.getUser().getIntroduction(),

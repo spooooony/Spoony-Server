@@ -5,6 +5,7 @@ import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,10 +16,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Platform platform;
     private String platformId;
+
+    @Enumerated(EnumType.STRING)
+    private Long imageLevel;
+    private Long level;
     private String userName;
     private Region region;
     private String introduction;
-    private LocalDateTime birth;
+    private LocalDate birth;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

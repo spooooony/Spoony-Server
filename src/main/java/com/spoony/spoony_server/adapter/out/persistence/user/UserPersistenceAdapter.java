@@ -12,6 +12,7 @@ import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.location.Location;
 import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.domain.user.ProfileImage;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.RegionErrorMessage;
@@ -20,6 +21,7 @@ import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -128,13 +130,14 @@ public class UserPersistenceAdapter implements UserPort {
 
     }
 
+
     @Override
-    public void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDateTime birth) {
+    public void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDate birth, Long imageLevel) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(()-> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         RegionEntity region = regionRepository.findById(regionId).orElseThrow(() -> new BusinessException(RegionErrorMessage.REGION_NOT_FOUND));;
 
-        userEntity.updateProfile(userName,region,introduction,birth);
+        userEntity.updateProfile(userName,region,introduction,birth,imageLevel);
     }
 
     @Override

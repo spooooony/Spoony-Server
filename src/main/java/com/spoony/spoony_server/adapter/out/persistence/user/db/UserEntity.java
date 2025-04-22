@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
 import com.spoony.spoony_server.domain.user.Platform;
+import com.spoony.spoony_server.domain.user.ProfileImage;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,8 +28,12 @@ public class UserEntity {
     private Platform platform;
     private String platformId;
 
+    private Long level;
+
+    private Long profileImageLevel;
+
     private String userName;
-    private LocalDateTime birth;
+    private LocalDate birth;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private RegionEntity region;
@@ -45,24 +51,30 @@ public class UserEntity {
     public UserEntity(Long userId,
                       Platform platform,
                       String platformId,
+                      Long level,
+                      Long profileImageLevel,
                       String userName,
                       RegionEntity region,
                       String introduction,
-                      LocalDateTime birth) {
+                      LocalDate birth) {
         this.userId = userId;
         this.platform = platform;
         this.platformId = platformId;
+        this.level = level;
+        this.profileImageLevel = profileImageLevel;
         this.userName = userName;
         this.region = region;
         this.introduction = introduction;
         this.birth = birth;
     }
 
-    public void updateProfile(String userName, RegionEntity region, String introduction, LocalDateTime birth) {
+    public void updateProfile(String userName, RegionEntity region, String introduction, LocalDate birth,Long profileImageLevel) {
         this.userName = userName;
         this.region = region;
         this.introduction = introduction;
         this.birth = birth;
+        this.profileImageLevel = profileImageLevel;
+
     }
 
 }

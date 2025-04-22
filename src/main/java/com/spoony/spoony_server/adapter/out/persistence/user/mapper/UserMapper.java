@@ -11,6 +11,8 @@ public class UserMapper {
                 userEntity.getUserId(),
                 userEntity.getPlatform(),
                 userEntity.getPlatformId(),
+                userEntity.getProfileImageLevel(),
+                userEntity.getLevel(),
                 userEntity.getUserName(),
                 RegionMapper.toDomain(userEntity.getRegion()),
                 userEntity.getIntroduction(),

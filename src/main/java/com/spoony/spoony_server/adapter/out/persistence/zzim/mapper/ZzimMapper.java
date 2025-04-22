@@ -17,6 +17,8 @@ public class ZzimMapper {
                         zzimPostEntity.getUser().getUserId(),
                         zzimPostEntity.getUser().getPlatform(),
                         zzimPostEntity.getUser().getPlatformId(),
+                        zzimPostEntity.getUser().getProfileImageLevel(),
+                        zzimPostEntity.getUser().getLevel(),
                         zzimPostEntity.getUser().getUserName(),
                         RegionMapper.toDomain(zzimPostEntity.getUser().getRegion()),
                         zzimPostEntity.getUser().getIntroduction(),
