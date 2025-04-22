@@ -6,6 +6,7 @@ import com.spoony.spoony_server.adapter.dto.user.UserSearchResultListDTO;
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
+import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
@@ -19,6 +20,7 @@ import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
@@ -108,13 +110,27 @@ public class PostService implements
                         category.getBackgroundColor())
         );
     }
-    public FeedListResponseDTO getPostsByUserId(UserGetCommand command){
+    public FeedListResponseDTO getPostsByUserId(UserReviewGetCommand command){
         Long userId = command.getUserId();
-
+        Boolean isLocalReview = command.getIsLocalReview();
         //1. 유저가 작성한 게시물 모두 조회
-        List<Post> postList = postPort.findPostsByUserId(userId)
-;
-        //2. 각 Post -> Feed
+        List<Post> postList = postPort.findPostsByUserId(userId);
+
+
+        //2. localReview가 true일 경우, 활동 지역과 식당 지역이 같은 게시물만 필터링
+        if(Boolean.TRUE.equals(isLocalReview)){
+            postList = postList.stream().filter(post -> {
+                String userRegionName = post.getUser().getRegion().getRegionName();
+
+
+                String placeAddress = post.getPlace().getPlaceAddress();
+
+                return placeAddress.contains(userRegionName);
+            }).collect(Collectors.toList());
+        }
+
+
+        //3. 각 Post -> Feed
         List<FeedResponseDTO> feedResponseList = postList.stream().map(post -> {
                     User author = post.getUser();
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
