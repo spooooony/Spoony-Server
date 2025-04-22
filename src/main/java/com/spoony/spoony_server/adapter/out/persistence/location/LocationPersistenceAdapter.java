@@ -10,21 +10,25 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Adapter
+@Transactional
 @RequiredArgsConstructor
 public class LocationPersistenceAdapter implements LocationPort {
 
     private final LocationRepository locationRepository;
 
+    @Override
     public Location findLocationById(Long locationId) {
         return locationRepository.findById(locationId)
                 .map(LocationMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
     }
+
     @Override
     public List<Location> findByLocationNameContaining(String query) {
         List<LocationEntity> locationEntityList = locationRepository.findByLocationNameContaining(query);

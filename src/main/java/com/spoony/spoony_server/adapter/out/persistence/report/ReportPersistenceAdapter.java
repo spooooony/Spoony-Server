@@ -16,8 +16,10 @@ import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Adapter
+@Transactional
 @RequiredArgsConstructor
 public class ReportPersistenceAdapter implements ReportPort {
 
@@ -25,6 +27,7 @@ public class ReportPersistenceAdapter implements ReportPort {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private  final UserReportRepository userReportRepository;
+
     @Override
     public void saveReport(Report report) {
         UserEntity userEntity = userRepository.findById(report.getUser().getUserId()).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
@@ -51,6 +54,4 @@ public class ReportPersistenceAdapter implements ReportPort {
                 .build();
         userReportRepository.save(userReportEntity);
     }
-
-
 }

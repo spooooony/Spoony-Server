@@ -8,11 +8,13 @@ import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
 
 @Adapter
+@Transactional
 @RequiredArgsConstructor
 public class TokenSearchAdapter implements TokenPort {
 

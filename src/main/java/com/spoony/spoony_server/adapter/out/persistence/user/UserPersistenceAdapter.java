@@ -19,12 +19,14 @@ import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
+@Transactional
 @RequiredArgsConstructor
 public class UserPersistenceAdapter implements UserPort {
 
@@ -86,9 +88,7 @@ public class UserPersistenceAdapter implements UserPort {
     @Override
     public void deleteFollowRelation(Long fromUserId, Long toUserId) {
         followRepository.deleteByFollower_UserIdAndFollowing_UserId(fromUserId, toUserId);
-
     }
-
 
     @Override
     public void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDate birth, Long imageLevel) {

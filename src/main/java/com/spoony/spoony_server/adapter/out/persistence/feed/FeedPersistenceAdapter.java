@@ -17,10 +17,12 @@ import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Adapter
+@Transactional
 @RequiredArgsConstructor
 public class FeedPersistenceAdapter implements FeedPort {
 
@@ -59,6 +61,7 @@ public class FeedPersistenceAdapter implements FeedPort {
         feedRepository.saveAll(feedList);
     }
 
+    @Override
     public void deleteFeedByUserIdAndPostId(Long userId, Long postId) {
         feedRepository.deleteByUser_UserIdAndPost_PostId(userId, postId);
     }

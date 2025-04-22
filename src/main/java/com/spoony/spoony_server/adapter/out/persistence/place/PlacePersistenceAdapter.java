@@ -10,10 +10,12 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Adapter
+@Transactional
 @RequiredArgsConstructor
 public class PlacePersistenceAdapter implements PlacePort {
 
@@ -38,6 +40,7 @@ public class PlacePersistenceAdapter implements PlacePort {
         return placeEntity.getPlaceId();
     }
 
+    @Override
     public Place findPlaceById(Long placeId) {
         return placeRepository.findById(placeId)
                 .map(PlaceMapper::toDomain)
