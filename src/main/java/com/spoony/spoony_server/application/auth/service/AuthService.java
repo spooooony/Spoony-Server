@@ -1,16 +1,14 @@
 package com.spoony.spoony_server.application.auth.service;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
-import com.spoony.spoony_server.adapter.auth.dto.request.UserLoginDTO;
+import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
+import com.spoony.spoony_server.adapter.auth.dto.response.LoginResponseDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
-import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
-import com.spoony.spoony_server.application.auth.port.in.RefreshUseCase;
-import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
+import com.spoony.spoony_server.application.auth.port.in.*;
 import com.spoony.spoony_server.application.auth.port.out.TokenPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenProvider;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenValidator;
@@ -24,7 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class AuthService implements
-        SignInUseCase,
+        SignupUseCase,
+        LoginUseCase,
+        LogoutUseCase,
+        WithdrawUseCase,
         RefreshUseCase {
 
     private final UserPort userPort;
@@ -35,21 +36,46 @@ public class AuthService implements
     private final KakaoService kakaoService;
 
     @Override
-    public UserTokenDTO signIn(String platformToken, UserLoginDTO userLoginDTO) {
+    public UserTokenDTO signup(String platformToken, UserSignupDTO userSignupDTO) {
 
-//         PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userLoginDTO);
+         PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userSignupDTO);
 
 //         소셜 로그인 테스트 전, 회원가입 테스트 코드
-         PlatformUserDTO platformUserDTO = new PlatformUserDTO("test_id", "test_email");
+//         PlatformUserDTO platformUserDTO = new PlatformUserDTO("test_id", "test_email");
 
-        User user = userPort.loadOrCreate(platformUserDTO, userLoginDTO);
+        User user = userPort.create(platformUserDTO, userSignupDTO);
         JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
         tokenPort.saveToken(user.getUserId(), token);
         return UserTokenDTO.of(user, token);
     }
 
     @Override
-    @Transactional
+    public LoginResponseDTO login(Platform platform, String platformToken) {
+        PlatformUserDTO platformUserDTO = getPlatformInfo(platform, platformToken);
+        User user = userPort.load(platform, platformUserDTO);
+
+        if (user == null) {
+            return LoginResponseDTO.of(false, null, null);
+        }
+
+        JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
+        tokenPort.saveToken(user.getUserId(), token);
+
+        return LoginResponseDTO.of(true, user, token);
+    }
+
+    @Override
+    public void logout(Long userId) {
+        tokenPort.deleteRefreshToken(userId);
+    }
+
+    @Override
+    public void withdraw(Long userId) {
+        tokenPort.deleteRefreshToken(userId);
+        userPort.deleteUser(userId);
+    }
+
+    @Override
     public JwtTokenDTO refreshAccessToken(final String refreshToken) {
         jwtTokenValidator.validateRefreshToken(refreshToken);
         Long userId = jwtTokenProvider.getClaimFromToken(refreshToken).userId();
@@ -57,7 +83,7 @@ public class AuthService implements
         tokenPort.checkRefreshToken(refreshToken, userId, isAccessToken);
 
         // 현재 refresh token 정보 삭제 (Refresh Token Rotation)
-        tokenPort.deleteRefreshToken(refreshToken);
+        tokenPort.deleteRefreshToken(userId);
 
         JwtTokenDTO tokens = jwtTokenProvider.generateTokenPair(userId);
         tokenPort.saveToken(userId, tokens);
@@ -65,10 +91,22 @@ public class AuthService implements
         return tokens;
     }
 
-    private PlatformUserDTO getPlatformInfo(String platformToken, UserLoginDTO userLoginDto) {
-        if (userLoginDto.platform().toString().equals("KAKAO")){
+    // 회원가입
+    private PlatformUserDTO getPlatformInfo(String platformToken, UserSignupDTO userSignupDto) {
+        if (userSignupDto.platform().toString().equals("KAKAO")){
             return kakaoService.getPlatformUserInfo(platformToken);
-        } else if (userLoginDto.platform().toString().equals("APPLE")){
+        } else if (userSignupDto.platform().toString().equals("APPLE")){
+            return appleService.getPlatformUserInfo(platformToken);
+        } else {
+            throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);
+        }
+    }
+
+    // 로그인
+    private PlatformUserDTO getPlatformInfo(Platform platform, String platformToken) {
+        if (platform.toString().equals("KAKAO")){
+            return kakaoService.getPlatformUserInfo(platformToken);
+        } else if (platform.toString().equals("APPLE")){
             return appleService.getPlatformUserInfo(platformToken);
         } else {
             throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);

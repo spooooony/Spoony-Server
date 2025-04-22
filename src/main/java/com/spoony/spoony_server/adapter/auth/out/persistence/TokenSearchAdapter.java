@@ -47,7 +47,7 @@ public class TokenSearchAdapter implements TokenPort {
     }
 
     @Override
-    public void deleteRefreshToken(String refreshToken) {
-        tokenRepository.deleteByRefreshToken(refreshToken);
+    public void deleteRefreshToken(Long userId) {
+        tokenRepository.deleteById(userId);
     }
 }
