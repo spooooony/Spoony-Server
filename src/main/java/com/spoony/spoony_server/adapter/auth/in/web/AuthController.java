@@ -1,10 +1,11 @@
 package com.spoony.spoony_server.adapter.auth.in.web;
 
-import com.spoony.spoony_server.adapter.auth.dto.request.UserLoginDTO;
+import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
+import com.spoony.spoony_server.adapter.auth.dto.response.LoginResponseDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
-import com.spoony.spoony_server.application.auth.port.in.RefreshUseCase;
-import com.spoony.spoony_server.application.auth.port.in.SignInUseCase;
+import com.spoony.spoony_server.application.auth.port.in.*;
+import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
@@ -23,16 +24,44 @@ import static com.spoony.spoony_server.global.auth.constant.AuthConstant.BEARER_
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final SignInUseCase signInUseCase;
+    private final SignupUseCase signupUseCase;
+    private final LoginUseCase loginUseCase;
+    private final LogoutUseCase logoutUseCase;
+    private final WithdrawUseCase withdrawUseCase;
     private final RefreshUseCase refreshUseCase;
 
-    @PostMapping("/signin")
-    @Operation(summary = "회원가입 API", description = "소셜 로그인 회원가입 API, Token Set 발급")
-    public ResponseEntity<ResponseDTO<UserTokenDTO>> signIn(
+    @PostMapping("/signup")
+    @Operation(summary = "회원가입 API", description = "회원 가입 API, Token Set 발급")
+    public ResponseEntity<ResponseDTO<UserTokenDTO>> signup(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
-            @Valid @RequestBody final UserLoginDTO userLoginDTO
+            @Valid @RequestBody final UserSignupDTO userSignupDTO
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(signInUseCase.signIn(platformToken, userLoginDTO)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(signupUseCase.signup(platformToken, userSignupDTO)));
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "로그인 API", description = "사용자 로그인 API, 성공 시 Token Set, 실패 시 회원가입 필요")
+    public ResponseEntity<ResponseDTO<LoginResponseDTO>> login(
+            @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
+            @RequestBody final Platform platform
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platform, platformToken)));
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃 API", description = "마이페이지 > 설정에서 로그아웃하는 API")
+    public ResponseEntity<ResponseDTO<Void>> logout(
+            @UserId Long userId
+    ) {
+        logoutUseCase.logout(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
+    }
+
+    @PostMapping("/withdraw")
+    @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴하는 API")
+    public ResponseEntity<ResponseDTO<Void>> withdraw(@UserId Long userId) {
+        withdrawUseCase.withdraw(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
     @PostMapping("/refresh")
@@ -46,19 +75,4 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(refreshUseCase.refreshAccessToken(refreshToken)));
     }
-
-    @PostMapping("/signout")
-    @Operation(summary = "로그아웃 API", description = "마이페이지 > 설정에서 로그아웃하는 API")
-    public ResponseEntity<Void> signOut(@UserId Long userId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-    }
-
-    @PostMapping("/withdraw")
-    @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴하는 API")
-    public ResponseEntity<Void> withdraw(@UserId Long userId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-    }
-
-
-
 }
