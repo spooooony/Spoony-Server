@@ -3,6 +3,7 @@ package com.spoony.spoony_server.application.service.user;
 import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
+import com.spoony.spoony_server.adapter.dto.post.RegionDTO;
 import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
@@ -16,6 +17,7 @@ import com.spoony.spoony_server.domain.location.Location;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.ProfileImage;
+import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
@@ -27,12 +29,19 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpdateUseCase , UserSearchUseCase {
+public class UserService implements
+        UserGetUseCase,
+        UserFollowUseCase,
+        UserUpdateUseCase,
+        UserSearchUseCase,
+        RegionGetUseCase {
 
     private final UserPort userPort;
     private final PostPort postPort;
     private final ZzimPostPort zzimPostPort;
 
+    @Transactional
+    @Override
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand,UserFollowCommand userFollowCommand) {
         User user = userPort.findUserById(userGetCommand.getUserId());
         Long followerCount = userPort.countFollowerByUserId(user.getUserId());
@@ -62,15 +71,10 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
                 isFollowing,
                 reviewCount,
                 user.getImageLevel().intValue()
-
-
         );
     }
 
-
-
-
-
+    @Transactional
     @Override
     public UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand command) {
         User user = userPort.findUserById(command.getUserId());
@@ -84,26 +88,31 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
         );
     }
 
+    @Transactional
     @Override
     public List<UserSimpleResponseDTO> getUserSimpleInfo(UserGetCommand command) {
         return null;
     }
 
+    @Transactional
     @Override
     public List<UserSimpleResponseDTO> getUserSimpleInfoBySearch(UserSearchCommand command) {
         return List.of();
     }
 
-
+    @Transactional
+    @Override
     public Boolean isUsernameDuplicate(UserNameCheckCommand command) {
         return userPort.existsByUserName(command.getUsername());
     }
 
+    @Transactional
     @Override
     public UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command) {
         return null;
     }
 
+    @Transactional
     @Override
     public FollowListResponseDTO getFollowers(Long userId) {
         List<Follow> followers = userPort.findFollowersByUserId(userId);
@@ -129,6 +138,7 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
 
     }
 
+    @Transactional
     @Override
     public FollowListResponseDTO getFollowings(Long userId) {
         List<Follow> followings = userPort.findFollowingsByUserId(userId);
@@ -150,19 +160,16 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
         return new FollowListResponseDTO(userDTOList.size(),userDTOList);
     }
 
-
     @Transactional
     @Override
     public void createFollow(UserFollowCommand command) {
         userPort.saveFollowRelation(command.getUserId(),command.getTargetUserId());
-
     }
 
     @Transactional
     @Override
     public void deleteFollow(UserFollowCommand command) {
         userPort.deleteFollowRelation(command.getUserId(),command.getTargetUserId());
-
     }
 
     @Transactional
@@ -171,7 +178,7 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
         userPort.updateUser(command.getUserId(),command.getUserName(),command.getRegionId(),command.getIntroduction(),command.getBirth(),command.getImageLevel());
     }
 
-
+    @Transactional
     @Override
     public UserSearchResultListDTO searchUsersByQuery(UserSearchCommand command){
         List<User> userList = userPort.findByUserNameContaining(command.getQuery());
@@ -182,8 +189,14 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
         return new UserSearchResultListDTO(userSearchResultList);
     }
 
+    @Transactional
+    @Override
+    public RegionListDTO getRegionList() {
+        List<RegionDTO> regionList = userPort.findAllRegions().stream()
+                .map(region -> new RegionDTO(region.getRegionId(), region.getRegionName()))
+                .toList();
 
-
-
+        return new RegionListDTO(regionList);
+    }
 }
 

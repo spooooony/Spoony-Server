@@ -8,11 +8,13 @@ import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.location.Location;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.ProfileImage;
+import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.RegionErrorMessage;
@@ -157,5 +159,10 @@ public class UserPersistenceAdapter implements UserPort {
         return followRepository.countByFollower_UserId(userId);
     }
 
-
+    @Override
+    public List<Region> findAllRegions() {
+        return regionRepository.findAll().stream()
+                .map(RegionMapper::toDomain)
+                .toList();
+    }
 }
