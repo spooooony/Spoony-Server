@@ -36,6 +36,7 @@ public class AuthController {
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @Valid @RequestBody final UserSignupDTO userSignupDTO
     ) {
+        System.out.println(platformToken);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(signupUseCase.signup(platformToken, userSignupDTO)));
     }
 

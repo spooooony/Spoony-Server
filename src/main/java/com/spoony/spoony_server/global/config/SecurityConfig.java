@@ -25,7 +25,8 @@ public class SecurityConfig {
     private final CustomJwtAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final List<String> AUTH_WHITE_LIST = List.of(
-            "/api/v1/auth/signin",
+            "/api/v1/auth/signup",
+            "/api/v1/auth/login",
             "/api/v1/auth/refresh",
             "/api/v1/user/exists",
             "/swagger-ui/**",
