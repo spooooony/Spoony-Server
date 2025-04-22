@@ -27,6 +27,7 @@ public class UserController {
     private final UserSearchUseCase userSearchUseCase;
     private final PostGetUseCase postGetUseCase;
     private final ProfileImageGetUseCase profileImageGetUseCase;
+    private final RegionGetUseCase regionGetUseCase;
 
     @GetMapping
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
@@ -37,8 +38,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
 
-
-
     @GetMapping("/{userId}")
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Id 기준)")
     public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfoById(
@@ -48,8 +47,6 @@ public class UserController {
         UserFollowCommand userFollowCommand = new UserFollowCommand(userId,targetUserId);
         UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(userGetCommand,userFollowCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
-
-
     }
 
     @GetMapping("/exists")
@@ -60,9 +57,6 @@ public class UserController {
         boolean isDuplicate = userGetUseCase.isUsernameDuplicate(command);
         return ResponseEntity.ok(ResponseDTO.success(isDuplicate));
     }
-
-
-
 
     @GetMapping("/followers")
     @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API입니다.")
@@ -76,7 +70,6 @@ public class UserController {
     @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getFollowings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
-
         FollowListResponseDTO followings = userGetUseCase.getFollowings(command.getUserId());
         return ResponseEntity.ok(ResponseDTO.success(followings));
     }
@@ -95,17 +88,16 @@ public class UserController {
             @UserId Long userId
     ) {
         UserGetCommand command = new UserGetCommand(userId);
-
         UserProfileUpdateResponseDTO responseDTO = userGetUseCase.getUserProfileInfo(command);
         return ResponseEntity.ok(ResponseDTO.success(responseDTO));
     }
+
     @PatchMapping("/profile")
     @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> updateUserProfile(
             @UserId Long userId,
             @RequestBody UserProfileUpdateRequestDTO userUpdateRequestDTO
     ) {
-
         UserUpdateCommand command = new UserUpdateCommand(userId,userUpdateRequestDTO.userName(),userUpdateRequestDTO.regionId(),userUpdateRequestDTO.introduction(),userUpdateRequestDTO.birth(),userUpdateRequestDTO.imageLevel());
         userUpdateUseCase.updateUserProfile(command);
         return ResponseEntity.ok(ResponseDTO.success(null));
@@ -134,7 +126,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
-
     @GetMapping("/{userId}/reviews")
     @Operation(
             summary = "특정 사용자 리뷰 전체 조회 API",
@@ -149,7 +140,6 @@ public class UserController {
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
-
 
     @PostMapping("/follow")
     @Operation(
@@ -187,7 +177,6 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-
     @PostMapping("/block")
     @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> blockUser(
@@ -197,16 +186,19 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-
-
     @GetMapping("/search")
     @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색하는 API")
     public ResponseEntity<ResponseDTO<UserSearchResultListDTO>> searchLocations(
                 @RequestParam String query) {
-            UserSearchCommand command = new UserSearchCommand(query);
-            UserSearchResultListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command);
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userSearchList));
-        }
+        UserSearchCommand command = new UserSearchCommand(query);
+        UserSearchResultListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userSearchList));
+    }
 
-
+    @GetMapping("/region")
+    @Operation(summary = "유저 활동 지역 리스트 API", description = "모든 유저 활동 지역 종류를 반환하는 API (?? 수저)")
+    public ResponseEntity<ResponseDTO<RegionListDTO>> getRegion() {
+        RegionListDTO regionListDTO = regionGetUseCase.getRegionList();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(regionListDTO));
+    }
 }

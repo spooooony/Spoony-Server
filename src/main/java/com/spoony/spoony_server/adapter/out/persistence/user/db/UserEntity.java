@@ -34,13 +34,12 @@ public class UserEntity {
 
     private String userName;
     private LocalDate birth;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private RegionEntity region;
 
     private String introduction;
-
-
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -74,7 +73,5 @@ public class UserEntity {
         this.introduction = introduction;
         this.birth = birth;
         this.profileImageLevel = profileImageLevel;
-
     }
-
 }

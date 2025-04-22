@@ -94,6 +94,8 @@ public class PostService implements
                 latestDate,
                 menuNameList,
                 post.getDescription(),
+                post.getValue(),
+                post.getCons(),
                 place.getPlaceName(),
                 place.getPlaceAddress(),
                 place.getLatitude(),

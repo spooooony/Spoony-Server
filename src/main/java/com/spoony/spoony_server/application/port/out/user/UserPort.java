@@ -6,6 +6,7 @@ import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionEntity;
 import com.spoony.spoony_server.domain.location.Location;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.ProfileImage;
+import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public interface UserPort {
     void deleteFollowRelation(Long fromUserId, Long toUserId);
     void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDate birth, Long imageLevel);
     List<User> findByUserNameContaining(String query);
-
+    List<Region> findAllRegions();
 
     // 내가 팔로우한 사람 수 (팔로잉 수)
     Long countFollowerByUserId(Long userId);
@@ -31,6 +32,4 @@ public interface UserPort {
 
     // 나를 팔로우한 사람 수 (팔로워 수)
     Long countFollowingByUserId(Long userId);
-
-
 }

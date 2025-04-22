@@ -42,6 +42,8 @@ public class PlaceSearchAdapter implements PlaceSearchPort {
                 double mapx = item.get("mapx").asDouble();
                 double mapy = item.get("mapy").asDouble();
 
+                if (!address.contains("서울")) return;
+
                 places.add(new PlaceResponseDTO(title, address, roadAddress, mapy / 10000000, mapx / 10000000));
             });
 
