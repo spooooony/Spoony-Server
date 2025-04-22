@@ -128,7 +128,7 @@ public class UserController {
     """
     )
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
-        UserGetCommand command = new UserGetCommand(userId); //user 객체
+        UserReviewGetCommand command = new UserReviewGetCommand(userId,null); //user 객체
 
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
@@ -141,11 +141,11 @@ public class UserController {
             description = """
     다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 목록**을 조회하는 API입니다.
     - **userId**는 path parameter로 전달받습니다.
-   
+    - **localReview** 쿼리 파라미터를 통해 로컬리뷰 필터링 여부를 지정할 수 있습니다 (기본값: false).
     """
     )
-    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId) {
-        UserGetCommand command = new UserGetCommand(userId);
+    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId,@RequestParam(defaultValue = "false") boolean isLocalReview) {
+        UserReviewGetCommand command = new UserReviewGetCommand(userId,isLocalReview);
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
