@@ -8,14 +8,14 @@ import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
-import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserSearchUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserUpdateUseCase;
+import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.location.Location;
+import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.domain.user.ProfileImage;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
@@ -31,6 +31,7 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
 
     private final UserPort userPort;
     private final PostPort postPort;
+    private final ZzimPostPort zzimPostPort;
 
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand,UserFollowCommand userFollowCommand) {
         User user = userPort.findUserById(userGetCommand.getUserId());
@@ -46,7 +47,8 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
                     userFollowCommand.getTargetUserId()
             );
         }
-        return new UserResponseDTO(
+
+        return UserResponseDTO.from(
                 user.getUserId(),
                 user.getPlatform(),
                 user.getPlatformId(),
@@ -58,36 +60,16 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
                 followerCount,
                 followingCount,
                 isFollowing,
-                reviewCount
+                reviewCount,
+                user.getImageLevel().intValue()
+
+
         );
     }
 
 
 
-//    public UserDetailResponseDTO getUserDetailInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand){
-//        User user = userPort.findUserById(userGetCommand.getUserId());
-//        String introduction = (user.getIntroduction() == null ? "안녕! 나는 어떤 스푼이냐면..." : user.getIntroduction());
-//        //Long reviewCount = userPort.countPostByUserId(user.getUserId());
-//        Long followerCount = userPort.countFollowerByUserId(user.getUserId());
-//        Long followingCount = userPort.countFollowingByUserId(user.getUserId());
-//
-//        // 🔥 로그인한 사용자가 이 유저를 팔로우 중인지 확인
-//        boolean isFollowing = false;
-//        if (userFollowCommand != null) {
-//            isFollowing = userPort.existsFollowRelation(
-//                    userFollowCommand.getUserId(),
-//                    userFollowCommand.getTargetUserId()
-//            );
-//        }
-//        return new UserDetailResponseDTO(
-//                user.getUserName(),
-//                user.getRegion().getRegionName(),
-//                introduction,
-//                followerCount,
-//                followingCount,
-//                isFollowing
-//        );
-//    }
+
 
     @Override
     public UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand command) {
@@ -96,7 +78,9 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
                 user.getUserName(),
                 user.getRegion().getRegionName(),
                 user.getIntroduction(),
-                user.getBirth()
+                user.getBirth(),
+                user.getImageLevel()
+
         );
     }
 
@@ -127,11 +111,16 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
         List<UserSimpleResponseDTO> userDTOList = followers.stream().map(follow -> {
             User followerUser = follow.getFollower();
             boolean isFollowing = userPort.existsFollowRelation(userId,followerUser.getUserId());
-            return new UserSimpleResponseDTO(
+            // profileImageLevel을 int로 변환
+            int profileImageLevel = followerUser.getImageLevel().intValue(); // Long을 int로 변환
+            ProfileImage profileImage = ProfileImage.fromLevel(profileImageLevel);
+            String profileImageUrl = "/images/" + profileImage.getImage();
+            return UserSimpleResponseDTO.from(
                     followerUser.getUserId(),
                     followerUser.getUserName(),
                     followerUser.getRegion().getRegionName(),
-                    isFollowing
+                    isFollowing,
+                    followerUser.getImageLevel().intValue()
             );
 
         }).toList();
@@ -147,11 +136,14 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
         List<UserSimpleResponseDTO> userDTOList = followings.stream().map(follow -> {
             User followingUser = follow.getFollowing();
             boolean isFollowing = userPort.existsFollowRelation(userId,followingUser.getUserId());
-            return new UserSimpleResponseDTO(
+            // profileImageLevel을 int로 변환
+
+            return UserSimpleResponseDTO.from(
                     followingUser.getUserId(),
                     followingUser.getUserName(),
                     followingUser.getRegion().getRegionName(),
-                    isFollowing
+                    isFollowing,
+                    followingUser.getImageLevel().intValue()
             );
 
         }).toList();
@@ -176,7 +168,7 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
     @Transactional
     @Override
     public  void updateUserProfile(UserUpdateCommand command){
-        userPort.updateUser(command.getUserId(),command.getUserName(),command.getRegionId(),command.getIntroduction(),command.getBirth());
+        userPort.updateUser(command.getUserId(),command.getUserName(),command.getRegionId(),command.getIntroduction(),command.getBirth(),command.getImageLevel());
     }
 
 
@@ -189,6 +181,7 @@ public class UserService implements UserGetUseCase, UserFollowUseCase , UserUpda
 
         return new UserSearchResultListDTO(userSearchResultList);
     }
+
 
 
 

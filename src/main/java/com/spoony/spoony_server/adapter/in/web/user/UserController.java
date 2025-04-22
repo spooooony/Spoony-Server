@@ -5,10 +5,7 @@ import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserFollowUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserGetUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserSearchUseCase;
-import com.spoony.spoony_server.application.port.in.user.UserUpdateUseCase;
+import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +26,7 @@ public class UserController {
     private final UserUpdateUseCase userUpdateUseCase;
     private final UserSearchUseCase userSearchUseCase;
     private final PostGetUseCase postGetUseCase;
+    private final ProfileImageGetUseCase profileImageGetUseCase;
 
     @GetMapping
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
@@ -108,23 +106,17 @@ public class UserController {
             @RequestBody UserProfileUpdateRequestDTO userUpdateRequestDTO
     ) {
 
-        UserUpdateCommand command = new UserUpdateCommand(userId,userUpdateRequestDTO.userName(),userUpdateRequestDTO.regionId(),userUpdateRequestDTO.introduction(),userUpdateRequestDTO.birth());
+        UserUpdateCommand command = new UserUpdateCommand(userId,userUpdateRequestDTO.userName(),userUpdateRequestDTO.regionId(),userUpdateRequestDTO.introduction(),userUpdateRequestDTO.birth(),userUpdateRequestDTO.imageLevel());
         userUpdateUseCase.updateUserProfile(command);
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-//    public ResponseEntity<ResponseDTO<Void>> followUser(
-//            @UserId Long userId,
-//            @RequestBody UserFollowRequestDTO requestDTO
-//    ) {
-//        UserFollowCommand command = new UserFollowCommand(
-//                userId,
-//                requestDTO.targetUserId()
-//        );
-//        userFollowUseCase.createFollow(command);
-//
-//        return ResponseEntity.ok(ResponseDTO.success(null));
-//    }
+    @GetMapping("/profile/images")
+    public ResponseEntity<ResponseDTO<ProfileImageListResponseDTO>> getAvailableProfileImages(@UserId Long userId){
+        UserGetCommand command = new UserGetCommand(userId);
+        ProfileImageListResponseDTO profileImageListResponse = profileImageGetUseCase.getAvailableProfileImages(command);
+        return ResponseEntity.ok(ResponseDTO.success(profileImageListResponse));
+    }
 
     @GetMapping("/reviews")
     @Operation(
@@ -142,19 +134,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
-//    @GetMapping("/review-amount")
-//    @Operation(
-//            summary = "내가 작성한 리뷰 개수 조회 API",
-//            description = """
-//    마이페이지에서 **해당 사용자가 작성한 리뷰 개수**를 조회하는 API입니다.
-//
-//    """
-//    )
-//    public ResponseEntity<ResponseDTO<ReviewAmountResponseDTO>> getMyReviewAmount(@UserId Long userId) {
-//        UserGetCommand command = new UserGetCommand(userId);
-//        ReviewAmountResponseDTO reviewAmountResponse = postGetUseCase.getPostAmountByUserId(command);
-//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(reviewAmountResponse));
-//    }
 
     @GetMapping("/{userId}/reviews")
     @Operation(
@@ -170,21 +149,6 @@ public class UserController {
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
-
-//    @GetMapping("/{userId}/review-amount")
-//    @Operation(
-//            summary = "특정 사용자 리뷰 개수 조회 API",
-//            description = """
-//    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 개수**를 조회하는 API입니다.
-//    - **userId**는 path parameter로 전달받습니다.
-//
-//    """
-//    )
-//    public ResponseEntity<ResponseDTO<ReviewAmountResponseDTO>> getReviewAmountByUserId(@PathVariable Long userId) {
-//        UserGetCommand command = new UserGetCommand(userId);
-//        ReviewAmountResponseDTO reviewAmountResponse = postGetUseCase.getPostAmountByUserId(command);
-//        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(reviewAmountResponse));
-//    }
 
 
     @PostMapping("/follow")
@@ -233,14 +197,7 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-//    @GetMapping("/search")
-//    @Operation(summary = "유저 검색 API", description = "**탐색>검색**에서 **유저 검색 결과**를 보여주는  API입니다")
-//    public ResponseEntity<ResponseDTO<List<UserSimpleResponseDTO>>> searchUsers(@RequestParam String query) {
-//        UserSearchCommand command = new UserSearchCommand(query);
-//        List<UserSimpleResponseDTO> result = userGetUseCase.getUserSimpleInfoBySearch(command);
-//
-//        return ResponseEntity.ok(ResponseDTO.success(result));
-//    }
+
 
     @GetMapping("/search")
     @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색하는 API")
