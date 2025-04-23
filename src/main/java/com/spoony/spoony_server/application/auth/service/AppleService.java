@@ -23,9 +23,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AppleService {
 
-    private final String APPLE_SUBJECT = "sub";
-    private final String APPLE_EMAIL = "email";
-
     @Value("${oauth.apple.client-id}")
     private String clientId;
 
@@ -35,10 +32,12 @@ public class AppleService {
     private final AppleClientSecretGenerator appleClientSecretGenerator;
 
     public PlatformUserDTO getPlatformUserInfo(String platformToken) {
+        platformToken = platformToken.replace("Bearer ", "").trim();
         Map<String, String> headers = appleJwtParser.parseHeaders(platformToken);
         ApplePublicKeyListDTO applePublicKeys = appleFeignClient.getApplePublicKeys();
         PublicKey publicKey = applePublicKeyGenerator.generatePublicKey(headers, applePublicKeys);
         Claims claims = appleJwtParser.parsePublicKeyAndGetClaims(platformToken, publicKey);
+        String APPLE_SUBJECT = "sub";
         return PlatformUserDTO.of(claims.get(APPLE_SUBJECT, String.class));
     }
 

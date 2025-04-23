@@ -132,6 +132,7 @@ public class UserPersistenceAdapter implements UserPort {
                 .platform(userSignupDTO.platform())
                 .platformId(platformUserDTO.platformId())
                 .userName(userSignupDTO.userName())
+                .birth(userSignupDTO.birth())
                 .region(regionEntity)
                 .introduction(userSignupDTO.introduction())
                 .level(1L)
