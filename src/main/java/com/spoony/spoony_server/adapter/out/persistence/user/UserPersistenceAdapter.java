@@ -134,6 +134,8 @@ public class UserPersistenceAdapter implements UserPort {
                 .userName(userSignupDTO.userName())
                 .region(regionEntity)
                 .introduction(userSignupDTO.introduction())
+                .level(1L)
+                .profileImageLevel(1L)
                 .build();
         userRepository.save(userEntity);
 

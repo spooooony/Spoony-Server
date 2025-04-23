@@ -27,11 +27,6 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private Platform platform;
     private String platformId;
-
-    private Long level;
-
-    private Long profileImageLevel;
-
     private String userName;
     private LocalDate birth;
 
@@ -40,6 +35,8 @@ public class UserEntity {
     private RegionEntity region;
 
     private String introduction;
+    private Long level;
+    private Long profileImageLevel;
 
     @CreatedDate
     private LocalDateTime createdAt;
