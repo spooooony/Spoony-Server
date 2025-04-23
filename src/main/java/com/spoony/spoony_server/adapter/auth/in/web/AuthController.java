@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.auth.in.web;
 
+import com.spoony.spoony_server.adapter.auth.dto.request.PlatformRequestDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.LoginResponseDTO;
@@ -44,9 +45,9 @@ public class AuthController {
     @Operation(summary = "로그인 API", description = "사용자 로그인 API, 성공 시 Token Set, 실패 시 회원가입 필요")
     public ResponseEntity<ResponseDTO<LoginResponseDTO>> login(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
-            @RequestBody final Platform platform
+            @RequestBody final PlatformRequestDTO platformRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platform, platformToken)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platformRequestDTO.platform(), platformToken)));
     }
 
     @PostMapping("/logout")

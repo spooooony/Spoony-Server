@@ -5,10 +5,12 @@ import com.spoony.spoony_server.adapter.auth.dto.verification.kakao.KakaoUserDTO
 import com.spoony.spoony_server.adapter.auth.out.external.KakaoFeignClient;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class KakaoService {
 
@@ -18,10 +20,10 @@ public class KakaoService {
     private final KakaoFeignClient kakaoFeignClient;
 
     public PlatformUserDTO getPlatformUserInfo(String platformToken) {
-        KakaoUserDTO kakaoUserDTO = kakaoFeignClient.getUserInformation(AuthConstant.BEARER_TOKEN_PREFIX + platformToken);
+        KakaoUserDTO kakaoUserDTO = kakaoFeignClient.getUserInformation(platformToken);
+        log.info("kakao user info = {}", kakaoUserDTO);
         return PlatformUserDTO.of(
-                kakaoUserDTO.id().toString(),
-                kakaoUserDTO.kakaoAccount().email());
+                kakaoUserDTO.id().toString());
     }
 
     public void unlink(final String platformId) {

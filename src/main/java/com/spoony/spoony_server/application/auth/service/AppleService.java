@@ -39,7 +39,7 @@ public class AppleService {
         ApplePublicKeyListDTO applePublicKeys = appleFeignClient.getApplePublicKeys();
         PublicKey publicKey = applePublicKeyGenerator.generatePublicKey(headers, applePublicKeys);
         Claims claims = appleJwtParser.parsePublicKeyAndGetClaims(platformToken, publicKey);
-        return PlatformUserDTO.of(claims.get(APPLE_SUBJECT, String.class), claims.get(APPLE_EMAIL, String.class));
+        return PlatformUserDTO.of(claims.get(APPLE_SUBJECT, String.class));
     }
 
     public void revoke(final String authCode) {
