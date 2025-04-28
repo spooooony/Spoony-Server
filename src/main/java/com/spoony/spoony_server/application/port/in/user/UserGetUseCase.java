@@ -13,7 +13,7 @@ public interface UserGetUseCase {
     List<UserSimpleResponseDTO> getUserSimpleInfoBySearch(UserSearchCommand command);
     Boolean isUsernameDuplicate(UserNameCheckCommand command);
     UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command);
-    FollowListResponseDTO getFollowers(Long userId);
-    FollowListResponseDTO getFollowings(Long userId);
+    FollowListResponseDTO getFollowers(UserGetCommand command);
+    FollowListResponseDTO getFollowings(UserGetCommand command);
 
 }

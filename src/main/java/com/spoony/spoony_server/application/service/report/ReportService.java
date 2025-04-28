@@ -70,15 +70,3 @@ public class ReportService implements ReportCreateUseCase {
         reportPort.saveUserReport(userReport);
     }
 }
-
-
-//
-//    Long postId = command.getPostId();
-//    Long userId = command.getUserId();
-//
-//    Post post = postPort.findPostById(postId);
-//    User user = userPort.findUserById(userId);
-//
-//    Report report = new Report(reportType,command.getReportDetail(),post,user);
-//    reportPort.saveReport(report);
-//}

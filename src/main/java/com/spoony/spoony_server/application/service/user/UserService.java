@@ -9,7 +9,9 @@ import com.spoony.spoony_server.adapter.dto.user.*;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
+import com.spoony.spoony_server.application.port.in.block.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
+import com.spoony.spoony_server.application.port.out.block.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
@@ -34,11 +36,12 @@ public class UserService implements
         UserFollowUseCase,
         UserUpdateUseCase,
         UserSearchUseCase,
-        RegionGetUseCase {
+        RegionGetUseCase
+         {
 
     private final UserPort userPort;
     private final PostPort postPort;
-    private final ZzimPostPort zzimPostPort;
+    private final BlockPort blockPort;
 
     @Transactional
     @Override
@@ -114,12 +117,12 @@ public class UserService implements
 
     @Transactional
     @Override
-    public FollowListResponseDTO getFollowers(Long userId) {
-        List<Follow> followers = userPort.findFollowersByUserId(userId);
+    public FollowListResponseDTO getFollowers(UserGetCommand command) {
+        List<Follow> followers = userPort.findFollowersByUserId(command.getUserId());
 
         List<UserSimpleResponseDTO> userDTOList = followers.stream().map(follow -> {
             User followerUser = follow.getFollower();
-            boolean isFollowing = userPort.existsFollowRelation(userId,followerUser.getUserId());
+            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(),followerUser.getUserId());
             // profileImageLevel을 int로 변환
             int profileImageLevel = followerUser.getImageLevel().intValue(); // Long을 int로 변환
             ProfileImage profileImage = ProfileImage.fromLevel(profileImageLevel);
@@ -140,12 +143,12 @@ public class UserService implements
 
     @Transactional
     @Override
-    public FollowListResponseDTO getFollowings(Long userId) {
-        List<Follow> followings = userPort.findFollowingsByUserId(userId);
+    public FollowListResponseDTO getFollowings(UserGetCommand command) {
+        List<Follow> followings = userPort.findFollowingsByUserId(command.getUserId());
 
         List<UserSimpleResponseDTO> userDTOList = followings.stream().map(follow -> {
             User followingUser = follow.getFollowing();
-            boolean isFollowing = userPort.existsFollowRelation(userId,followingUser.getUserId());
+            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(),followingUser.getUserId());
             // profileImageLevel을 int로 변환
 
             return UserSimpleResponseDTO.from(
@@ -180,11 +183,15 @@ public class UserService implements
 
     @Transactional
     @Override
-    public UserSearchResultListDTO searchUsersByQuery(UserSearchCommand command){
-        List<User> userList = userPort.findByUserNameContaining(command.getQuery());
+    public UserSearchResultListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand){
+
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
+        List<User> userList = userPort.findByUserNameContaining(searchCommand.getQuery());
 
         List<UserSearchResultDTO> userSearchResultList = userList.stream()
-                .map(user -> new UserSearchResultDTO(user.getUserName(),user.getRegion().getRegionName())).toList();
+                .filter(user -> !blockedUserIds.contains(user.getUserId())) // 차단된 사용자 제외
+                .map(user -> new UserSearchResultDTO(user.getUserName(), user.getRegion().getRegionName()))
+                .toList();
 
         return new UserSearchResultListDTO(userSearchResultList);
     }
@@ -198,5 +205,8 @@ public class UserService implements
 
         return new RegionListDTO(regionList);
     }
+
+
+
 }
 

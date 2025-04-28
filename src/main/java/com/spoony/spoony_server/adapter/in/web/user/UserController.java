@@ -3,11 +3,17 @@ package com.spoony.spoony_server.adapter.in.web.user;
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.application.port.command.block.BlockCheckCommand;
+import com.spoony.spoony_server.application.port.command.block.BlockUserCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
+import com.spoony.spoony_server.application.port.in.block.BlockCheckUseCase;
+import com.spoony.spoony_server.application.port.in.block.BlockUserCreateUseCase;
+import com.spoony.spoony_server.application.port.in.block.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
+import com.spoony.spoony_server.global.message.business.BlockErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +34,10 @@ public class UserController {
     private final PostGetUseCase postGetUseCase;
     private final ProfileImageGetUseCase profileImageGetUseCase;
     private final RegionGetUseCase regionGetUseCase;
+    private final BlockUserCreateUseCase blockUserCreateUseCase;
+    private final BlockCheckUseCase blockCheckUseCase;
+    private final BlockedUserGetUseCase blockedUserGetUseCase;
+
 
     @GetMapping
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
@@ -43,8 +53,18 @@ public class UserController {
     public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfoById(
             @UserId Long userId,
             @PathVariable Long targetUserId) {
+
+
         UserGetCommand userGetCommand = new UserGetCommand(targetUserId);
         UserFollowCommand userFollowCommand = new UserFollowCommand(userId,targetUserId);
+
+        BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
+
+        if (blockCheckUseCase.isBlocked(blockCheckCommand)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
+        }
+
         UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(userGetCommand,userFollowCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
@@ -62,7 +82,7 @@ public class UserController {
     @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getFollowers(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
-        FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command.getUserId());
+        FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
         return ResponseEntity.ok(ResponseDTO.success(followListResponse));
     }
 
@@ -70,7 +90,7 @@ public class UserController {
     @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API입니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getFollowings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
-        FollowListResponseDTO followings = userGetUseCase.getFollowings(command.getUserId());
+        FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
         return ResponseEntity.ok(ResponseDTO.success(followings));
     }
 
@@ -135,8 +155,14 @@ public class UserController {
     - **localReview** 쿼리 파라미터를 통해 로컬리뷰 필터링 여부를 지정할 수 있습니다 (기본값: false).
     """
     )
-    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@PathVariable Long userId,@RequestParam(defaultValue = "false") boolean isLocalReview) {
-        UserReviewGetCommand command = new UserReviewGetCommand(userId,isLocalReview);
+    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@UserId Long userId, @PathVariable Long targetUserId,@RequestParam(defaultValue = "false") boolean isLocalReview) {
+        UserReviewGetCommand command = new UserReviewGetCommand(targetUserId,isLocalReview);
+        BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
+
+        if (blockCheckUseCase.isBlocked(blockCheckCommand)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
+        }
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
@@ -160,7 +186,7 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-    @DeleteMapping("/unfollow")
+    @DeleteMapping("/follow")
     @Operation(
             summary = "유저 팔로우 취소 API",
             description = "다른 사용자에 대한 팔로우를 취소하는 API입니다."
@@ -180,18 +206,44 @@ public class UserController {
     @PostMapping("/block")
     @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> blockUser(
-            @UserId Long requesterId,
-            @RequestBody UserBlockRequestDTO userBlockRequestDTO
+            @UserId Long userId,
+            @RequestBody UserBlockRequestDTO requestDTO
     ) {
+        BlockUserCommand command = new BlockUserCommand(
+                userId,
+                requestDTO.targetUserId()
+        );
+        blockUserCreateUseCase.createUserBlock(command);
+        return ResponseEntity.ok(ResponseDTO.success(null));
+    }
+
+
+    @DeleteMapping("/block")
+    @Operation(
+            summary = "유저 차단 해제 API",
+            description = "다른 사용자에 대한 차단을 해제하는 API입니다."
+    )
+    public ResponseEntity<ResponseDTO<Void>> unBlockUser(
+            @UserId Long userId,
+            @RequestBody UserBlockRequestDTO requestDTO
+    ) {
+        BlockUserCommand command = new BlockUserCommand(
+                userId,
+                requestDTO.targetUserId()
+        );
+        blockUserCreateUseCase.deleteUserBlock(command);
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
     @GetMapping("/search")
     @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색하는 API")
     public ResponseEntity<ResponseDTO<UserSearchResultListDTO>> searchLocations(
+                @UserId Long userId,
                 @RequestParam String query) {
-        UserSearchCommand command = new UserSearchCommand(query);
-        UserSearchResultListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command);
+
+        UserGetCommand command = new UserGetCommand(userId);
+        UserSearchCommand searchCommand = new UserSearchCommand(query);
+        UserSearchResultListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command, searchCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userSearchList));
     }
 
@@ -201,4 +253,7 @@ public class UserController {
         RegionListDTO regionListDTO = regionGetUseCase.getRegionList();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(regionListDTO));
     }
+
+
+
 }

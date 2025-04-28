@@ -7,6 +7,7 @@ import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
 import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
+import com.spoony.spoony_server.application.port.in.block.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
@@ -36,7 +37,7 @@ public class PostController {
     private final PostDeleteUseCase postDeleteUseCase;
     private final PostUpdateUseCase postUpdateUseCase;
     private final PostSearchUseCase postSearchUseCase;
-
+    private final BlockedUserGetUseCase blockedUserGetUseCase;
     @GetMapping("/{postId}")
     @Operation(summary = "게시물 조회 API", description = "특정 게시물의 상세 정보를 조회하는 API")
     public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(
@@ -151,12 +152,17 @@ public class PostController {
     @GetMapping("/search")
     @Operation(summary = "리뷰 검색 API", description = "검색어를 통해 리뷰를 검색하는 API")
     public ResponseEntity<ResponseDTO<PostSearchResultListDTO>> searchLocations(
+            @UserId Long userId,
             @RequestParam String query) {
-        PostSearchCommand command = new PostSearchCommand(query);
-        PostSearchResultListDTO postSearchList = postSearchUseCase.searchReviewsByQuery(command);
+
+        UserGetCommand userGetCommand = new UserGetCommand(userId);
+        PostSearchCommand searchCommand = new PostSearchCommand(query);
+
+
+
+        PostSearchResultListDTO postSearchList = postSearchUseCase.searchReviewsByQuery(userGetCommand,searchCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postSearchList));
     }
 
 
 }
-

@@ -7,3 +7,5 @@ public interface ReportPort {
     void saveReport(Report report);
     void saveUserReport(UserReport userReport);
 }
+
+
