@@ -12,4 +12,5 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     List<PostEntity> findByUser_UserId(Long userId);
     Long countByUser_UserId(Long userId);
     List<PostEntity> findByDescriptionContaining(String query);
+
 }

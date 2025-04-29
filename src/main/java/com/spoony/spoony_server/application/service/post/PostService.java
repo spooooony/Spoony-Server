@@ -9,6 +9,7 @@ import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
+import com.spoony.spoony_server.application.port.out.block.BlockPort;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.application.port.out.post.*;
@@ -57,7 +58,7 @@ public class PostService implements
     private final FeedPort feedPort;
     private final PostDeletePort postDeletePort;
     private final PhotoPort photoPort;
-
+    private final BlockPort blockPort;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -171,15 +172,20 @@ public class PostService implements
 
     }
     @Override
-    public PostSearchResultListDTO searchReviewsByQuery(PostSearchCommand command){
-        List<Post> postList = postPort.findByPostDescriptionContaining(command.getQuery());
+    public PostSearchResultListDTO searchReviewsByQuery(UserGetCommand userGetCommand,PostSearchCommand postSearchCommand){
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(userGetCommand.getUserId());
+        List<Post> postList = postPort.findByPostDescriptionContaining(postSearchCommand.getQuery());
+
 
         List<FeedResponseDTO> postSearchResultList = postList.stream()
+                .filter(post -> !blockedUserIds.contains(post.getUser().getUserId())) // 🔥 추가 (차단한 유저 제외)
                 .map(post -> {
-                        List<String> phothUrlList = postPort.findPhotoById(post.getPostId()).stream()
-                                .map(Photo::getPhotoUrl).toList();
-                        PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-                        Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
+                    List<String> photoUrlList = postPort.findPhotoById(post.getPostId()).stream()
+                            .map(Photo::getPhotoUrl)
+                            .toList();
+
+                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+                    Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
                     Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
                     String userRegion = post.getUser().getRegion().getRegionName();
 
@@ -200,7 +206,7 @@ public class PostService implements
                                     category.getBackgroundColor()
                             ),
                             zzimCount,
-                            phothUrlList,
+                            photoUrlList,
                             latestDate
                     );
                 })

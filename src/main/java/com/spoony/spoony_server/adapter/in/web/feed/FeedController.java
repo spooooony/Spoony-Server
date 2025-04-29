@@ -22,6 +22,8 @@ public class FeedController {
 
     private final FeedGetUseCase feedGetUseCase;
 
+
+
     @GetMapping("/{categoryId}")
     @Operation(summary = "피드 조회 API", description = "사용자의 피드를 카테고리 단위로 조회하는 API")
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getFeedListByUserId(
