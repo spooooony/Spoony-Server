@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.in.web.zzim;
 
+import com.spoony.spoony_server.application.port.command.block.BlockCheckCommand;
 import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
@@ -9,6 +10,7 @@ import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimPostAddRequestDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusListResponseDTO;
+import com.spoony.spoony_server.global.message.business.BlockErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,13 @@ public class ZzimPostController {
         zzimAddUseCase.addZzimPost(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
+
+//    BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
+//
+//        if (blockCheckUseCase.isBlocked(blockCheckCommand)) {
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
+//    }
 
     @GetMapping
     @Operation(summary = "북마크 조회 API", description = "북마크 장소 리스트를 조회하는 API")

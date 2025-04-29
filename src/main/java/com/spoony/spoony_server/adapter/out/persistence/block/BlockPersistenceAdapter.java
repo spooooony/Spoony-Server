@@ -51,7 +51,7 @@ public class BlockPersistenceAdapter implements BlockPort {
 
     @Override
     public List<Long> getBlockedUserIds(Long userId) {
-        return blockRepository.findBlockedIdsByBlockerId(userId);
+        return blockRepository.findBlockedUserIdsByBlockerUserId(userId);
     }
 
 //    @Override

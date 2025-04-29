@@ -158,8 +158,6 @@ public class PostController {
         UserGetCommand userGetCommand = new UserGetCommand(userId);
         PostSearchCommand searchCommand = new PostSearchCommand(query);
 
-
-
         PostSearchResultListDTO postSearchList = postSearchUseCase.searchReviewsByQuery(userGetCommand,searchCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postSearchList));
     }

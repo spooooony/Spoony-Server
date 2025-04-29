@@ -4,6 +4,7 @@ import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
+import com.spoony.spoony_server.application.port.out.block.BlockPort;
 import com.spoony.spoony_server.application.port.out.location.LocationPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
@@ -42,6 +43,7 @@ public class ZzimPostService implements
     private final PostPort postPort;
     private final UserPort userPort;
     private final LocationPort locationPort;
+    private final BlockPort blockPort;
 
     public void addZzimPost(ZzimAddCommand command) {
         Long postId = command.getPostId();
@@ -100,15 +102,18 @@ public class ZzimPostService implements
         return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
-    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) {
-        User user = userPort.findUserById(command.getUserId());
+    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { //command -> userId, placeId
+        User user = userPort.findUserById(command.getUserId()); //로그인 userId
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(user.getUserId());
         List<ZzimPost> zzimPostList = zzimPostPort.findUserByUserId(user.getUserId());
 
         List<ZzimFocusResponseDTO> zzimFocusResponseList = zzimPostList.stream()
                 .filter(zzimPost -> {
                     Post post = zzimPost.getPost();
                     Place postPlace = post.getPlace();
-                    return postPlace != null && postPlace.getPlaceId().equals(command.getPlaceId());
+                    User writer = post.getUser();
+                    return postPlace != null && postPlace.getPlaceId().equals(command.getPlaceId())&&
+                            !blockedUserIds.contains(writer.getUserId());
                 })
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
