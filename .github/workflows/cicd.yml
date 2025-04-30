@@ -132,16 +132,18 @@ jobs:
 
           echo "⌛️ 컨테이너 실행 대기 (30 sec)"
           sleep 30
-
-          echo "🔁 Nginx 트래픽 대기 (10 sec)..."
-          sleep 10
-
-          echo "🔁 Nginx 설정 적용"
-          sudo nginx -t && sudo nginx -s reload
-
+          
           echo "🗑️ 이전 컨테이너 제거"
           sudo docker stop spoony-dev-\$ACTIVE_PORT
           sudo docker rm spoony-dev-\$ACTIVE_PORT
+          
+          echo "🧹 Docker 시스템 정리"
+          sudo docker image prune -f
+          sudo docker container prune -f
+          sudo docker volume prune -f
+
+          echo "🔁 Nginx 설정 적용"
+          sudo nginx -t && sudo nginx -s reload
 
           echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
           EOF
