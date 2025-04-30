@@ -80,6 +80,10 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
           #!/bin/bash
+          
+          echo "🔍 현재 실행 중인 포트 확인"
+          ACTIVE_PORT=$(ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP \
+            "sudo docker ps --format '{{.Ports}}'" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
 
           echo "🌐 Docker 네트워크 존재 여부 확인"
           if ! sudo docker network inspect spoony-network > /dev/null 2>&1; then
@@ -105,9 +109,6 @@ jobs:
             echo "🚀 Redis 컨테이너 없음 → 새로 생성 및 실행"
             sudo docker run -d --name redis --network spoony-network redis
           fi
-
-          echo "🔍 현재 실행 중인 포트 확인"
-          ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
 
           if [[ -z "\$ACTIVE_PORT" ]]; then
             echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8081)으로 설정합니다."
