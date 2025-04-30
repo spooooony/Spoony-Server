@@ -1,119 +1,81 @@
-name: CI/CD
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Install SSH Client
+      run: sudo apt-get update && sudo apt-get install -y openssh-client
 
-on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'main'
-      environment:
-        description: 'Environment to deploy (dev or prod)'
-        required: true
-        default: 'dev'
+    - name: Create SSH Key File
+      run: |
+        if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+          echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
+          echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+        else
+          echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
+          echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+        fi
+        chmod 600 ssh_key.pem
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch }}
+    - name: SSH into EC2 and Deploy
+      run: |
+        EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
+        #!/bin/bash
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+        echo "🌐 Docker 네트워크 존재 여부 확인"
+        if ! sudo docker network inspect spoony-network > /dev/null 2>&1; then
+          echo "➕ 네트워크 spoony-network 생성"
+          sudo docker network create spoony-network
+        else
+          echo "✅ 네트워크 spoony-network 이미 존재"
+        fi
 
-      - name: Generate application.yml
-        run: |
-          mkdir -p ./src/main/resources
-          echo "${{ secrets.CD_APPLICATION }}" > ./src/main/resources/application.yml
+        echo "🧠 Redis 컨테이너가 실행 중인지 확인"
+        if [ "\$(sudo docker ps -q -f name=redis)" ]; then
+          echo "🔗 Redis 컨테이너를 spoony-network에 연결"
+          sudo docker network connect spoony-network redis || true
+        else
+          echo "🚀 Redis 컨테이너 실행 (spoony-network 포함)"
+          sudo docker run -d --name redis --network spoony-network redis
+        fi
 
-      - name: Generate application-aws.yml
-        run: echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
+        echo "🔍 현재 실행 중인 포트 확인"
+        ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
 
-      - name: Generate application-naver.yml
-        run: echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
+        if [[ -z "\$ACTIVE_PORT" ]]; then
+          echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8081)으로 설정합니다."
+          ACTIVE_PORT="8081"
+        fi
 
-      - name: Generate application-oath.yml
-        run: echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
+        if [[ "\$ACTIVE_PORT" == "8081" ]]; then
+          NEW_PORT="8082"
+        else
+          NEW_PORT="8081"
+        fi
+        echo "🔄 새로운 컨테이너를 \$NEW_PORT 포트에서 실행"
 
-      - name: Build Project
-        run: ./gradlew clean build -x test
+        echo "🚀 최신 이미지 가져오기"
+        sudo docker pull yh0872/spoony-dev:latest
 
-      - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        echo "🔧 새로운 컨테이너 실행 (spoony-network 포함)"
+        sudo docker run -d -p \$NEW_PORT:8080 \
+          --name spoony-dev-\$NEW_PORT \
+          --network spoony-network \
+          yh0872/spoony-dev
 
-      - name: Build Docker Image
-        run: docker build -t yh0872/spoony-dev:latest .
+        echo "⌛️ 컨테이너 실행 대기 (30 sec)"
+        sleep 30
 
-      - name: Publish Image to Docker Hub
-        run: docker push yh0872/spoony-dev:latest
+        echo "🔁 Nginx 트래픽 대기 (10 sec)..."
+        sleep 10
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install SSH Client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
+        echo "🔁 Nginx 설정 적용"
+        sudo nginx -t && sudo nginx -s reload
 
-      - name: Create SSH Key File
-        run: |
-          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-            echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
-            echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
-          else
-            echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
-            echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
-          fi
-          chmod 600 ssh_key.pem
+        echo "🗑️ 이전 컨테이너 제거"
+        sudo docker stop spoony-dev-\$ACTIVE_PORT
+        sudo docker rm spoony-dev-\$ACTIVE_PORT
 
-      - name: SSH into EC2 and Deploy
-        run: |
-          EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
-
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << EOF
-          #!/bin/bash
-
-          echo "🔍 현재 실행 중인 포트 확인"
-          ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
-
-          if [[ -z "\$ACTIVE_PORT" ]]; then
-            echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8081)으로 설정합니다."
-            ACTIVE_PORT="8081"
-          fi
-
-          if [[ "\$ACTIVE_PORT" == "8081" ]]; then
-            NEW_PORT="8082"
-          else
-            NEW_PORT="8081"
-          fi
-          echo "🔄 새로운 컨테이너를 \$NEW_PORT 포트에서 실행"
-
-          echo "🚀 최신 이미지 가져오기"
-          sudo docker pull yh0872/spoony-dev:latest
-
-          echo "🔧 새로운 컨테이너 실행 (포트 \$NEW_PORT)"
-          sudo docker run -d -p \$NEW_PORT:8080 --name spoony-dev-\$NEW_PORT yh0872/spoony-dev
-
-          echo "⌛️ 컨테이너 실행 대기 (30 sec)"
-          sleep 30
-
-          echo "🔁 Nginx 트래픽 대기 (10 sec)..."
-          sleep 10
-
-          echo "🔁 Nginx 설정 적용"
-          sudo nginx -t && sudo nginx -s reload
-
-          echo "🗑️ 이전 컨테이너 제거"
-          sudo docker stop spoony-dev-\$ACTIVE_PORT
-          sudo docker rm spoony-dev-\$ACTIVE_PORT
-
-          echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
-          EOF
+        echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
+        EOF
