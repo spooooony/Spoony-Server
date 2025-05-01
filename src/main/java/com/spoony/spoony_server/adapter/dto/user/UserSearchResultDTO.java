@@ -1,7 +1,23 @@
 package com.spoony.spoony_server.adapter.dto.user;
 
+import com.spoony.spoony_server.domain.user.ProfileImage;
+
 public record UserSearchResultDTO(
-                                  String userName,
-                                  String regionName
-                                  ) {
+        Long userId,
+        String username,
+        String regionName,
+        String profileImageUrl
+) {
+
+    public static UserSearchResultDTO from(Long userId, String username, String regionName, int imageLevel) {
+        ProfileImage profileImage = ProfileImage.fromLevel(imageLevel);
+        String profileImageUrl = "/images/" + profileImage.getImage();
+
+        return new UserSearchResultDTO(
+                userId,
+                username,
+                regionName,
+                profileImageUrl
+        );
+    }
 }

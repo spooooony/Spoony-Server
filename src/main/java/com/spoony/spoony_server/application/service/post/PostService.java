@@ -128,8 +128,9 @@ public class PostService implements
 
                 String placeAddress = post.getPlace().getPlaceAddress();
 
+                System.out.println("일치 여부: " + userRegionName.equals(placeAddress));
                 return placeAddress.contains(userRegionName);
-            }).collect(Collectors.toList());
+            }).toList();
         }
 
 
@@ -341,8 +342,7 @@ public class PostService implements
         // 스푼 히스토리 기록
         spoonPort.updateSpoonHistoryByActivity(user, activity);
 
-        // 사용자의 피드에서 게시물 삭제
-        feedPort.deleteFeedByUserIdAndPostId(command.getUserId(), command.getPostId());
+
     }
 
     @Transactional

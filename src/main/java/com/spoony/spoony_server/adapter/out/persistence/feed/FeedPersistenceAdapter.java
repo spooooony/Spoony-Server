@@ -16,7 +16,7 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class FeedPersistenceAdapter implements FeedPort {
     }
 
     @Override
-    public List<Feed> findFeedByUserId(Long userId) {
+    public List<Feed> findFeedListByFollowing(Long userId) {
         return feedRepository.findByUser_UserId(userId)
                 .stream()
                 .map(FeedMapper::toDomain)
@@ -65,4 +65,32 @@ public class FeedPersistenceAdapter implements FeedPort {
     public void deleteFeedByUserIdAndPostId(Long userId, Long postId) {
         feedRepository.deleteByUser_UserIdAndPost_PostId(userId, postId);
     }
+
+    @Override
+    public List<Feed> searchFeedByFollowingWithFilters(Long userId, List<String> categories, String locationQuery){
+        Specification<FeedEntity> spec = FeedSpecification.buildFeedSpec(userId, categories, locationQuery);
+        return feedRepository.findAll(spec)
+                .stream()
+                .map(FeedMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Feed> searchAllFeedsWithFilters(List<String> categories, String locationQuery) {
+        Specification<FeedEntity> spec = Specification.where(null); // 전체에서 조회이므로 userId 조건 x
+
+        if (categories != null && !categories.isEmpty()) {
+            spec = spec.and(FeedSpecification.withCategories(categories));
+        }
+
+        if (locationQuery != null && !locationQuery.isBlank()) {
+            spec = spec.and(FeedSpecification.hasLocation(locationQuery));
+        }
+
+        return feedRepository.findAll(spec)
+                .stream()
+                .map(FeedMapper::toDomain)
+                .toList();
+    }
+
 }

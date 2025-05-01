@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.application.service.feed;
 
 import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
+import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
@@ -31,32 +32,17 @@ public class FeedService implements FeedGetUseCase {
     private final PostCategoryPort postCategoryPort;
     private final ZzimPostPort zzimPostPort;
 
-    public FeedListResponseDTO getFeedListByUserId(FeedGetCommand command) {
-        String locationQuery = command.getLocationQuery();
-        String sortBy = command.getSortBy();
+    public FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command) {
+//        String locationQuery = command.getLocationQuery();
+//        String sortBy = command.getSortBy();
 
-        List<Feed> feedList = feedPort.findFeedByUserId(command.getUserId());
+        List<Feed> feedList = feedPort.findFeedListByFollowing(command.getUserId());
         List<FeedResponseDTO> feedResponseList = feedList.stream()
-                .filter(feed -> feed.getPost().getPlace().getPlaceAddress().contains(locationQuery))
-                .filter(feed -> {
-                    if (command.getCategoryId() == 1) {
-                        return true;
-                    }
-                    else if (command.getCategoryId() == 2) {
-                        Post post = feed.getPost();
-                        return post.getUser().getRegion().getRegionName().contains(locationQuery);
-                    }
-                    Post post = feed.getPost();
-                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-                    return postCategory.getCategory().getCategoryId().equals(command.getCategoryId());
-                })
                 .map(feed -> {
                     Post post = feed.getPost();
                     User author = post.getUser();
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = postCategory.getCategory();
-
-
 
                     List<Photo> photoList = postPort.findPhotoById(post.getPostId());
                     List<String> photoUrlList = photoList.stream()
@@ -82,18 +68,47 @@ public class FeedService implements FeedGetUseCase {
                 })
                 .collect(Collectors.toList());
 
-        if (sortBy.equals("popularity")) {
-            feedResponseList.sort((dto1, dto2) -> Long.compare(dto2.zzimCount(), dto1.zzimCount()));
-        } else if (sortBy.equals("latest")) {
-            feedResponseList.sort((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt()));
-        }
 
         return new FeedListResponseDTO(feedResponseList);
     }
 
     @Override
     public FeedListResponseDTO getAllPosts() {
-        return null;
+        List<Post> postList = postPort.findAll();
+        List<FeedResponseDTO> feedResponseList = postList.stream()
+                .map(post -> {
+                    User author = post.getUser();
+
+                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+                    Category category = postCategory.getCategory();
+
+                    List<Photo> photoList = postPort.findPhotoById(post.getPostId());
+                    List<String> photoUrlList = photoList.stream()
+                            .map(Photo::getPhotoUrl)
+                            .toList();
+
+                    return new FeedResponseDTO(
+                            author.getUserId(),
+                            author.getUserName(),
+                            author.getRegion().getRegionName(),
+                            post.getPostId(),
+                            post.getDescription(),
+                            new CategoryColorResponseDTO(
+                                    category.getCategoryId(),
+                                    category.getCategoryName(),
+                                    category.getIconUrlColor(),
+                                    category.getTextColor(),
+                                    category.getBackgroundColor()
+                            ),
+                            zzimPostPort.countZzimByPostId(post.getPostId()),
+                            photoUrlList,
+                            post.getCreatedAt()
+                    );
+                })
+                .sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt()))
+                .collect(Collectors.toList());
+
+        return new FeedListResponseDTO(feedResponseList);
     }
 
     @Override

@@ -25,6 +25,7 @@ public class BlockService implements BlockUserCreateUseCase, BlockCheckUseCase ,
     public void createUserBlock(BlockUserCommand command) {
         blockPort.saveUserBlockRelation(command.getUserId(), command.getTargetUserId());
         userPort.deleteFollowRelation(command.getUserId(),command.getTargetUserId());
+
     }
     @Transactional
     @Override

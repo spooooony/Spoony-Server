@@ -26,5 +26,5 @@ public interface PostPort {
     void deleteAllPhotosByPostId(Long postId);
     Long countPostsByUserId(Long userId);
     List<Post> findByPostDescriptionContaining(String query);
-    //List<Post> findPostsByUserId(Long userId);
+    List<Post> findAll();
 }

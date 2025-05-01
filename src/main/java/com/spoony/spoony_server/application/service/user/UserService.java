@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +37,7 @@ public class UserService implements
         UserFollowUseCase,
         UserUpdateUseCase,
         UserSearchUseCase,
-        RegionGetUseCase
-         {
+        RegionGetUseCase {
 
     private final UserPort userPort;
     private final PostPort postPort;
@@ -45,7 +45,7 @@ public class UserService implements
 
     @Transactional
     @Override
-    public UserResponseDTO getUserInfo(UserGetCommand userGetCommand,UserFollowCommand userFollowCommand) {
+    public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
         User user = userPort.findUserById(userGetCommand.getUserId());
         Long followerCount = userPort.countFollowerByUserId(user.getUserId());
         Long followingCount = userPort.countFollowingByUserId(user.getUserId());
@@ -122,11 +122,8 @@ public class UserService implements
 
         List<UserSimpleResponseDTO> userDTOList = followers.stream().map(follow -> {
             User followerUser = follow.getFollower();
-            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(),followerUser.getUserId());
-            // profileImageLevel을 int로 변환
-            int profileImageLevel = followerUser.getImageLevel().intValue(); // Long을 int로 변환
-            ProfileImage profileImage = ProfileImage.fromLevel(profileImageLevel);
-            String profileImageUrl = "/images/" + profileImage.getImage();
+            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
+
             return UserSimpleResponseDTO.from(
                     followerUser.getUserId(),
                     followerUser.getUserName(),
@@ -137,7 +134,7 @@ public class UserService implements
 
         }).toList();
 
-       return new FollowListResponseDTO(userDTOList.size(),userDTOList);
+        return new FollowListResponseDTO(userDTOList.size(), userDTOList);
 
     }
 
@@ -148,8 +145,8 @@ public class UserService implements
 
         List<UserSimpleResponseDTO> userDTOList = followings.stream().map(follow -> {
             User followingUser = follow.getFollowing();
-            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(),followingUser.getUserId());
-            // profileImageLevel을 int로 변환
+            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
+
 
             return UserSimpleResponseDTO.from(
                     followingUser.getUserId(),
@@ -160,39 +157,49 @@ public class UserService implements
             );
 
         }).toList();
-        return new FollowListResponseDTO(userDTOList.size(),userDTOList);
+        return new FollowListResponseDTO(userDTOList.size(), userDTOList);
     }
 
     @Transactional
     @Override
     public void createFollow(UserFollowCommand command) {
-        userPort.saveFollowRelation(command.getUserId(),command.getTargetUserId());
+        userPort.saveFollowRelation(command.getUserId(), command.getTargetUserId());
     }
 
     @Transactional
     @Override
     public void deleteFollow(UserFollowCommand command) {
-        userPort.deleteFollowRelation(command.getUserId(),command.getTargetUserId());
+        userPort.deleteFollowRelation(command.getUserId(), command.getTargetUserId());
     }
 
     @Transactional
     @Override
-    public  void updateUserProfile(UserUpdateCommand command){
-        userPort.updateUser(command.getUserId(),command.getUserName(),command.getRegionId(),command.getIntroduction(),command.getBirth(),command.getImageLevel());
+    public void updateUserProfile(UserUpdateCommand command) {
+        userPort.updateUser(command.getUserId(), command.getUserName(), command.getRegionId(), command.getIntroduction(), command.getBirth(), command.getImageLevel());
     }
 
     @Transactional
     @Override
-    public UserSearchResultListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand){
+    public UserSearchResultListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
 
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
         List<User> userList = userPort.findByUserNameContaining(searchCommand.getQuery());
 
         List<UserSearchResultDTO> userSearchResultList = userList.stream()
                 .filter(user -> !blockedUserIds.contains(user.getUserId())) // 차단된 사용자 제외
-                .map(user -> new UserSearchResultDTO(user.getUserName(), user.getRegion().getRegionName()))
-                .toList();
+                .map(user -> {
 
+                    // UserSearchResultDTO를 반환
+                    return UserSearchResultDTO.from(
+                            user.getUserId(),
+                            user.getUserName(),
+                            user.getRegion().getRegionName(),
+                            user.getImageLevel().intValue() // 추가된 profileImageUrl
+                    );
+                })
+                .collect(Collectors.toList()); // 리스트로 수집
+
+        // UserSearchResultListDTO로 반환
         return new UserSearchResultListDTO(userSearchResultList);
     }
 
@@ -205,7 +212,6 @@ public class UserService implements
 
         return new RegionListDTO(regionList);
     }
-
 
 
 }

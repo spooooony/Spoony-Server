@@ -39,12 +39,6 @@ public class ZzimPostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
-//    BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
-//
-//        if (blockCheckUseCase.isBlocked(blockCheckCommand)) {
-//        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-//                .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
-//    }
 
     @GetMapping
     @Operation(summary = "북마크 조회 API", description = "북마크 장소 리스트를 조회하는 API")

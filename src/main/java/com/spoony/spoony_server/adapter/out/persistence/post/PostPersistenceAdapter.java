@@ -226,6 +226,14 @@ public class PostPersistenceAdapter implements
         List<PostEntity> postEntityList = postRepository.findByDescriptionContaining(query);
         return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Post> findAll() {
+        List<PostEntity> postEntityList = postRepository.findAll();
+        return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
+
+    }
+
     @Override
     public Long countPostsByUserId(Long userId) {
         return postRepository.countByUser_UserId(userId);
