@@ -48,7 +48,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{targetUserId}")
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Id 기준)")
     public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfoById(
             @UserId Long userId,
@@ -80,16 +80,32 @@ public class UserController {
 
     @GetMapping("/followers")
     @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API입니다.")
-    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getFollowers(@UserId Long userId) {
+    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getMyFollowers(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
+        FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
+        return ResponseEntity.ok(ResponseDTO.success(followListResponse));
+    }
+
+    @GetMapping("/followers/{targetUserId}")
+    @Operation(summary = "팔로워 조회 API", description = "타유저를 팔로우하는 유저 목록을 조회하는 API입니다.")
+    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowers(@PathVariable Long targetUserId) {
+        UserGetCommand command = new UserGetCommand(targetUserId);
         FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
         return ResponseEntity.ok(ResponseDTO.success(followListResponse));
     }
 
     @GetMapping("/followings")
     @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API입니다.")
-    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getFollowings(@UserId Long userId) {
+    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getMyFollowings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
+        FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
+        return ResponseEntity.ok(ResponseDTO.success(followings));
+    }
+
+    @GetMapping("/followings/{targetUserId}")
+    @Operation(summary = "팔로잉 조회 API", description = "타유저가 팔로우하는 유저 목록을 조회하는 API입니다.")
+    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowings(@PathVariable Long targetUserId) {
+        UserGetCommand command = new UserGetCommand(targetUserId);
         FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
         return ResponseEntity.ok(ResponseDTO.success(followings));
     }
@@ -146,7 +162,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }
 
-    @GetMapping("/{userId}/reviews")
+    @GetMapping(value = "/reviews/{targetUserId}", produces = "application/json; charset=UTF-8")
     @Operation(
             summary = "특정 사용자 리뷰 전체 조회 API",
             description = """

@@ -9,6 +9,7 @@ import com.spoony.spoony_server.application.port.command.post.PostGetCommand;
 import com.spoony.spoony_server.application.port.command.post.PostSearchCommand;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface PostGetUseCase {
     PostResponseDTO getPostById(PostGetCommand command);
