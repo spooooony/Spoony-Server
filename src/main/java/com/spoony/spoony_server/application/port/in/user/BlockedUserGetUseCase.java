@@ -1,6 +1,5 @@
-package com.spoony.spoony_server.application.port.in.block;
+package com.spoony.spoony_server.application.port.in.user;
 
-import com.spoony.spoony_server.application.port.command.block.BlockCheckCommand;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 
 import java.util.List;

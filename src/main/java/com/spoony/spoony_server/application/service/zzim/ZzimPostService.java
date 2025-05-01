@@ -4,7 +4,7 @@ import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
-import com.spoony.spoony_server.application.port.out.block.BlockPort;
+import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.location.LocationPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;

@@ -1,14 +1,13 @@
 package com.spoony.spoony_server.adapter.in.web.user;
 
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
-import com.spoony.spoony_server.application.port.command.block.BlockCheckCommand;
-import com.spoony.spoony_server.application.port.command.block.BlockUserCommand;
+import com.spoony.spoony_server.application.port.command.user.BlockCheckCommand;
+import com.spoony.spoony_server.application.port.command.user.BlockUserCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
-import com.spoony.spoony_server.application.port.in.block.BlockCheckUseCase;
-import com.spoony.spoony_server.application.port.in.block.BlockUserCreateUseCase;
-import com.spoony.spoony_server.application.port.in.block.BlockedUserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
@@ -19,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,7 +50,6 @@ public class UserController {
     public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfoById(
             @UserId Long userId,
             @PathVariable Long targetUserId) {
-
 
         UserGetCommand userGetCommand = new UserGetCommand(targetUserId);
         UserFollowCommand userFollowCommand = new UserFollowCommand(userId,targetUserId);

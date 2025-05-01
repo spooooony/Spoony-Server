@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.adapter.in.web.zzim;
 
-import com.spoony.spoony_server.application.port.command.block.BlockCheckCommand;
 import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
@@ -10,7 +9,6 @@ import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimPostAddRequestDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusListResponseDTO;
-import com.spoony.spoony_server.global.message.business.BlockErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

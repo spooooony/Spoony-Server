@@ -1,8 +1,4 @@
-package com.spoony.spoony_server.application.port.out.block;
-
-import com.spoony.spoony_server.domain.block.Block;
-import com.spoony.spoony_server.domain.report.Report;
-import com.spoony.spoony_server.domain.report.UserReport;
+package com.spoony.spoony_server.application.port.out.user;
 
 import java.util.List;
 

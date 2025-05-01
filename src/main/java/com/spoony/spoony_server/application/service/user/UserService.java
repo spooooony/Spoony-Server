@@ -1,28 +1,17 @@
 package com.spoony.spoony_server.application.service.user;
 
-import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
-import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
-import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
 import com.spoony.spoony_server.adapter.dto.post.RegionDTO;
-import com.spoony.spoony_server.adapter.dto.post.ReviewAmountResponseDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
-import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
-import com.spoony.spoony_server.application.port.in.block.BlockedUserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
-import com.spoony.spoony_server.application.port.out.block.BlockPort;
+import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
-import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
-import com.spoony.spoony_server.domain.location.Location;
-import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Follow;
-import com.spoony.spoony_server.domain.user.ProfileImage;
-import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
-import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,19 +20,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService implements
         UserGetUseCase,
         UserFollowUseCase,
         UserUpdateUseCase,
         UserSearchUseCase,
-        RegionGetUseCase {
+        RegionGetUseCase,
+        BlockUserCreateUseCase,
+        BlockCheckUseCase,
+        BlockedUserGetUseCase {
 
     private final UserPort userPort;
     private final PostPort postPort;
     private final BlockPort blockPort;
 
-    @Transactional
     @Override
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
         User user = userPort.findUserById(userGetCommand.getUserId());
@@ -77,7 +69,6 @@ public class UserService implements
         );
     }
 
-    @Transactional
     @Override
     public UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand command) {
         User user = userPort.findUserById(command.getUserId());
@@ -91,31 +82,26 @@ public class UserService implements
         );
     }
 
-    @Transactional
     @Override
     public List<UserSimpleResponseDTO> getUserSimpleInfo(UserGetCommand command) {
         return null;
     }
 
-    @Transactional
     @Override
     public List<UserSimpleResponseDTO> getUserSimpleInfoBySearch(UserSearchCommand command) {
         return List.of();
     }
 
-    @Transactional
     @Override
     public Boolean isUsernameDuplicate(UserNameCheckCommand command) {
         return userPort.existsByUserName(command.getUsername());
     }
 
-    @Transactional
     @Override
     public UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command) {
         return null;
     }
 
-    @Transactional
     @Override
     public FollowListResponseDTO getFollowers(UserGetCommand command) {
         List<Follow> followers = userPort.findFollowersByUserId(command.getUserId());
@@ -131,14 +117,10 @@ public class UserService implements
                     isFollowing,
                     followerUser.getImageLevel().intValue()
             );
-
         }).toList();
-
         return new FollowListResponseDTO(userDTOList.size(), userDTOList);
-
     }
 
-    @Transactional
     @Override
     public FollowListResponseDTO getFollowings(UserGetCommand command) {
         List<Follow> followings = userPort.findFollowingsByUserId(command.getUserId());
@@ -146,7 +128,6 @@ public class UserService implements
         List<UserSimpleResponseDTO> userDTOList = followings.stream().map(follow -> {
             User followingUser = follow.getFollowing();
             boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
-
 
             return UserSimpleResponseDTO.from(
                     followingUser.getUserId(),
@@ -160,25 +141,21 @@ public class UserService implements
         return new FollowListResponseDTO(userDTOList.size(), userDTOList);
     }
 
-    @Transactional
     @Override
     public void createFollow(UserFollowCommand command) {
         userPort.saveFollowRelation(command.getUserId(), command.getTargetUserId());
     }
 
-    @Transactional
     @Override
     public void deleteFollow(UserFollowCommand command) {
         userPort.deleteFollowRelation(command.getUserId(), command.getTargetUserId());
     }
 
-    @Transactional
     @Override
     public void updateUserProfile(UserUpdateCommand command) {
         userPort.updateUser(command.getUserId(), command.getUserName(), command.getRegionId(), command.getIntroduction(), command.getBirth(), command.getImageLevel());
     }
 
-    @Transactional
     @Override
     public UserSearchResultListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
 
@@ -213,6 +190,25 @@ public class UserService implements
         return new RegionListDTO(regionList);
     }
 
+    @Override
+    public void createUserBlock(BlockUserCommand command) {
+        blockPort.saveUserBlockRelation(command.getUserId(), command.getTargetUserId());
+        userPort.deleteFollowRelation(command.getUserId(),command.getTargetUserId());
+    }
 
+    @Override
+    public void deleteUserBlock(BlockUserCommand command) {
+        blockPort.deleteUserBlockRelation(command.getUserId(),command.getTargetUserId());
+    }
+
+    @Override
+    public boolean isBlocked(BlockCheckCommand command) {
+        return blockPort.existsBlockUserRelation(command.getUserId(), command.getTargetUserId());
+    }
+
+    @Override
+    public List<Long> searchUsersByQuery(UserGetCommand command) {
+        return blockPort.getBlockedUserIds(command.getUserId());
+    }
 }
 

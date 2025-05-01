@@ -1,6 +1,5 @@
-package com.spoony.spoony_server.domain.block;
+package com.spoony.spoony_server.domain.user;
 
-import com.spoony.spoony_server.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -1,15 +1,10 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
 import com.spoony.spoony_server.adapter.dto.post.*;
-import com.spoony.spoony_server.adapter.dto.user.*;
-import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
-import com.spoony.spoony_server.application.port.command.user.UserNameCheckCommand;
-import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
-import com.spoony.spoony_server.application.port.in.block.BlockedUserGetUseCase;
+import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.*;
-import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;

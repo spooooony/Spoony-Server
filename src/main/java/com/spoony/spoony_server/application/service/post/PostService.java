@@ -1,15 +1,12 @@
 package com.spoony.spoony_server.application.service.post;
 
 import com.spoony.spoony_server.adapter.dto.post.*;
-import com.spoony.spoony_server.adapter.dto.user.UserSearchResultDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserSearchResultListDTO;
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
-import com.spoony.spoony_server.application.port.command.user.UserSearchCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
-import com.spoony.spoony_server.application.port.out.block.BlockPort;
+import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.application.port.out.post.*;
@@ -21,7 +18,6 @@ import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.Follow;
-import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
