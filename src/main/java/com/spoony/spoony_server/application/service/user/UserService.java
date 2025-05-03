@@ -2,6 +2,7 @@ package com.spoony.spoony_server.application.service.user;
 
 import com.spoony.spoony_server.adapter.dto.post.RegionDTO;
 import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
 import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
@@ -12,11 +13,14 @@ import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
+import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -143,12 +147,44 @@ public class UserService implements
 
     @Override
     public void createFollow(UserFollowCommand command) {
-        userPort.saveFollowRelation(command.getUserId(), command.getTargetUserId());
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
+        // 1. 이미 팔로우 중인지 확인
+        if (userPort.existsFollowRelation(userId, targetUserId)) {
+            throw new BusinessException(UserErrorMessage.ALEADY_FOLLOW);
+        }
+
+        Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId,targetUserId);
+
+        if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.BLOCKED) {
+            throw new BusinessException(UserErrorMessage.USER_BLOCKED);
+        }
+
+        //언팔로우->팔로우인지 or 신규 팔로우인지에 따라 분기처리
+        if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.UNFOLLOWED){ //언팔로우->팔로우
+            blockPort.deleteUserBlockRelation(userId,targetUserId,BlockStatus.UNFOLLOWED); //block 테이블에서 삭제
+            userPort.saveFollowRelation(userId,targetUserId);
+
+
+        } else{  //신규 팔로우
+            userPort.saveNewFollowRelation(userId, targetUserId);
+            userPort.saveFollowRelation(userId, targetUserId);
+
+        }
+
     }
 
     @Override
     public void deleteFollow(UserFollowCommand command) {
-        userPort.deleteFollowRelation(command.getUserId(), command.getTargetUserId());
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
+
+        // 1. block 테이블에 저장 (상태: UNFOLLOWED)
+        blockPort.saveUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED);
+
+        // 2. follow 관계 제거 (양방향)
+        userPort.deleteFollowRelation(userId, targetUserId);
+        userPort.deleteFollowRelation(targetUserId, userId);
     }
 
     @Override
@@ -192,13 +228,38 @@ public class UserService implements
 
     @Override
     public void createUserBlock(BlockUserCommand command) {
-        blockPort.saveUserBlockRelation(command.getUserId(), command.getTargetUserId());
-        userPort.deleteFollowRelation(command.getUserId(),command.getTargetUserId());
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
+
+        // 1. block 테이블에 저장
+        blockPort.saveUserBlockRelation(command.getUserId(), command.getTargetUserId(),BlockStatus.BLOCKED);
+
+        // 2. follow 관계 제거 (양방향)
+        userPort.deleteFollowRelation(userId, targetUserId);
+        userPort.deleteFollowRelation(targetUserId, userId);
+
+        // 3. 피드에서 게시물 제거
+        //    - 내 피드에서 상대방의 게시물 제거
+        //    - 상대방 피드에서 나의 게시물 제거
+        userPort.removeFeedPostsRelatedToBlock(userId, targetUserId);
+        userPort.removeFeedPostsRelatedToBlock(targetUserId, userId);
+
     }
 
     @Override
     public void deleteUserBlock(BlockUserCommand command) {
-        blockPort.deleteUserBlockRelation(command.getUserId(),command.getTargetUserId());
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
+
+        Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId, targetUserId);
+
+        // BlockStatus가 BLOCKED일 경우 UNFOLLOWED로 상태 변경
+        if (blockStatus.get() == BlockStatus.BLOCKED) {
+            blockPort.updateUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED);
+        } else {
+            // 상태가 이미 UNFOLLOWED라면 아무 동작도 하지 않음
+            throw new BusinessException(UserErrorMessage.USER_NOT_FOUND);
+        }
     }
 
     @Override

@@ -23,7 +23,7 @@ public class FeedController {
 
     private final FeedGetUseCase feedGetUseCase;
 
-    @GetMapping("following")
+    @GetMapping("/following")
     @Operation(summary = "팔로잉 유저들의 피드를 최신순으로 조회", description = "팔로우한 유저들의 피드를 최신순으로 조회합니다.")
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getFollowingFeed(@UserId Long userId){
 

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,7 +22,7 @@ public class BlockEntity {
     private Long blockId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "blocker_id")
+    @JoinColumn(name = "blocking_id")
     private UserEntity blocker;
 
 
@@ -28,10 +30,30 @@ public class BlockEntity {
     @JoinColumn(name = "blocked_id")
     private UserEntity blocked;
 
+    @Enumerated(EnumType.STRING)
+    private BlockStatus status;
+
+    @Column(nullable = false)
+    private LocalDateTime time;
+
+
+
+
     @Builder
-    public BlockEntity(Long blockId,UserEntity blocker,UserEntity blocked){
-        this.blockId = blockId;
+    public BlockEntity(UserEntity blocker,UserEntity blocked,BlockStatus status, LocalDateTime time){
         this.blocker = blocker;
         this.blocked = blocked;
+        this.status = status;
+        this.time = time;
+
+    }
+
+    public BlockEntity changeStatus(BlockStatus status) {
+        return BlockEntity.builder()
+                .blocker(this.blocker)
+                .blocked(this.blocked)
+                .status(status)
+                .time(LocalDateTime.now())
+                .build();
     }
 }
