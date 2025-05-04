@@ -12,7 +12,7 @@ public record  UserSimpleResponseDTO (
 
     public static UserSimpleResponseDTO from(Long userId, String username, String regionName, boolean isFollowing, int imageLevel) {
         ProfileImage profileImage = ProfileImage.fromLevel(imageLevel);
-        String profileImageUrl = "/images/" + profileImage.getImage();
+        String profileImageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
 
         return new UserSimpleResponseDTO(
                 userId,

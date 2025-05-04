@@ -35,7 +35,7 @@ public record UserResponseDTO(long userId,
             int profileImageLevel
     ) {
         ProfileImage profileImage = ProfileImage.fromLevel(profileImageLevel);
-        String profileImageUrl = "/images/" + profileImage.getImage();
+        String profileImageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
 
         return new UserResponseDTO(
                 userId,
