@@ -25,9 +25,12 @@ public interface UserPort {
     Long countFollowerByUserId(Long userId);
     // 나를 팔로우한 사람 수 (팔로워 수)
     Long countFollowingByUserId(Long userId);
-
+    void saveNewFollow(Long fromUserId, Long toUserId);
     // AUTH
     User create(PlatformUserDTO platformUserDTO, UserSignupDTO userSignupDTO);
     User load(Platform platform, PlatformUserDTO platformUserDTO);
     void deleteUser(Long userId);
+
+    void saveNewFollowRelation(Long userId, Long targetUserId);
+    void removeFeedPostsRelatedToBlock(Long fromUserId, Long toUserId);
 }

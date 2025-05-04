@@ -2,6 +2,7 @@ package com.spoony.spoony_server.adapter.out.persistence.user;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
@@ -36,6 +37,8 @@ public class UserPersistenceAdapter implements UserPort {
     private final SpoonBalanceRepository spoonBalanceRepository;
     private final ActivityRepository activityRepository;
     private final SpoonHistoryRepository spoonHistoryRepository;
+    private final NewFollowRepository newFollowRepository;
+    private final FeedRepository feedRepository;
 
     @Override
     public User findUserById(Long userId) {
@@ -66,7 +69,7 @@ public class UserPersistenceAdapter implements UserPort {
 
     @Override
     public boolean existsFollowRelation(Long fromUserId, Long toUserId) {
-        return false;
+        return followRepository.existsByFollower_UserIdAndFollowing_UserId(fromUserId, toUserId);
     }
 
     @Override
@@ -92,11 +95,12 @@ public class UserPersistenceAdapter implements UserPort {
 
     @Override
     public void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDate birth, Long imageLevel) {
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(()-> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
-        RegionEntity region = regionRepository.findById(regionId).orElseThrow(() -> new BusinessException(RegionErrorMessage.REGION_NOT_FOUND));;
+        RegionEntity region = regionRepository.findById(regionId).orElseThrow(() -> new BusinessException(RegionErrorMessage.REGION_NOT_FOUND));
+        ;
 
-        userEntity.updateProfile(userName,region,introduction,birth,imageLevel);
+        userEntity.updateProfile(userName, region, introduction, birth, imageLevel);
     }
 
     @Override
@@ -106,13 +110,28 @@ public class UserPersistenceAdapter implements UserPort {
     }
 
     @Override
-    public Long countFollowerByUserId(Long userId){
+    public Long countFollowerByUserId(Long userId) {
         return followRepository.countByFollowing_UserId(userId);
     }
 
     @Override
-    public Long countFollowingByUserId(Long userId){
+    public Long countFollowingByUserId(Long userId) {
         return followRepository.countByFollower_UserId(userId);
+    }
+
+    @Override
+    public void saveNewFollow(Long fromUserId, Long toUserId) {
+        UserEntity fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        UserEntity toUser = userRepository.findById(toUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        NewFollowEntity newFollowEntity = NewFollowEntity.builder()
+                .newFollower(fromUser)
+                .newFollowing(toUser)
+                .build();
+
+        newFollowRepository.save(newFollowEntity);
+
     }
 
     @Override
@@ -125,8 +144,8 @@ public class UserPersistenceAdapter implements UserPort {
     // AUTH
     @Override
     public User create(PlatformUserDTO platformUserDTO, UserSignupDTO userSignupDTO) {
-        RegionEntity regionEntity =  regionRepository.findById(userSignupDTO.regionId())
-            .orElseThrow(() -> new BusinessException(UserErrorMessage.REGION_NOT_FOUND));
+        RegionEntity regionEntity = regionRepository.findById(userSignupDTO.regionId())
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.REGION_NOT_FOUND));
 
         UserEntity userEntity = UserEntity.builder()
                 .platform(userSignupDTO.platform())
@@ -176,5 +195,29 @@ public class UserPersistenceAdapter implements UserPort {
 
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void saveNewFollowRelation(Long fromUserId, Long toUserId) {
+        UserEntity fromUser = userRepository.findById(fromUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        UserEntity toUser = userRepository.findById(toUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        NewFollowEntity newFollow = NewFollowEntity.builder()
+                .newFollower(fromUser)
+                .newFollowing(toUser)
+                .build();
+        newFollowRepository.save(newFollow);
+    }
+
+    @Override
+    public void removeFeedPostsRelatedToBlock(Long fromUserId, Long toUserId) {
+        // fromUserId가 toUserId를 차단한 경우
+        // fromUserId는 userId로서 피드에 toUserId(내가 차단한 유저)가 작성한 글이 있으면 삭제
+
+        feedRepository.deleteByUser_UserIdAndAuthor_UserId(fromUserId, toUserId);
+        feedRepository.deleteByUser_UserIdAndAuthor_UserId(toUserId, fromUserId);
+
     }
 }

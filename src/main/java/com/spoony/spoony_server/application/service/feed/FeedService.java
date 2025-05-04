@@ -7,6 +7,7 @@ import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
+import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Category;
@@ -31,13 +32,25 @@ public class FeedService implements FeedGetUseCase {
     private  final PostPort postPort;
     private final PostCategoryPort postCategoryPort;
     private final ZzimPostPort zzimPostPort;
+    private final BlockPort blockPort;
 
     public FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command) {
 //        String locationQuery = command.getLocationQuery();
 //        String sortBy = command.getSortBy();
 
+        // 1. 팔로우한 유저들의 게시물 리스트를 가져옴
         List<Feed> feedList = feedPort.findFeedListByFollowing(command.getUserId());
+
+        // 2. 내가 차단한 유저들의 ID를 가져옴
+        List<Long> userIdsBlockedByMe = blockPort.findBlockedUserIds(command.getUserId());
+
+        // 3. 나를 차단한 유저들의 ID를 가져옴
+        List<Long> userIdsBlockingMe = blockPort.findBlockingUserIds(command.getUserId());
+
+
         List<FeedResponseDTO> feedResponseList = feedList.stream()
+                .filter(feed -> !userIdsBlockedByMe.contains(feed.getPost().getUser().getUserId())// 내가 차단한 유저의 게시물 제외
+                        && !userIdsBlockingMe.contains(feed.getPost().getUser().getUserId())) // 나를 차단한 유저의 게시물 제외
                 .map(feed -> {
                     Post post = feed.getPost();
                     User author = post.getUser();
@@ -48,6 +61,7 @@ public class FeedService implements FeedGetUseCase {
                     List<String> photoUrlList = photoList.stream()
                             .map(Photo::getPhotoUrl)
                             .toList();
+
                     return new FeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
@@ -65,12 +79,43 @@ public class FeedService implements FeedGetUseCase {
                             photoUrlList,
                             post.getCreatedAt()
                     );
-                })
-                .collect(Collectors.toList());
-
-
+                }).sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt())).toList();
         return new FeedListResponseDTO(feedResponseList);
     }
+
+//        List<FeedResponseDTO> feedResponseList2 = feedList.stream()
+//                .map(feed -> {
+//                    Post post = feed.getPost();
+//                    User author = post.getUser();
+//                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+//                    Category category = postCategory.getCategory();
+//
+//                    List<Photo> photoList = postPort.findPhotoById(post.getPostId());
+//                    List<String> photoUrlList = photoList.stream()
+//                            .map(Photo::getPhotoUrl)
+//                            .toList();
+//                    return new FeedResponseDTO(
+//                            author.getUserId(),
+//                            author.getUserName(),
+//                            author.getRegion().getRegionName(),
+//                            post.getPostId(),
+//                            post.getDescription(),
+//                            new CategoryColorResponseDTO(
+//                                    category.getCategoryId(),
+//                                    category.getCategoryName(),
+//                                    category.getIconUrlColor(),
+//                                    category.getTextColor(),
+//                                    category.getBackgroundColor()
+//                            ),
+//                            zzimPostPort.countZzimByPostId(post.getPostId()),
+//                            photoUrlList,
+//                            post.getCreatedAt()
+//                    );
+//                })
+//                .collect(Collectors.toList());
+
+
+
 
     @Override
     public FeedListResponseDTO getAllPosts() {

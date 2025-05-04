@@ -21,13 +21,20 @@ public class FeedEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private UserEntity author;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostEntity post;
 
     @Builder
-    public FeedEntity(UserEntity user, PostEntity post) {
+    public FeedEntity(UserEntity user, PostEntity post,UserEntity author) {
         this.user = user;
         this.post = post;
+        this.author = author;
     }
 }

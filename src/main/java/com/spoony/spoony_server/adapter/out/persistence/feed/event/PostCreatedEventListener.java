@@ -35,6 +35,8 @@ public class PostCreatedEventListener {
         PostEntity postEntity = postRepository.findById(postId)
                 .orElseThrow();
 
+        UserEntity author = postEntity.getUser();
+
         for (int i = 0; i < followerIds.size(); i += 10_000) {
             int fromIndex = i;
             int toIndex = Math.min(i + 10_000, followerIds.size());
@@ -43,7 +45,7 @@ public class PostCreatedEventListener {
                     .map(followerId -> {
                         UserEntity userEntity = userRepository.findById(followerId)
                                 .orElseThrow();
-                        return new FeedEntity(userEntity, postEntity);
+                        return new FeedEntity(userEntity, postEntity,author);
                     })
                     .toList();
 

@@ -9,10 +9,12 @@ public record ProfileImageResponseDTO(
         boolean isUnlocked
 ) {
     public static ProfileImageResponseDTO of(ProfileImage profileImage, boolean isUnlocked) {
+        String imageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
+        System.out.println("Generated Image URL: " + imageUrl);  // 이 부분에서 URL을 콘솔에 출력
         return new ProfileImageResponseDTO(
                 profileImage.getImageLevel(),
                 profileImage.getUnlockCondition(),
-                "/profile-images/" + profileImage.getImage(),
+                imageUrl,
                 isUnlocked
         );
     }
