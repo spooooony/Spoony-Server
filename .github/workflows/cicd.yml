@@ -135,6 +135,12 @@ jobs:
           echo "⌛️ 컨테이너 실행 대기 (30 sec)"
           sleep 30
           
+          echo "🛠 Nginx 설정 포트 교체"
+          sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:\$NEW_PORT/" /etc/nginx/sites-available/default
+
+          echo "🔁 Nginx 설정 적용"
+          sudo nginx -t && sudo nginx -s reload
+          
           echo "🗑️ 이전 컨테이너 제거"
           sudo docker stop spoony-dev-\$ACTIVE_PORT
           sudo docker rm spoony-dev-\$ACTIVE_PORT
@@ -143,9 +149,6 @@ jobs:
           sudo docker image prune -f
           sudo docker container prune -f
           sudo docker volume prune -f
-
-          echo "🔁 Nginx 설정 적용"
-          sudo nginx -t && sudo nginx -s reload
 
           echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
           EOF
