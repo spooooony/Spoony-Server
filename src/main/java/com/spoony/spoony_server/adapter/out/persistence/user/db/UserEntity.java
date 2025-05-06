@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.ProfileImage;
 import jakarta.persistence.*;
@@ -13,6 +14,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -63,6 +66,9 @@ public class UserEntity {
         this.introduction = introduction;
         this.birth = birth;
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PostEntity> posts = new ArrayList<>();
 
     public void updateProfile(String userName, RegionEntity region, String introduction, LocalDate birth,Long profileImageLevel) {
         this.userName = userName;
