@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public record UserSignupDTO(@NotNull Platform platform,
                             @NotNull String userName,
-                            @NotNull LocalDate birth,
-                            @NotNull Long regionId,
-                            @NotNull String introduction) {
+                            LocalDate birth,
+                            Long regionId,
+                            String introduction) {
 }
