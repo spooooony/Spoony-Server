@@ -22,7 +22,7 @@ public class BlockEntity {
     private Long blockId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "blocking_id")
+    @JoinColumn(name = "blocker_id")
     private UserEntity blocker;
 
 
@@ -40,11 +40,11 @@ public class BlockEntity {
 
 
     @Builder
-    public BlockEntity(UserEntity blocker,UserEntity blocked,BlockStatus status, LocalDateTime time){
+    public BlockEntity(UserEntity blocker,UserEntity blocked,BlockStatus status){
         this.blocker = blocker;
         this.blocked = blocked;
         this.status = status;
-        this.time = time;
+        this.time = LocalDateTime.now();
 
     }
 
@@ -57,7 +57,6 @@ public class BlockEntity {
                 .blocker(this.blocker)
                 .blocked(this.blocked)
                 .status(status)
-                .time(LocalDateTime.now())
                 .build();
     }
 }
