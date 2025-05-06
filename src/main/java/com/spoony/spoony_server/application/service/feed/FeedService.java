@@ -22,9 +22,14 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,66 +100,66 @@ public class FeedService implements FeedGetUseCase {
     }
 
 
-
     @Transactional
     public FilteredFeedResponseListDTO getFilteredFeed(FeedFilterCommand command) {
-        // 필터링된 게시물을 가져오는 과정에서 예외 처리
+        Logger logger = LoggerFactory.getLogger(getClass());
+        logger.info("getFilteredFeed 호출됨");
+        logger.info("FeedFilterCommand: {}", command);
+
         List<Post> filteredPosts;
+        List<Long> categoryIds = command.getCategoryIds();
+        boolean isLocalReviewFlag = command.isLocalReview();
+
         try {
-            filteredPosts = postPort.findFilteredPosts(
-                    command.getCategoryIds(),
-                    command.getRegionIds()
-            );
+            if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
+                logger.info("✅✅✅ 로컬리뷰 전체 조회 (category 필터 제거)");
+                filteredPosts = postPort.findFilteredPosts(
+                        categoryIds,   // 카테고리 필터는 [2]로만 전달 (실제로는 [2]가 단독일 경우 category 필터를 제외할 것)
+                        command.getRegionIds(),
+                        command.getSortBy(),
+                        isLocalReviewFlag // 로컬리뷰 플래그 그대로 전달
+                );
+            } else {
+                logger.info(isLocalReviewFlag ? "✅✅✅ 로컬리뷰: 필터링 로직 실행" : "일반리뷰: 필터링 로직 실행");
+                filteredPosts = postPort.findFilteredPosts(
+                        categoryIds,
+                        command.getRegionIds(),
+                        command.getSortBy(),
+                        isLocalReviewFlag
+                );
+            }
         } catch (Exception e) {
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
+        logger.info("필터링된 게시물 수: {}", filteredPosts.size());
+
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
+                    List<PostCategory> postCategories = postCategoryPort.findAllByPostId(post.getPostId());
+                    Category mainCategory = postCategories.isEmpty() ? null : postCategories.get(0).getCategory();
 
-                    // PostCategory가 null일 경우 처리
-                    PostCategory postCategory;
-                    try {
-                        postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-                    } catch (BusinessException e) {
-                        // Category가 없는 경우, 로컬리뷰 여부를 false로 설정
-                        postCategory = null;
-                    }
-                    Category category = (postCategory != null) ? postCategory.getCategory() : null;
-
-                    // 사진 리스트가 null인 경우 처리
-                    List<String> photoUrlList = new ArrayList<>();
-                    if (category != null) {
-                        List<Photo> photoList = postPort.findPhotoById(post.getPostId());
-                        if (photoList != null && !photoList.isEmpty()) {
-                            photoUrlList = photoList.stream()
-                                    .map(Photo::getPhotoUrl)
-                                    .collect(Collectors.toList());
-                        }
-                    }
-
-                    // category_id가 2일 경우 로컬리뷰로 간주
-                    boolean isLocalReview = category != null && category.getCategoryId() == 2;
-
-                    // 필터링된 게시물 DTO 생성
                     return new FilteredFeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
-                            author.getRegion() != null ? author.getRegion().getRegionName() : "Unknown",  // 지역 이름
+                            author.getRegion() != null ? author.getRegion().getRegionName() : "Unknown",
                             post.getPostId(),
                             post.getDescription(),
-                            category != null ? new CategoryColorResponseDTO(
-                                    category.getCategoryId(),
-                                    category.getCategoryName(),
-                                    category.getIconUrlColor(),
-                                    category.getTextColor(),
-                                    category.getBackgroundColor()
-                            ) : null,
+                            mainCategory != null ?
+                                    new CategoryColorResponseDTO(
+                                            mainCategory.getCategoryId(),
+                                            mainCategory.getCategoryName(),
+                                            mainCategory.getIconUrlColor(),
+                                            mainCategory.getTextColor(),
+                                            mainCategory.getBackgroundColor()
+                                    ) : null,
                             zzimPostPort.countZzimByPostId(post.getPostId()),
-                            photoUrlList,
+                            postPort.findPhotoById(post.getPostId()).stream()
+                                    .map(Photo::getPhotoUrl)
+                                    .collect(Collectors.toList()),
                             post.getCreatedAt(),
-                            isLocalReview  // 로컬리뷰인지 여부 추가
+                            isLocalReviewFlag  // 여기서 command의 플래그 그대로 사용
                     );
                 })
                 .collect(Collectors.toList());
@@ -163,63 +168,79 @@ public class FeedService implements FeedGetUseCase {
     }
 
 
-
-
-
-//    @Override
-//    public FeedListResponseDTO getFilteredFeed(FeedFilterCommand command) {
-//        // 1. 필터링된 Feed 가져오기
-//        List<Feed> filteredFeeds = feedPort.findFilteredFeeds(
-//                command.getCategoryIds(),
-//                command.getRegionIds(),
-//                command.isLocalReviewEnabled()
-//        );
+//    @Transactional
+//    public FilteredFeedResponseListDTO getFilteredFeed(FeedFilterCommand command) {
+//        // 필터링된 게시물을 가져오는 과정에서 예외 처리
+//        List<Post> filteredPosts;
+//        try {
+//            // 새로운 방식으로 필터링된 게시물 목록 가져오기
+//            filteredPosts = postPort.findFilteredPosts(
+//                    command.getCategoryIds(),
+//                    command.getRegionIds(),
+//                    command.getSortBy()
+//            );
+//        } catch (Exception e) {
+//            // 예외 발생 시 처리
+//            throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
+//        }
 //
-//        // 2. DTO 변환
-//        List<FeedResponseDTO> feedResponseList = filteredFeeds.stream()
-//                .map(feed -> {
-//                    Post post = feed.getPost();
+//        // 필터링된 게시물을 DTO로 변환
+//        List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
+//                .map(post -> {
 //                    User author = post.getUser();
-//                    List<PostCategory> postCategories = postCategoryPort.findPostCategoriesByPostId(post.getPostId());
-//                    // 카테고리 ID가 제공되지 않거나 일치하는 카테고리가 없다면 category_id가 1인 기본 카테고리 추가
-//                    if (postCategories.isEmpty()) {
-//                        Category defaultCategory = categoryPort.findCategoryById(1L); // category_id = 1 (전체조회) 카테고리
-//                        PostCategory defaultPostCategory = new PostCategory(post, defaultCategory);
-//                        postCategories.add(defaultPostCategory);
-//                    }
-//                    // 여러 카테고리 가능 - 중복 가능
-//                    List<Category> categories = postCategories.stream()
-//                            .map(PostCategory::getCategory)
-//                            .collect(Collectors.toList());
-//                    Category category = categories.get(0);  // 첫 번째 카테고리 (선택된 카테고리)
-//                    List<Photo> photoList = postPort.findPhotoById(post.getPostId());
-//                    List<String> photoUrlList = photoList.stream()
-//                            .map(Photo::getPhotoUrl)
-//                            .toList();
 //
-//                    return new FeedResponseDTO(
+//                    // PostCategory가 null일 경우 처리
+//                    PostCategory postCategory;
+//                    try {
+//                        postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+//                    } catch (BusinessException e) {
+//                        // Category가 없는 경우, 로컬리뷰 여부를 false로 설정
+//                        postCategory = null;
+//                    }
+//                    Category category = (postCategory != null) ? postCategory.getCategory() : null;
+//
+//                    // 사진 리스트가 null인 경우 처리
+//                    List<String> photoUrlList = new ArrayList<>();
+//                    if (category != null) {
+//                        List<Photo> photoList = postPort.findPhotoById(post.getPostId());
+//                        if (photoList != null && !photoList.isEmpty()) {
+//                            photoUrlList = photoList.stream()
+//                                    .map(Photo::getPhotoUrl)
+//                                    .collect(Collectors.toList());
+//                        }
+//                    }
+//
+//                    // category_id가 2일 경우 로컬리뷰로 간주
+//                    boolean isLocalReview = category != null && category.getCategoryId() == 2;
+//
+//                    // 필터링된 게시물 DTO 생성
+//                    return new FilteredFeedResponseDTO(
 //                            author.getUserId(),
 //                            author.getUserName(),
-//                            author.getRegion().getRegionName(),
+//                            author.getRegion() != null ? author.getRegion().getRegionName() : "Unknown",  // 지역 이름
 //                            post.getPostId(),
 //                            post.getDescription(),
-//                            new CategoryColorResponseDTO(
+//                            category != null ? new CategoryColorResponseDTO(
 //                                    category.getCategoryId(),
 //                                    category.getCategoryName(),
 //                                    category.getIconUrlColor(),
 //                                    category.getTextColor(),
 //                                    category.getBackgroundColor()
-//                            ),
+//                            ) : null,
 //                            zzimPostPort.countZzimByPostId(post.getPostId()),
 //                            photoUrlList,
-//                            post.getCreatedAt()
+//                            post.getCreatedAt(),
+//                            isLocalReview  // 로컬리뷰인지 여부 추가
 //                    );
 //                })
-//                .sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt())) // 최신순 정렬
-//                .toList();
+//                .collect(Collectors.toList());
 //
-//        return new FeedListResponseDTO(feedResponseList);
+//        // DTO 리스트를 포함한 응답 반환
+//        return new FilteredFeedResponseListDTO(feedResponseList);
 //    }
+
+
+
 
     private List<FeedResponseDTO> buildFeedResponseDTOList(List<Post> postList) {
         return postList.stream()
