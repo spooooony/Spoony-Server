@@ -2,18 +2,18 @@ package com.spoony.spoony_server.adapter.out.persistence.user;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
+import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockEntity;
+import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockRepository;
 import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.BlockMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
-import com.spoony.spoony_server.domain.user.Follow;
-import com.spoony.spoony_server.domain.user.Platform;
-import com.spoony.spoony_server.domain.user.Region;
-import com.spoony.spoony_server.domain.user.User;
+import com.spoony.spoony_server.domain.user.*;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.RegionErrorMessage;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
@@ -39,6 +39,7 @@ public class UserPersistenceAdapter implements UserPort {
     private final SpoonHistoryRepository spoonHistoryRepository;
     private final NewFollowRepository newFollowRepository;
     private final FeedRepository feedRepository;
+    private final BlockRepository blockRepository;
 
     @Override
     public User findUserById(Long userId) {
@@ -220,4 +221,11 @@ public class UserPersistenceAdapter implements UserPort {
         feedRepository.deleteByUser_UserIdAndAuthor_UserId(toUserId, fromUserId);
 
     }
+
+    @Override
+    public List<Block> findBlockedByUserId(Long userId) {
+        List<BlockEntity> blockingList = blockRepository.findByBlocker_UserId(userId);
+        return blockingList.stream().map(BlockMapper::toDomain).toList();
+    }
 }
+

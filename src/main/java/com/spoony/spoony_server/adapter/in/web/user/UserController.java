@@ -215,6 +215,13 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
+    @GetMapping("/blockings")
+    @Operation(summary = "차단한 유저 조회 API", description = "로그인한 사용자가 차단한 유저 목록을 조회하는 API입니다.")
+    public ResponseEntity<ResponseDTO<BlockListResponseDTO>> getBlockings(@UserId Long userId) {
+        UserGetCommand command = new UserGetCommand(userId);
+        BlockListResponseDTO blockedUsers = userGetUseCase.getBlockings(command);
+        return ResponseEntity.ok(ResponseDTO.success(blockedUsers));
+    }
     @PostMapping("/block")
     @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API입니다.")
     public ResponseEntity<ResponseDTO<Void>> blockUser(

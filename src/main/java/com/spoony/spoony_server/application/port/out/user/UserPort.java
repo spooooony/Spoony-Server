@@ -2,10 +2,7 @@ package com.spoony.spoony_server.application.port.out.user;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
-import com.spoony.spoony_server.domain.user.Follow;
-import com.spoony.spoony_server.domain.user.Platform;
-import com.spoony.spoony_server.domain.user.Region;
-import com.spoony.spoony_server.domain.user.User;
+import com.spoony.spoony_server.domain.user.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,4 +30,6 @@ public interface UserPort {
 
     void saveNewFollowRelation(Long userId, Long targetUserId);
     void removeFeedPostsRelatedToBlock(Long fromUserId, Long toUserId);
+
+    List<Block> findBlockedByUserId(Long userId);
 }

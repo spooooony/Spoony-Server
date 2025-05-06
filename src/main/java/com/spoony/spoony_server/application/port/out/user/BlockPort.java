@@ -17,5 +17,8 @@ public interface BlockPort {
     List<Long> findBlockedUserIds(Long userId);
 
     List<Long> findBlockingUserIds(Long userId);
+    void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status);
+
+
 }
 

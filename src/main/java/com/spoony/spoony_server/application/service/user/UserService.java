@@ -11,6 +11,7 @@ import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.domain.user.Block;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -146,6 +147,24 @@ public class UserService implements
     }
 
     @Override
+    public BlockListResponseDTO getBlockings(UserGetCommand command) {
+        List<Block> blockeds = userPort.findBlockedByUserId(command.getUserId());
+        List<UserSimpleResponseDTO> userDTOList = blockeds.stream().map(block ->{
+            User blockedUser = block.getBlocked();
+            boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
+
+            return UserSimpleResponseDTO.from(
+                    blockedUser.getUserId(),
+                    blockedUser.getUserName(),
+                    blockedUser.getRegion().getRegionName(),
+                    isBlocked,
+                    blockedUser.getImageLevel().intValue()
+            );
+        }).toList();
+            return new BlockListResponseDTO(userDTOList);
+    }
+
+    @Override
     public void createFollow(UserFollowCommand command) {
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
@@ -156,6 +175,8 @@ public class UserService implements
 
         Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId,targetUserId);
 
+
+        //어차피 아래 조건문에 도달하지조차 않을테지만(클라 뷰에서 막혀서) 그래도 일단 추가
         if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.BLOCKED) {
             throw new BusinessException(UserErrorMessage.USER_BLOCKED);
         }
@@ -164,6 +185,8 @@ public class UserService implements
         if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.UNFOLLOWED){ //언팔로우->팔로우
             blockPort.deleteUserBlockRelation(userId,targetUserId,BlockStatus.UNFOLLOWED); //block 테이블에서 삭제
             userPort.saveFollowRelation(userId,targetUserId);
+
+            //+ feed 업데이트도 누락된게 있는지 확인해야함
 
 
         } else{  //신규 팔로우
@@ -231,18 +254,13 @@ public class UserService implements
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
 
-        // 1. block 테이블에 저장
-        blockPort.saveUserBlockRelation(command.getUserId(), command.getTargetUserId(),BlockStatus.BLOCKED);
+        blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.BLOCKED);
 
         // 2. follow 관계 제거 (양방향)
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
 
-        // 3. 피드에서 게시물 제거
-        //    - 내 피드에서 상대방의 게시물 제거
-        //    - 상대방 피드에서 나의 게시물 제거
-        userPort.removeFeedPostsRelatedToBlock(userId, targetUserId);
-        userPort.removeFeedPostsRelatedToBlock(targetUserId, userId);
+
 
     }
 

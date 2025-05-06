@@ -15,5 +15,6 @@ public interface UserGetUseCase {
     UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command);
     FollowListResponseDTO getFollowers(UserGetCommand command);
     FollowListResponseDTO getFollowings(UserGetCommand command);
+    BlockListResponseDTO getBlockings(UserGetCommand command);
 
 }

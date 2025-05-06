@@ -1,6 +1,8 @@
 package com.spoony.spoony_server.adapter.in.web.feed;
 
+import com.spoony.spoony_server.adapter.dto.post.FilteredFeedResponseListDTO;
 import com.spoony.spoony_server.adapter.dto.user.UserSearchResultListDTO;
+import com.spoony.spoony_server.application.port.command.feed.FeedFilterCommand;
 import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class FeedController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 
-    @GetMapping("")
+    @GetMapping("/filtered")
     @Operation(
             summary = "탐색 탭 전체 피드 조회 API",
             description = """
@@ -42,9 +45,49 @@ public class FeedController {
     - 현재는 페이징 없이 전체를 반환합니다.
     """
     )
-    public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getLatestReviewFeed() {
-        FeedListResponseDTO feedListResponse = feedGetUseCase.getAllPosts();
+    public ResponseEntity<ResponseDTO<FilteredFeedResponseListDTO>> getFeeds(
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> regionIds,
+            @RequestParam(defaultValue = "createdAt") String sortBy
+    ) {
+        // 1. 기본값: categoryIds가 null 또는 비어 있으면 전체 카테고리(1)로 설정
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            categoryIds = List.of(1L);
+        }
+
+        // 2. 전체(1)와 다른 카테고리가 함께 있으면 예외 처리
+        if (categoryIds.contains(1L) && categoryIds.size() > 1) {
+            throw new IllegalArgumentException("카테고리 전체(1)은 다른 카테고리와 함께 선택할 수 없습니다.");
+        }
+
+        // 3. 로컬리뷰 여부를 categoryId=2가 포함됐는지로 판단
+        boolean localReviewEnabled = categoryIds.contains(2L);
+
+        // 4. 로컬리뷰(2)를 제외한 카테고리 필터링 (3~9 범위의 카테고리만 필터링)
+        List<Long> filteredCategoryIds = categoryIds.stream()
+                .filter(id -> id >= 3 && id <= 9) // 3~9 범위의 카테고리만 필터링
+                .collect(Collectors.toList());
+
+        // 5. 전체 카테고리(1)가 선택되었으면 null로 처리
+        if (categoryIds.equals(List.of(1L))) {
+            filteredCategoryIds = null;
+        }
+
+        // 6. 지역 필터링 비활성화 시 regionIds가 비어 있으면 null 처리
+        if (regionIds != null && regionIds.isEmpty()) {
+            regionIds = null;
+        }
+
+        // 7. FeedFilterCommand에 필터된 카테고리와 지역 정보, 로컬리뷰 활성화 여부를 전달
+        FeedFilterCommand command = new FeedFilterCommand(filteredCategoryIds, regionIds);
+
+        // 8. 필터링된 피드를 가져오기 위해 UseCase 호출
+        FilteredFeedResponseListDTO feedListResponse = feedGetUseCase.getFilteredFeed(command);
+
+        // 9. 응답 반환
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 
+
 }
+

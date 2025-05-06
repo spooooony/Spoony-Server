@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface FeedPort {
     List<Feed> findFeedListByFollowing(Long userId);
-    void saveFollowersFeed(List<Follow> followList, Post post);
-    void saveFollowerFeed(Long userId, Long postId);
+    void updateFeedFromNewFollowers(Long userId);
+
+    //List<Feed> findFilteredFeeds(List<Long> categoryIds, List<Long> regionIds, boolean localReviewEnabled);
+
     void deleteFeedByUserIdAndPostId(Long userId, Long postId);
 
-    List<Feed> searchFeedByFollowingWithFilters(Long userId, List<String> categories, String locationQuery);
-
-    List<Feed> searchAllFeedsWithFilters(List<String> categories, String locationQuery);
+    //List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, boolean localReviewEnabled);
 }

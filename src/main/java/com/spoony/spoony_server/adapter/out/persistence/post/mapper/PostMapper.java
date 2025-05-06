@@ -5,10 +5,14 @@ import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostMapper {
 
     public static Post toDomain(PostEntity postEntity) {
+        Logger logger = LoggerFactory.getLogger(PostMapper.class);
+        logger.info("PostEntity to Domain 변환 시작");
         return new Post(
                 postEntity.getPostId(),
                 new User(
