@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +44,7 @@ public class BlockPersistenceAdapter implements BlockPort {
 
     @Override
     public boolean existsBlockUserRelation(Long fromUserId, Long toUserId) {
-        return blockRepository.existsByBlocker_userIdAndBlocked_userId(fromUserId,toUserId);
+        return blockRepository.existsByBlocker_userIdAndBlocked_userId(fromUserId, toUserId);
 
     }
 
@@ -54,7 +55,7 @@ public class BlockPersistenceAdapter implements BlockPort {
 
     @Override
     public Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId) {
-        return blockRepository.findByBlocker_UserIdAndBlocked_UserId(fromUserId,toUserId).map(BlockEntity ::getStatus);
+        return blockRepository.findByBlocker_UserIdAndBlocked_UserId(fromUserId, toUserId).map(BlockEntity::getStatus);
     }
 
     @Override
@@ -78,10 +79,63 @@ public class BlockPersistenceAdapter implements BlockPort {
     }
 
     @Override
+    public void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
+        Optional<BlockEntity> optionalBlock = blockRepository.findByBlocker_UserIdAndBlocked_UserId(fromUserId, toUserId);
+
+        if (optionalBlock.isPresent()) {
+            BlockEntity blockEntity = optionalBlock.get();
+            if (blockEntity.getStatus() != status) {
+                blockEntity.updateStatus(status);
+            }
+            // 이미 있고 상태도 같으면 아무것도 하지 않음
+        } else {
+            // 기존 관계가 아예 없을 때만 새로 저장
+            UserEntity fromUser = userRepository.findById(fromUserId)
+                    .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+            UserEntity toUser = userRepository.findById(toUserId)
+                    .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+            BlockEntity newBlock = BlockEntity.builder()
+                    .blocker(fromUser)
+                    .blocked(toUser)
+                    .status(status)
+                    .time(LocalDateTime.now())
+                    .build();
+
+            blockRepository.save(newBlock);
+        }
+    }
+    @Override
     public void deleteUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
         blockRepository.deleteByBlocker_UserIdAndBlocked_UserIdAndStatus(fromUserId, toUserId, status);
 
     }
+//            // UNFOLLOWED → BLOCKED 변경만 허용
+////            if (blockEntity.getStatus() == BlockStatus.UNFOLLOWED && status == BlockStatus.BLOCKED) {
+////                blockEntity.updateStatus(BlockStatus.BLOCKED);
+////            }else {
+//            // 상태가 다르면 무조건 갱신
+//            if (blockEntity.getStatus() != status) {
+//                blockEntity.updateStatus(status);
+//            }
+//        } else {
+//            UserEntity fromUser = userRepository.findById(fromUserId)
+//                    .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+//            UserEntity toUser = userRepository.findById(toUserId)
+//                    .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+//
+//            BlockEntity newBlock = BlockEntity.builder()
+//                    .blocker(fromUser)
+//                    .blocked(toUser)
+//                    .status(status)
+//                    .time(LocalDateTime.now())
+//                    .build();
+//
+//            blockRepository.save(newBlock);
+//        }
+//    }
+}
+
 
 
 
@@ -89,4 +143,4 @@ public class BlockPersistenceAdapter implements BlockPort {
 //    public List<Long> findBlockedIdsByBlockerId(Long userId) {
 //        return blockRepository.findBlocked_userIdByBlocker_userId(userId);
 //    }
-}
+

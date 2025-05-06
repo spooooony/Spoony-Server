@@ -24,7 +24,11 @@ public interface PostPort {
     void deleteAllPostCategoryByPostId(Long postId);
     void deleteAllMenusByPostId(Long postId);
     void deleteAllPhotosByPostId(Long postId);
+
+    List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds);
+
     Long countPostsByUserId(Long userId);
     List<Post> findByPostDescriptionContaining(String query);
     List<Post> findAll();
+
 }

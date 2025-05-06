@@ -48,6 +48,10 @@ public class BlockEntity {
 
     }
 
+    public void updateStatus(BlockStatus status) {
+        this.status = status;
+        this.time = LocalDateTime.now();
+    }
     public BlockEntity changeStatus(BlockStatus status) {
         return BlockEntity.builder()
                 .blocker(this.blocker)

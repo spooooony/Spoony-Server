@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface PostCategoryRepository extends JpaRepository<PostCategoryEntity, Long> {
-    Optional<PostCategoryEntity> findByPost_PostId(Long postID);
-    List<PostCategoryEntity> findAllByPost_PostId(Long postID);
+    Optional<PostCategoryEntity> findByPost_PostId(Long postId);
+    List<PostCategoryEntity> findAllByPost_PostId(Long postId);
 }
 

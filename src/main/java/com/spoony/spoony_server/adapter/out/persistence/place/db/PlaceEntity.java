@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.place.db;
 
+import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,19 +20,23 @@ public class PlaceEntity {
     private String placeRoadAddress;
     private Double latitude;
     private Double longitude;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id",nullable = true)
+    private RegionEntity region;
     @Builder
     public PlaceEntity(Long placeId,
                        String placeName,
                        String placeAddress,
                        String placeRoadAddress,
                        Double latitude,
-                       Double longitude) {
+                       Double longitude,
+                       RegionEntity region) {
         this.placeId = placeId;
         this.placeName = placeName;
         this.placeAddress = placeAddress;
         this.placeRoadAddress = placeRoadAddress;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.region = region;
     }
 }
