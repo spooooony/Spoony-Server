@@ -92,11 +92,13 @@ jobs:
             echo "✅ 네트워크 spoony-network 이미 존재"
           fi
 
-          echo "🧠 Redis 컨테이너가 존재하는지 확인"
-          if [ "$(sudo docker ps -a -q -f name=^redis$)" ]; then
+          REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
+          REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
+          
+          if [ -n "$REDIS_EXISTS" ]; then
             echo "🔗 Redis 컨테이너가 존재합니다."
         
-            if [ "$(sudo docker ps -q -f name=^redis$)" ]; then
+            if [ -n "$REDIS_RUNNING" ]; then
               echo "🔄 Redis 컨테이너 실행 중 → 네트워크 연결 시도"
               sudo docker network connect spoony-network redis || true
             else
