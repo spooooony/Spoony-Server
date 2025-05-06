@@ -273,7 +273,7 @@ public class PostPersistenceAdapter implements
 
     @Transactional
     @Override
-    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds) {
+    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy) {
         Logger logger = LoggerFactory.getLogger(getClass());
         logger.info("findFilteredPosts 호출됨");
         logger.info("categoryIds: {}", categoryIds);
@@ -281,22 +281,9 @@ public class PostPersistenceAdapter implements
 
         // 카테고리 및 지역 필터 결합
         Specification<PostEntity> spec = PostSpecification.withCategoryAndRegion(categoryIds, regionIds);
-        if (spec == null) {
-            logger.error("카테고리 및 지역 필터가 제대로 생성되지 않았습니다.");
-        }
-        logger.info("카테고리 및 지역 필터 적용 완료");
-        logger.debug("withCategoryAndRegion 호출됨, spec: {}", spec);
-
-        // 로컬리뷰 필터
-        spec = spec.and(PostSpecification.withLocalReview(categoryIds));
-        if (spec == null) {
-            logger.error("로컬리뷰 필터가 제대로 생성되지 않았습니다.");
-        }
-        logger.info("로컬리뷰 필터 적용 완료");
-        logger.debug("withLocalReview 필터 추가됨, spec: {}", spec);
 
         // 쿼리 실행 및 정렬
-        List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, sortBy));
         logger.info("findAll 실행 완료. 필터링된 게시물 수: {}", filteredPostEntities.size());
 
         // 엔티티를 도메인 객체로 변환 후 반환
@@ -307,7 +294,6 @@ public class PostPersistenceAdapter implements
 
         return result;
     }
-
 
 
 

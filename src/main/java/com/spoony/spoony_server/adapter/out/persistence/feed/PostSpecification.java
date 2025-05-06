@@ -51,21 +51,14 @@ public class PostSpecification {
 
     // 로컬리뷰 필터링 (category_id = 2인 경우, 게시물 지역 필터링)
     public static Specification<PostEntity> withLocalReview(List<Long> categoryIds) {
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            logger.debug("로컬리뷰 필터링 시작: categoryIds = {}", categoryIds);
 
-            if (categoryIds.contains(2L)) { // 로컬리뷰 카테고리만 필터링
-                // 작성자 지역과 게시물 지역이 일치하는지 체크
-                Join<PostEntity, PlaceEntity> placeJoin = root.join("place");
-                Join<PostEntity, UserEntity> userJoin = root.join("user");
-                predicates.add(cb.equal(placeJoin.get("region").get("id"), userJoin.get("region").get("id"))); // 지역 일치 체크
-                logger.debug("지역 일치 필터링 추가");
-            }
-
-            logger.debug("로컬리뷰 필터링 최종 Predicate: {}", predicates);
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+            return (root, query, builder) -> {
+                if (categoryIds.contains(2L)) {  // 로컬리뷰만 필터링
+                    // 작성자 지역과 맛집의 지역이 일치하는 조건 추가
+                    return builder.equal(root.get("user").get("region").get("regionId"), root.get("place").get("region").get("regionId"));
+                }
+                return builder.conjunction();  // 로컬리뷰가 아닌 경우엔 필터를 적용하지 않음
+            };
     }
 
     // 지역 필터링 (region_id를 사용하여 해당 지역의 게시물만 가져옴)
@@ -94,26 +87,29 @@ public class PostSpecification {
 
     // 카테고리 및 지역 필터 결합
     public static Specification<PostEntity> withCategoryAndRegion(List<Long> categoryIds, List<Long> regionIds) {
-        return (root, query, cb) -> {
+        return (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            logger.debug("카테고리와 지역 필터 결합 시작: categoryIds = {}, regionIds = {}", categoryIds, regionIds);
 
-            // 카테고리 필터 적용
-            Specification<PostEntity> categorySpec = withCategoryIds(categoryIds);
-            Predicate categoryPredicate = categorySpec.toPredicate(root, query, cb);
-            predicates.add(categoryPredicate);
-            logger.debug("카테고리 필터 추가");
-
-            // 지역 필터 적용
-            if (regionIds != null && !regionIds.isEmpty()) {
-                Specification<PostEntity> regionSpec = withRegionIds(regionIds);
-                Predicate regionPredicate = regionSpec.toPredicate(root, query, cb);
-                predicates.add(regionPredicate);
-                logger.debug("지역 필터 추가");
+            // 카테고리 필터링
+            if (categoryIds.contains(1L)) { // '전체' 카테고리일 경우
+                // 모든 게시물 반환 (category_id에 필터링 없음)
+            } else if (categoryIds.contains(2L)) { // '로컬 수저' 카테고리일 경우
+                // 작성자 지역과 게시물의 지역이 동일한지 체크
+                Join<PostEntity, PlaceEntity> placeJoin = root.join("place");
+                Join<PostEntity, UserEntity> userJoin = root.join("user");
+                predicates.add(builder.equal(placeJoin.get("region").get("regionId"), userJoin.get("region").get("regionId")));
+            } else {
+                // 카테고리 3~9에 해당하는 경우 해당 카테고리만 필터링
+                predicates.add(root.get("category").get("categoryId").in(categoryIds));
             }
 
-            logger.debug("카테고리 및 지역 필터 최종 Predicate: {}", predicates);
-            return cb.and(predicates.toArray(new Predicate[0]));
+            // 지역 필터링
+            if (regionIds != null && !regionIds.isEmpty()) {
+                predicates.add(root.get("place").get("region").get("regionId").in(regionIds));
+            }
+
+            return builder.and(predicates.toArray(new Predicate[0]));
         };
     }
+
 }

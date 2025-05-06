@@ -101,14 +101,18 @@ public class FeedService implements FeedGetUseCase {
         // 필터링된 게시물을 가져오는 과정에서 예외 처리
         List<Post> filteredPosts;
         try {
+            // 새로운 방식으로 필터링된 게시물 목록 가져오기
             filteredPosts = postPort.findFilteredPosts(
                     command.getCategoryIds(),
-                    command.getRegionIds()
+                    command.getRegionIds(),
+                    command.getSortBy()
             );
         } catch (Exception e) {
+            // 예외 발생 시 처리
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
+        // 필터링된 게시물을 DTO로 변환
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
@@ -159,6 +163,7 @@ public class FeedService implements FeedGetUseCase {
                 })
                 .collect(Collectors.toList());
 
+        // DTO 리스트를 포함한 응답 반환
         return new FilteredFeedResponseListDTO(feedResponseList);
     }
 

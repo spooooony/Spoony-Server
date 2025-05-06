@@ -25,7 +25,7 @@ public interface PostPort {
     void deleteAllMenusByPostId(Long postId);
     void deleteAllPhotosByPhotoUrl(List<String> deletePhotoUrlList);
 
-    List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds);
+    List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds,String sortBy);
 
     Long countPostsByUserId(Long userId);
     List<Post> findByPostDescriptionContaining(String query);
