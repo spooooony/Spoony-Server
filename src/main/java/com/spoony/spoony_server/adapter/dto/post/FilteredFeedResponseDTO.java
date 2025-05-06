@@ -16,4 +16,5 @@ public record FilteredFeedResponseDTO(
         boolean isLocalReview
 
 ) {
+
 }

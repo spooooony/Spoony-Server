@@ -99,7 +99,6 @@ public class BlockPersistenceAdapter implements BlockPort {
                     .blocker(fromUser)
                     .blocked(toUser)
                     .status(status)
-                    .time(LocalDateTime.now())
                     .build();
 
             blockRepository.save(newBlock);

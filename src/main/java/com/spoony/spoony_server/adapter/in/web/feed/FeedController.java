@@ -10,8 +10,12 @@ import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
+import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +43,10 @@ public class FeedController {
     @Operation(
             summary = "탐색 탭 전체 피드 조회 API",
             description = """
-    탐색 탭에서 최신순으로 전체 게시글(리뷰)을 조회하는 API입니다.
-
-    - 정렬 기준: createdAt 기준 내림차순 (최신순)
-    - 현재는 페이징 없이 전체를 반환합니다.
+        탐색 탭에서 최신순으로 전체 게시글(리뷰)을 조회하는 API입니다.
+        
+        - 정렬 기준: createdAt 기준 내림차순 (최신순)
+        - 현재는 페이징 없이 전체를 반환합니다.
     """
     )
     public ResponseEntity<ResponseDTO<FilteredFeedResponseListDTO>> getFeeds(
@@ -50,43 +54,51 @@ public class FeedController {
             @RequestParam(required = false) List<Long> regionIds,
             @RequestParam(defaultValue = "createdAt") String sortBy
     ) {
+        Logger logger = LoggerFactory.getLogger(getClass());
+
+        logger.info("getFeeds 호출됨");
+        logger.info("categoryIds: {}", categoryIds);
+        logger.info("regionIds: {}", regionIds);
+        logger.info("sortBy: {}", sortBy);
         // 1. 기본값: categoryIds가 null 또는 비어 있으면 전체 카테고리(1)로 설정
         if (categoryIds == null || categoryIds.isEmpty()) {
             categoryIds = List.of(1L);
+            logger.info("categoryIds가 null 또는 비어 있어 기본값으로 [1] 설정됨");
         }
 
-        // 2. 전체(1)와 다른 카테고리가 함께 있으면 예외 처리
+        // 2. 카테고리 1과 2~9가 동시에 선택되면 예외 처리
         if (categoryIds.contains(1L) && categoryIds.size() > 1) {
+            logger.error("카테고리 1은 다른 카테고리와 함께 선택할 수 없습니다.");
             throw new IllegalArgumentException("카테고리 전체(1)은 다른 카테고리와 함께 선택할 수 없습니다.");
         }
 
-        // 3. 로컬리뷰 여부를 categoryId=2가 포함됐는지로 판단
-        boolean localReviewEnabled = categoryIds.contains(2L);
-
-        // 4. 로컬리뷰(2)를 제외한 카테고리 필터링 (3~9 범위의 카테고리만 필터링)
-        List<Long> filteredCategoryIds = categoryIds.stream()
-                .filter(id -> id >= 3 && id <= 9) // 3~9 범위의 카테고리만 필터링
-                .collect(Collectors.toList());
-
-        // 5. 전체 카테고리(1)가 선택되었으면 null로 처리
-        if (categoryIds.equals(List.of(1L))) {
-            filteredCategoryIds = null;
-        }
-
-        // 6. 지역 필터링 비활성화 시 regionIds가 비어 있으면 null 처리
+        // 3. 지역 필터링이 비활성화되면 null 처리
         if (regionIds != null && regionIds.isEmpty()) {
             regionIds = null;
+            logger.info("regionIds가 비어있어 null로 설정됨");
         }
 
-        // 7. FeedFilterCommand에 필터된 카테고리와 지역 정보, 로컬리뷰 활성화 여부를 전달
-        FeedFilterCommand command = new FeedFilterCommand(filteredCategoryIds, regionIds);
+        // 로컬리뷰 여부 판단: categoryId = 2 포함 여부로 판단
+        boolean isLocalReview = categoryIds.contains(2L);
+        logger.info("🟢isLocalReview: {}", isLocalReview);
 
-        // 8. 필터링된 피드를 가져오기 위해 UseCase 호출
-        FilteredFeedResponseListDTO feedListResponse = feedGetUseCase.getFilteredFeed(command);
+        // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, sortBy, isLocalReview);
+        logger.info("🟢FeedFilterCommand 생성 완료: {}", command);
+        // 5. 필터링된 피드를 가져오기 위해 UseCase 호출
+        FilteredFeedResponseListDTO feedListResponse;
+        try {
+            feedListResponse = feedGetUseCase.getFilteredFeed(command);
+        } catch (Exception e) {
+            logger.error("🟢피드 조회 중 오류 발생: {}", e.getMessage(), e);
+            throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
+        }
 
-        // 9. 응답 반환
+        // 6. 응답 반환
+        logger.info("🟢FilteredFeedResponseListDTO 반환");
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
+
 
 
 }

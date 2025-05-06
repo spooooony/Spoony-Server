@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface PhotoRepository extends JpaRepository<PhotoEntity, Long> {
     Optional<List<PhotoEntity>> findByPost_PostId(Long postId);
     List<PhotoEntity> findAllByPost_PostId(Long postId);
-    void deleteAllByPhotoUrlIn(List<String> photoUrlList);
+
+    void deleteAllByPhotoUrlIn(List<String> deletePhotoUrlList);
 }
