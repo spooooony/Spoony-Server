@@ -230,9 +230,8 @@ public class PostPersistenceAdapter implements
     }
 
     @Override
-    public void deleteAllPhotosByPostId(Long postId) {
-        List<PhotoEntity> photos = photoRepository.findAllByPost_PostId(postId);
-        photoRepository.deleteAll(photos);
+    public void deleteAllPhotosByPhotoUrl(List<String> deletePhotoUrlList) {
+        photoRepository.deleteAllByPhotoUrlIn(deletePhotoUrlList);
     }
 
     @Override

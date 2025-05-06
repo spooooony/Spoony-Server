@@ -41,7 +41,7 @@ public class PostService implements
         PostDeleteUseCase,
         PostUpdateUseCase,
         PostSearchUseCase
-         {
+{
 
     private final PostPort postPort;
     private final PostCreatePort postCreatePort;
@@ -353,15 +353,15 @@ public class PostService implements
     @Transactional
     public void updatePost(PostUpdateCommand command) {
         //S3 삭제 로직
-        List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
-        postDeletePort.deleteImagesFromS3(imageUrls);
+        List<String> deletePhotoUrlList = command.getDeletePhotoUrlList();
+        postDeletePort.deleteImagesFromS3(deletePhotoUrlList);
 
         postPort.updatePost(command.getPostId(), command.getDescription(), command.getValue(), command.getCons());
         Post post = postPort.findPostById(command.getPostId());
 
         postPort.deleteAllPostCategoryByPostId(command.getPostId());
         postPort.deleteAllMenusByPostId(command.getPostId());
-        postPort.deleteAllPhotosByPostId(command.getPostId());
+        postPort.deleteAllPhotosByPhotoUrl(deletePhotoUrlList);
 
         Category category = categoryPort.findCategoryById(command.getCategoryId());
         PostCategory postCategory = new PostCategory(post, category);
@@ -378,10 +378,9 @@ public class PostService implements
         });
     }
 
-    public void deletePhotos(PostDeleteCommand command) {
-        List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
+    public void deletePhotos(PostPhotoDeleteCommand command) {
+        List<String> imageUrls = command.getDeleteImageUrlList();
         postDeletePort.deleteImagesFromS3(imageUrls);
     }
-
 
 }

@@ -54,8 +54,12 @@ public class PostController {
             @Parameter(description = "게시물에 첨부할 사진 리스트 (이미지 파일)")
             List<MultipartFile> photos
     ) throws IOException {
-        PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
-        List<String> photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
+        List<String> photoUrlList = List.of();
+
+        if (photos != null && photos.stream().anyMatch(photo -> !photo.isEmpty())) {
+            PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
+            photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
+        }
 
         PostCreateCommand command = new PostCreateCommand(
                 userId,
@@ -118,16 +122,16 @@ public class PostController {
             @RequestPart("data")
             @Parameter(description = "게시물 수정 요청 데이터 (JSON 형식)")
             PostUpdateRequestDTO postUpdateRequestDTO,
-            @RequestPart("photos")
+            @RequestPart(value = "photos", required = false)
             @Parameter(description = "게시물 수정 사진 리스트 (이미지 파일)")
             List<MultipartFile> photos
     ) throws IOException {
-        // 사진 삭제 후 재업로드
-        PostDeleteCommand deleteCommand = new PostDeleteCommand(postUpdateRequestDTO.postId());
-        postDeleteUseCase.deletePhotos(deleteCommand);
+        List<String> photoUrlList = List.of();
 
-        PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
-        List<String> photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
+        if (photos != null && photos.stream().anyMatch(photo -> !photo.isEmpty())) {
+            PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
+            photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
+        }
 
         PostUpdateCommand command = new PostUpdateCommand(
                 postUpdateRequestDTO.postId(),
@@ -136,7 +140,8 @@ public class PostController {
                 postUpdateRequestDTO.cons(),
                 postUpdateRequestDTO.categoryId(),
                 postUpdateRequestDTO.menuList(),
-                photoUrlList
+                photoUrlList,
+                postUpdateRequestDTO.deleteImageUrlList()
         );
 
         postUpdateUseCase.updatePost(command);
@@ -156,6 +161,4 @@ public class PostController {
         PostSearchResultListDTO postSearchList = postSearchUseCase.searchReviewsByQuery(userGetCommand,searchCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postSearchList));
     }
-
-
 }

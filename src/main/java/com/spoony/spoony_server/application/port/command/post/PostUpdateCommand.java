@@ -15,4 +15,5 @@ public class PostUpdateCommand {
     private final Long categoryId;
     private final List<String> menuList;
     private final List<String> photoUrlList;
+    private final List<String> deletePhotoUrlList;
 }

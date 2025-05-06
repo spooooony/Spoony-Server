@@ -7,5 +7,6 @@ public record PostUpdateRequestDTO(Long postId,
                                    Double value,
                                    String cons,
                                    Long categoryId,
-                                   List<String> menuList) {
+                                   List<String> menuList,
+                                   List<String> deleteImageUrlList) {
 }

@@ -7,6 +7,6 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class PostDeleteCommand {
-    private final Long postId;
+public class PostPhotoDeleteCommand {
+    private final List<String> deleteImageUrlList;
 }

@@ -23,7 +23,7 @@ public interface PostPort {
     void updatePost(Long postId, String description, Double value, String cons);
     void deleteAllPostCategoryByPostId(Long postId);
     void deleteAllMenusByPostId(Long postId);
-    void deleteAllPhotosByPostId(Long postId);
+    void deleteAllPhotosByPhotoUrl(List<String> deletePhotoUrlList);
 
     List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds);
 
