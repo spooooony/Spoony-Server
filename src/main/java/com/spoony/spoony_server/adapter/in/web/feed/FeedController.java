@@ -10,8 +10,12 @@ import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
+import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,28 +54,48 @@ public class FeedController {
             @RequestParam(required = false) List<Long> regionIds,
             @RequestParam(defaultValue = "createdAt") String sortBy
     ) {
+        Logger logger = LoggerFactory.getLogger(getClass());
+
+        logger.info("getFeeds 호출됨");
+        logger.info("categoryIds: {}", categoryIds);
+        logger.info("regionIds: {}", regionIds);
+        logger.info("sortBy: {}", sortBy);
         // 1. 기본값: categoryIds가 null 또는 비어 있으면 전체 카테고리(1)로 설정
         if (categoryIds == null || categoryIds.isEmpty()) {
             categoryIds = List.of(1L);
+            logger.info("categoryIds가 null 또는 비어 있어 기본값으로 [1] 설정됨");
         }
 
         // 2. 카테고리 1과 2~9가 동시에 선택되면 예외 처리
         if (categoryIds.contains(1L) && categoryIds.size() > 1) {
+            logger.error("카테고리 1은 다른 카테고리와 함께 선택할 수 없습니다.");
             throw new IllegalArgumentException("카테고리 전체(1)은 다른 카테고리와 함께 선택할 수 없습니다.");
         }
 
         // 3. 지역 필터링이 비활성화되면 null 처리
         if (regionIds != null && regionIds.isEmpty()) {
             regionIds = null;
+            logger.info("regionIds가 비어있어 null로 설정됨");
         }
 
-        // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
-        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, sortBy);
+        // 로컬리뷰 여부 판단: categoryId = 2 포함 여부로 판단
+        boolean isLocalReview = categoryIds.contains(2L);
+        logger.info("🟢isLocalReview: {}", isLocalReview);
 
+        // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, sortBy, isLocalReview);
+        logger.info("🟢FeedFilterCommand 생성 완료: {}", command);
         // 5. 필터링된 피드를 가져오기 위해 UseCase 호출
-        FilteredFeedResponseListDTO feedListResponse = feedGetUseCase.getFilteredFeed(command);
+        FilteredFeedResponseListDTO feedListResponse;
+        try {
+            feedListResponse = feedGetUseCase.getFilteredFeed(command);
+        } catch (Exception e) {
+            logger.error("🟢피드 조회 중 오류 발생: {}", e.getMessage(), e);
+            throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
+        }
 
         // 6. 응답 반환
+        logger.info("🟢FilteredFeedResponseListDTO 반환");
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 

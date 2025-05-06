@@ -29,8 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 @Adapter
 @Transactional
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class PostPersistenceAdapter implements
     private final RegionRepository regionRepository;
 
     @Override
-    public List<Post> findPostsByUserId (Long userId) {
+    public List<Post> findPostsByUserId(Long userId) {
         return postRepository.findByUser_UserId(userId)
                 .stream()
                 .map(PostMapper::toDomain)
@@ -76,6 +78,13 @@ public class PostPersistenceAdapter implements
     public List<PostCategory> findPostCategoriesByPostId(Long postId) {
         return postCategoryRepository.findAllByPost_PostId(postId)
                 .stream()
+                .map(PostCategoryMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostCategory> findAllByPostId(Long postId) {
+        return postCategoryRepository.findAllByPost_PostId(postId).stream()
                 .map(PostCategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -234,6 +243,11 @@ public class PostPersistenceAdapter implements
         photoRepository.deleteAllByPhotoUrlIn(deletePhotoUrlList);
     }
 
+//    @Override
+//    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy) {
+//        return List.of();
+//    }
+
     @Override
     public List<Post> findByPostDescriptionContaining(String query) {
         List<PostEntity> postEntityList = postRepository.findByDescriptionContaining(query);
@@ -246,42 +260,17 @@ public class PostPersistenceAdapter implements
         return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
 
     }
-
-
-//    @Transactional
-//    @Override
-//    public List<Post> findFilteredPosts(List<Long> categoryIds , List<Long> regionIds) {
-//        Logger logger = LoggerFactory.getLogger(getClass()); // 클래스마다 로거 생성
-//        logger.info("findFilteredPosts 호출됨");
-//
-//        // 카테고리 및 지역 필터 결합
-//        Specification<PostEntity> spec = PostSpecification.withCategoryAndRegion(categoryIds, regionIds);
-//
-//        // 로컬리뷰 필터 (category_id = 2인 경우 작성자의 지역과 게시물 지역 일치)
-//        spec = spec.and(PostSpecification.withLocalReview(categoryIds));
-//
-//        // 쿼리 실행 및 정렬 (최신순으로 createdAt 기준)
-//        List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
-//
-//        logger.info("필터링된 게시물 수: {}", filteredPostEntities.size());
-//
-//        // 엔티티를 도메인 객체로 변환 후 반환
-//        return filteredPostEntities.stream()
-//                .map(PostMapper::toDomain)
-//                .collect(Collectors.toList());
-//    }
-
     @Transactional
     @Override
-    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy) {
+    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy, boolean isLocalReview) {
         Logger logger = LoggerFactory.getLogger(getClass());
-        logger.info("findFilteredPosts 호출됨");
-        logger.info("categoryIds: {}", categoryIds);
-        logger.info("regionIds: {}", regionIds);
-
-        // 카테고리 및 지역 필터 결합
-        Specification<PostEntity> spec = PostSpecification.withCategoryAndRegion(categoryIds, regionIds);
-
+        logger.info("🟢findFilteredPosts 호출됨");
+        logger.info("🟢categoryIds: {}", categoryIds);
+        logger.info("🟢regionIds: {}", regionIds);
+        logger.info("🟢isLocalReview: {}", isLocalReview);
+        // 카테고리, 지역, 로컬리뷰 필터 결합
+        Specification<PostEntity> spec = PostSpecification.buildFilterSpec(categoryIds, regionIds, isLocalReview);
+        logger.debug("🟢Specification 생성됨: {}", spec);
         // 쿼리 실행 및 정렬
         List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, sortBy));
         logger.info("findAll 실행 완료. 필터링된 게시물 수: {}", filteredPostEntities.size());
@@ -294,6 +283,30 @@ public class PostPersistenceAdapter implements
 
         return result;
     }
+
+    //    @Transactional
+//    @Override
+//    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy) {
+//        Logger logger = LoggerFactory.getLogger(getClass());
+//        logger.info("findFilteredPosts 호출됨");
+//        logger.info("categoryIds: {}", categoryIds);
+//        logger.info("regionIds: {}", regionIds);
+//
+//        // 카테고리 및 지역 필터 결합
+//        Specification<PostEntity> spec = PostSpecification.withCategoryAndRegion(categoryIds, regionIds);
+//
+//        // 쿼리 실행 및 정렬
+//        List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, sortBy));
+//        logger.info("findAll 실행 완료. 필터링된 게시물 수: {}", filteredPostEntities.size());
+//
+//        // 엔티티를 도메인 객체로 변환 후 반환
+//        List<Post> result = filteredPostEntities.stream()
+//                .map(PostMapper::toDomain)
+//                .collect(Collectors.toList());
+//        logger.info("도메인 객체로 변환 완료. 반환할 게시물 수: {}", result.size());
+//
+//        return result;
+//    }
 
 
 
