@@ -145,14 +145,24 @@ public class UserPersistenceAdapter implements UserPort {
     // AUTH
     @Override
     public User create(PlatformUserDTO platformUserDTO, UserSignupDTO userSignupDTO) {
-        RegionEntity regionEntity = regionRepository.findById(userSignupDTO.regionId())
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.REGION_NOT_FOUND));
+        RegionEntity regionEntity = null;
+        AgeGroup ageGroup = null;
+
+        if (userSignupDTO.regionId() != null) {
+            regionEntity = regionRepository.findById(userSignupDTO.regionId())
+                    .orElseThrow(() -> new BusinessException(UserErrorMessage.REGION_NOT_FOUND));
+        }
+
+        if (userSignupDTO.birth() != null) {
+            ageGroup = AgeGroup.from(userSignupDTO.birth());
+        }
 
         UserEntity userEntity = UserEntity.builder()
                 .platform(userSignupDTO.platform())
                 .platformId(platformUserDTO.platformId())
                 .userName(userSignupDTO.userName())
                 .birth(userSignupDTO.birth())
+                .ageGroup(ageGroup)
                 .region(regionEntity)
                 .introduction(userSignupDTO.introduction())
                 .level(1L)

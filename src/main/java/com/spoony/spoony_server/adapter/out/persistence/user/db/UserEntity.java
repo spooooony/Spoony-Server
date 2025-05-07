@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.ProfileImage;
 import jakarta.persistence.*;
@@ -33,6 +34,9 @@ public class UserEntity {
     private String userName;
     private LocalDate birth;
 
+    @Enumerated(EnumType.STRING)
+    private AgeGroup ageGroup;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private RegionEntity region;
@@ -55,7 +59,8 @@ public class UserEntity {
                       String userName,
                       RegionEntity region,
                       String introduction,
-                      LocalDate birth) {
+                      LocalDate birth,
+                      AgeGroup ageGroup) {
         this.userId = userId;
         this.platform = platform;
         this.platformId = platformId;
@@ -65,6 +70,7 @@ public class UserEntity {
         this.region = region;
         this.introduction = introduction;
         this.birth = birth;
+        this.ageGroup = ageGroup;
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
