@@ -27,6 +27,7 @@ public class PostMapper {
                         RegionMapper.toDomain(postEntity.getUser().getRegion()),
                         postEntity.getUser().getIntroduction(),
                         postEntity.getUser().getBirth(),
+                        postEntity.getUser().getAgeGroup(),
                         postEntity.getUser().getCreatedAt(),
                         postEntity.getUser().getUpdatedAt()
                 ),

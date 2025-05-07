@@ -23,6 +23,7 @@ public class ZzimMapper {
                         RegionMapper.toDomain(zzimPostEntity.getUser().getRegion()),
                         zzimPostEntity.getUser().getIntroduction(),
                         zzimPostEntity.getUser().getBirth(),
+                        zzimPostEntity.getUser().getAgeGroup(),
                         zzimPostEntity.getUser().getCreatedAt(),
                         zzimPostEntity.getUser().getUpdatedAt()
              ),

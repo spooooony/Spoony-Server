@@ -19,11 +19,16 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Long imageLevel;
+
     private Long level;
     private String userName;
     private Region region;
     private String introduction;
     private LocalDate birth;
+
+    @Enumerated(EnumType.STRING)
+    private AgeGroup ageGroup;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

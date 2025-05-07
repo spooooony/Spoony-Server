@@ -17,6 +17,7 @@ public class UserMapper {
                 RegionMapper.toDomain(userEntity.getRegion()),
                 userEntity.getIntroduction(),
                 userEntity.getBirth(),
+                userEntity.getAgeGroup(),
                 userEntity.getCreatedAt(),
                 userEntity.getUpdatedAt()
         );
