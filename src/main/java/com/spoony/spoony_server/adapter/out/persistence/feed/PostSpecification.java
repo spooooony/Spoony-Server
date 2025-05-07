@@ -2,11 +2,9 @@ package com.spoony.spoony_server.adapter.out.persistence.feed;
 
 
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
-import com.spoony.spoony_server.adapter.out.persistence.post.db.CategoryEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
-import com.spoony.spoony_server.domain.post.PostCategory;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -15,7 +13,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,47 +149,6 @@ public class PostSpecification {
     }
 
 
-//    // 카테고리 및 지역 필터 결합
-//    public static Specification<PostEntity> withCategoryAndRegion(List<Long> categoryIds, List<Long> regionIds) {
-//        return (root, query, builder) -> {
-//            Logger logger = LoggerFactory.getLogger(PostSpecification.class);
-//            List<Predicate> predicates = new ArrayList<>();
-//
-//            // 카테고리 필터링
-//            if (categoryIds.contains(1L)) { // '전체' 카테고리일 경우
-//                logger.info("🟢 [카테고리 필터] 전체 선택됨 (categoryId = 1) → 모든 게시물 반환");
-//                // 아무 조건도 추가하지 않음
-//            } else if (categoryIds.contains(2L)) { // '로컬 수저' 카테고리일 경우
-//                logger.info("📍 [카테고리 필터] 로컬 수저 선택됨 (categoryId = 2) → 작성자 지역과 게시물 지역이 같은 게시물 필터링");
-//                Join<PostEntity, PlaceEntity> placeJoin = root.join("place");
-//                Join<PostEntity, UserEntity> userJoin = root.join("user");
-//
-//                logger.info("🔄 place.regionId = {}", placeJoin.get("region").get("regionId").toString());
-//                logger.info("👤 user.regionId = {}", userJoin.get("region").get("regionId").toString());
-//
-//                predicates.add(builder.equal(
-//                        placeJoin.get("region").get("regionId"),
-//                        userJoin.get("region").get("regionId")
-//                ));
-//            } else {
-//                logger.info("📦 [카테고리 필터] 특정 카테고리 선택됨 → categoryIds: {}", categoryIds);
-//                predicates.add(root.get("category").get("categoryId").in(categoryIds));
-//            }
-//
-//            // 지역 필터링
-//            if (regionIds != null && !regionIds.isEmpty()) {
-//                logger.info("🗺️ [지역 필터] 지역 선택됨 → regionIds: {}", regionIds);
-//                predicates.add(root.get("place").get("region").get("regionId").in(regionIds));
-//            } else {
-//                logger.info("🔓 [지역 필터] 지역 조건 없음 → 전체 지역 대상");
-//            }
-//
-//            logger.info("🔎 최종 적용될 필터 개수: {}", predicates.size());
-//
-//            return builder.and(predicates.toArray(new Predicate[0]));
-//        };
-//    }
-// 카테고리 및 지역 필터 결합
 
 
 }
