@@ -14,7 +14,7 @@ public class UserMapper {
                 userEntity.getProfileImageLevel(),
                 userEntity.getLevel(),
                 userEntity.getUserName(),
-                RegionMapper.toDomain(userEntity.getRegion()),
+                userEntity.getRegion() != null ? RegionMapper.toDomain(userEntity.getRegion()) : null,
                 userEntity.getIntroduction(),
                 userEntity.getBirth(),
                 userEntity.getAgeGroup(),
