@@ -8,10 +8,10 @@ import java.util.Arrays;
 
 @Getter
 public enum AgeGroup {
+    AGE_10S("10대", 10, 19),
     AGE_20S("20대", 20, 29),
     AGE_30S("30대", 30, 39),
-    AGE_40S("40대", 40, 49),
-    AGE_50S("50대", 50, 59);
+    AGE_ETC("40대 이상", 40, 49);
 
     private final String displayName;
     private final int minAge;
