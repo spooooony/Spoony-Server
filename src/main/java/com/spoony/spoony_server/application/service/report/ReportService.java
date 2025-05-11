@@ -16,8 +16,10 @@ import com.spoony.spoony_server.global.message.business.ReportErrorMessage;
 import com.spoony.spoony_server.domain.report.ReportType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReportService implements ReportCreateUseCase {
     private final ReportPort reportPort;
@@ -35,7 +37,7 @@ public class ReportService implements ReportCreateUseCase {
         ReportType reportType = command.getReportType();
 
         if (reportType == null) {
-            reportType = ReportType.ADVERTISEMENT;
+            reportType = ReportType.PROMOTIONAL_CONTENT;
         }
 
         Long postId = command.getPostId();
