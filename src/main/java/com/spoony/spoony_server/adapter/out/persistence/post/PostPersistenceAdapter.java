@@ -15,6 +15,7 @@ import com.spoony.spoony_server.application.port.out.post.CategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.domain.post.*;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -257,14 +258,20 @@ public class PostPersistenceAdapter implements
     }
     @Transactional
     @Override
-    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy, boolean isLocalReview) {
+    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, List<AgeGroup> ageGroups, String sortBy, boolean isLocalReview) {
         Logger logger = LoggerFactory.getLogger(getClass());
         logger.info("🟢findFilteredPosts 호출됨");
         logger.info("🟢categoryIds: {}", categoryIds);
         logger.info("🟢regionIds: {}", regionIds);
+        logger.info("🟢ageGroups: {}", ageGroups);
         logger.info("🟢isLocalReview: {}", isLocalReview);
-        // 카테고리, 지역, 로컬리뷰 필터 결합
-        Specification<PostEntity> spec = PostSpecification.buildFilterSpec(categoryIds, regionIds, isLocalReview);
+        // 카테고리, 지역, 연령대, 로컬리뷰 필터 결합
+        Specification<PostEntity> spec = PostSpecification.buildFilterSpec(
+                categoryIds,
+                regionIds,
+                ageGroups,
+                isLocalReview
+        );
         logger.debug("🟢Specification 생성됨: {}", spec);
         // 쿼리 실행 및 정렬
         List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, sortBy));

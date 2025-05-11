@@ -4,6 +4,7 @@ import com.spoony.spoony_server.domain.post.Menu;
 import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.post.PostCategory;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.User;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public interface PostPort {
     void deleteAllMenusByPostId(Long postId);
     void deleteAllPhotosByPhotoUrl(List<String> deletePhotoUrlList);
 
-    List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, String sortBy, boolean isLocalReview);
+    List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds,  List<AgeGroup>ageGroups,String sortBy,  boolean isLocalReview);
 
     Long countPostsByUserId(Long userId);
     List<Post> findByPostDescriptionContaining(String query);

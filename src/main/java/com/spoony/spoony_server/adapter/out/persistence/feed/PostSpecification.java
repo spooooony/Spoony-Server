@@ -5,6 +5,7 @@ import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -27,17 +28,18 @@ public class PostSpecification {
             List<Predicate> predicates = new ArrayList<>();
             logger.debug("카테고리 필터링 시작: categoryIds = {}", categoryIds);
 
+            Join<PostEntity, PostCategoryEntity> postCategoryJoin = root.join("postCategories");
+
             // category_id = 1 (전체) 처리
             if (categoryIds.contains(1L)) {
                 if (categoryIds.size() > 1) {
                     // category_id = 1은 단독으로만 사용됨
                     throw new IllegalArgumentException("category_id 1은 단독으로만 사용할 수 있습니다.");
                 }
-                predicates.add(cb.equal(root.get("categoryId"), 1L)); // categoryId = 1 필터링
+
+                predicates.add(cb.equal(postCategoryJoin.get("category").get("categoryId"), 1L));
                 logger.debug("category_id = 1 필터링 추가");
             } else {
-                // 로컬리뷰(category_id = 2)와 다른 카테고리들 (category_id=3~9) 처리
-                Join<PostEntity, PostCategoryEntity> postCategoryJoin = root.join("postCategories");
                 predicates.add(postCategoryJoin.get("category").get("categoryId").in(categoryIds));
                 logger.debug("category_id in {} 필터링 추가", categoryIds);
             }
@@ -46,6 +48,32 @@ public class PostSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+//    public static Specification<PostEntity> withCategoryIds(List<Long> categoryIds) {
+//        return (root, query, cb) -> {
+//            List<Predicate> predicates = new ArrayList<>();
+//            logger.debug("카테고리 필터링 시작: categoryIds = {}", categoryIds);
+//
+//            Join<PostEntity, PostCategoryEntity> postCategoryJoin = root.join("postCategories");
+//            // category_id = 1 (전체) 처리
+//            if (categoryIds.contains(1L)) {
+//                if (categoryIds.size() > 1) {
+//                    // category_id = 1은 단독으로만 사용됨
+//                    throw new IllegalArgumentException("category_id 1은 단독으로만 사용할 수 있습니다.");
+//                }
+//                predicates.add(cb.equal(root.get("categoryId"), 1L)); // categoryId = 1 필터링
+//                logger.debug("category_id = 1 필터링 추가");
+//            } else {
+//                // 로컬리뷰(category_id = 2)와 다른 카테고리들 (category_id=3~9) 처리
+//                Join<PostEntity, PostCategoryEntity> postCategoryJoin = root.join("postCategories");
+//                predicates.add(postCategoryJoin.get("category").get("categoryId").in(categoryIds));
+//                logger.debug("category_id in {} 필터링 추가", categoryIds);
+//            }
+//
+//            logger.debug("카테고리 필터링 최종 Predicate: {}", predicates);
+//            return cb.and(predicates.toArray(new Predicate[0]));
+//        };
+//    }
+
 
     // 로컬리뷰 필터링 (category_id = 2인 경우, 게시물 지역 필터링)
     public static Specification<PostEntity> withLocalReview(List<Long> categoryIds) {
@@ -83,6 +111,22 @@ public class PostSpecification {
         };
     }
 
+    public static Specification<PostEntity> withAgeGroup(List<AgeGroup> ageGroups){
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            logger.debug("연령대 필터링 시작: ageGroups = {}", ageGroups);
+
+            if (ageGroups != null && !ageGroups.isEmpty()){
+                // UserEntity의 ageGroup과 비교하여 필터링
+                Join<PostEntity, UserEntity> userJoin = root.join("user");
+                predicates.add(userJoin.get("ageGroup").in(ageGroups));
+                logger.debug("ageGroup in {} 필터링 추가", ageGroups);
+
+            }
+            logger.debug("연령대 필터링 최종 Predicate: {}", predicates);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 
     public static Specification<PostEntity> withCategoryAndRegion(List<Long> categoryIds, List<Long> regionIds) {
         return (root, query, builder) -> {
@@ -130,14 +174,21 @@ public class PostSpecification {
 
     }
 
-    public static Specification<PostEntity> buildFilterSpec(List<Long> categoryIds, List<Long> regionIds, boolean isLocalReview) {
+    public static Specification<PostEntity> buildFilterSpec(List<Long> categoryIds, List<Long> regionIds,List<AgeGroup> ageGroups, boolean isLocalReview) {
         Specification<PostEntity> spec = Specification.where(null);
+
 
         // 로컬리뷰 필터
         spec = spec.and(withLocalReview(categoryIds));
 
         // 지역 필터
         spec = spec.and(withRegionIds(regionIds));
+
+        //연령대 필터
+        if (ageGroups != null && !ageGroups.isEmpty()) {
+            spec = spec.and(PostSpecification.withAgeGroup(ageGroups));
+        }
+
 
         // ✅ category_id = 2 단독일 경우, 카테고리 필터는 적용하지 않음
         boolean onlyLocalCategory = categoryIds.size() == 1 && categoryIds.contains(2L);

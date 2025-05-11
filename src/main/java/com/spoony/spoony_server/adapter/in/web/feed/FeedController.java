@@ -1,12 +1,10 @@
 package com.spoony.spoony_server.adapter.in.web.feed;
 
 import com.spoony.spoony_server.adapter.dto.post.FilteredFeedResponseListDTO;
-import com.spoony.spoony_server.adapter.dto.user.UserSearchResultListDTO;
 import com.spoony.spoony_server.application.port.command.feed.FeedFilterCommand;
-import com.spoony.spoony_server.application.port.command.feed.FeedGetCommand;
 import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
-import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
@@ -52,6 +50,7 @@ public class FeedController {
     public ResponseEntity<ResponseDTO<FilteredFeedResponseListDTO>> getFeeds(
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> regionIds,
+            @RequestParam(required = false) List<AgeGroup> ageGroups,
             @RequestParam(defaultValue = "createdAt") String sortBy
     ) {
         Logger logger = LoggerFactory.getLogger(getClass());
@@ -59,6 +58,7 @@ public class FeedController {
         logger.info("getFeeds 호출됨");
         logger.info("categoryIds: {}", categoryIds);
         logger.info("regionIds: {}", regionIds);
+        logger.info("ageGroups: {}", ageGroups);
         logger.info("sortBy: {}", sortBy);
         // 1. 기본값: categoryIds가 null 또는 비어 있으면 전체 카테고리(1)로 설정
         if (categoryIds == null || categoryIds.isEmpty()) {
@@ -82,8 +82,13 @@ public class FeedController {
         boolean isLocalReview = categoryIds.contains(2L);
         logger.info("🟢isLocalReview: {}", isLocalReview);
 
+        // 4. ageGroups가 비어 있으면 null로 설정
+        if (ageGroups != null && ageGroups.isEmpty()) {
+            ageGroups = null;
+            logger.info("ageGroups가 비어 있어 null로 설정됨");
+        }
         // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
-        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, sortBy, isLocalReview);
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups,sortBy, isLocalReview);
         logger.info("🟢FeedFilterCommand 생성 완료: {}", command);
         // 5. 필터링된 피드를 가져오기 위해 UseCase 호출
         FilteredFeedResponseListDTO feedListResponse;
@@ -98,6 +103,7 @@ public class FeedController {
         logger.info("🟢FilteredFeedResponseListDTO 반환");
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
+
 
 
 
