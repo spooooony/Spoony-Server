@@ -270,11 +270,12 @@ public class PostPersistenceAdapter implements
                 categoryIds,
                 regionIds,
                 ageGroups,
-                isLocalReview
+                isLocalReview,
+                sortBy
         );
         logger.debug("🟢Specification 생성됨: {}", spec);
         // 쿼리 실행 및 정렬
-        List<PostEntity> filteredPostEntities = postRepository.findAll(spec, Sort.by(Sort.Direction.DESC, sortBy));
+        List<PostEntity> filteredPostEntities = postRepository.findAll(spec);
         logger.info("findAll 실행 완료. 필터링된 게시물 수: {}", filteredPostEntities.size());
 
         // 엔티티를 도메인 객체로 변환 후 반환

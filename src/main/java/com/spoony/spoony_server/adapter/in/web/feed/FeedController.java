@@ -55,6 +55,9 @@ public class FeedController {
     ) {
         Logger logger = LoggerFactory.getLogger(getClass());
 
+        FilteredFeedResponseListDTO feedListResponse = null;
+        //logger.info("🟢FilteredFeedResponseListDTO size: {}", feedListResponse.filteredFeedResponseDTOList().size());
+
         logger.info("getFeeds 호출됨");
         logger.info("categoryIds: {}", categoryIds);
         logger.info("regionIds: {}", regionIds);
@@ -88,12 +91,12 @@ public class FeedController {
             logger.info("ageGroups가 비어 있어 null로 설정됨");
         }
         // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
-        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups,sortBy, isLocalReview);
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview);
         logger.info("🟢FeedFilterCommand 생성 완료: {}", command);
         // 5. 필터링된 피드를 가져오기 위해 UseCase 호출
-        FilteredFeedResponseListDTO feedListResponse;
         try {
             feedListResponse = feedGetUseCase.getFilteredFeed(command);
+            logger.info("🟢FilteredFeedResponseListDTO size: {}", feedListResponse.filteredFeedResponseDTOList().size());
         } catch (Exception e) {
             logger.error("🟢피드 조회 중 오류 발생: {}", e.getMessage(), e);
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
@@ -101,6 +104,8 @@ public class FeedController {
 
         // 6. 응답 반환
         logger.info("🟢FilteredFeedResponseListDTO 반환");
+
+        logger.info("🟢🟢🟢🟢🟢FilteredFeedResponseListDTO size: {}", feedListResponse.filteredFeedResponseDTOList().size());
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 
