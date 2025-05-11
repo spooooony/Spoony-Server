@@ -107,6 +107,7 @@ public class FeedService implements FeedGetUseCase {
         List<AgeGroup> ageGroups = command.getAgeGroups();
         Long cursor = command.getCursor();
         int size = command.getSize();
+        Long currentUserId = command.getCurrentUserId();
 
         try {
             if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
@@ -139,9 +140,12 @@ public class FeedService implements FeedGetUseCase {
 
         logger.info("필터링된 게시물 수: {}", filteredPosts.size());
 
+
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
+                    boolean isMine = currentUserId != null && currentUserId.equals(author.getUserId()); //작성자 식별
+
                     List<PostCategory> postCategories = postCategoryPort.findAllByPostId(post.getPostId());
                     Category mainCategory = postCategories.isEmpty() ? null : postCategories.get(0).getCategory();
 
@@ -164,7 +168,8 @@ public class FeedService implements FeedGetUseCase {
                                     .map(Photo::getPhotoUrl)
                                     .collect(Collectors.toList()),
                             post.getCreatedAt(),
-                            isLocalReviewFlag  // 여기서 command의 플래그 그대로 사용
+                            isLocalReviewFlag,
+                            isMine
                     );
                 })
                 .collect(Collectors.toList());
