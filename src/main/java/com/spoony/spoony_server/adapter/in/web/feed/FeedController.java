@@ -91,6 +91,7 @@ public class FeedController {
     """
     )
     public ResponseEntity<ResponseDTO<FilteredFeedResponseListDTO>> getFeeds(
+            @UserId Long currentUserId,
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> regionIds,
             @RequestParam(required = false) List<AgeGroup> ageGroups,
@@ -136,7 +137,7 @@ public class FeedController {
             logger.info("ageGroups가 비어 있어 null로 설정됨");
         }
         // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
-        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview, cursor, size);
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview, cursor, size,currentUserId);
         logger.info("🟢FeedFilterCommand 생성 완료: {}", command);
         // 5. 필터링된 피드를 가져오기 위해 UseCase 호출
         try {

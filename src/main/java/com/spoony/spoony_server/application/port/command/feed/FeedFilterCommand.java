@@ -18,5 +18,5 @@ public class FeedFilterCommand {
 
     private final Long cursor;
     private final int size;
-
+    private final Long currentUserId;
 }

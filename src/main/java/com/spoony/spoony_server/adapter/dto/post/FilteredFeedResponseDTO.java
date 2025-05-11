@@ -13,7 +13,9 @@ public record FilteredFeedResponseDTO(
         Long zzimCount,
         List<String> photoUrlList,
         LocalDateTime createdAt,
-        boolean isLocalReview
+        boolean isLocalReview,
+        boolean isMine
+
 
 ) {
 
