@@ -16,6 +16,7 @@ import com.spoony.spoony_server.domain.post.Category;
 import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.post.PostCategory;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
@@ -103,6 +104,7 @@ public class FeedService implements FeedGetUseCase {
         List<Post> filteredPosts;
         List<Long> categoryIds = command.getCategoryIds();
         boolean isLocalReviewFlag = command.isLocalReview();
+        List<AgeGroup> ageGroups = command.getAgeGroups();
 
         try {
             if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
@@ -110,6 +112,7 @@ public class FeedService implements FeedGetUseCase {
                 filteredPosts = postPort.findFilteredPosts(
                         categoryIds,   // 카테고리 필터는 [2]로만 전달 (실제로는 [2]가 단독일 경우 category 필터를 제외할 것)
                         command.getRegionIds(),
+                        ageGroups,
                         command.getSortBy(),
                         isLocalReviewFlag // 로컬리뷰 플래그 그대로 전달
                 );
@@ -118,11 +121,13 @@ public class FeedService implements FeedGetUseCase {
                 filteredPosts = postPort.findFilteredPosts(
                         categoryIds,
                         command.getRegionIds(),
+                        ageGroups,
                         command.getSortBy(),
                         isLocalReviewFlag
                 );
             }
         } catch (Exception e) {
+            logger.error("피드 조회 중 오류 발생: {}", e.getMessage(), e);
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
