@@ -105,6 +105,8 @@ public class FeedService implements FeedGetUseCase {
         List<Long> categoryIds = command.getCategoryIds();
         boolean isLocalReviewFlag = command.isLocalReview();
         List<AgeGroup> ageGroups = command.getAgeGroups();
+        Long cursor = command.getCursor();
+        int size = command.getSize();
 
         try {
             if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
@@ -114,7 +116,9 @@ public class FeedService implements FeedGetUseCase {
                         command.getRegionIds(),
                         ageGroups,
                         command.getSortBy(),
-                        isLocalReviewFlag // 로컬리뷰 플래그 그대로 전달
+                        isLocalReviewFlag,
+                        cursor,
+                        size
                 );
             } else {
                 logger.info(isLocalReviewFlag ? "✅✅✅ 로컬리뷰: 필터링 로직 실행" : "일반리뷰: 필터링 로직 실행");
@@ -123,7 +127,9 @@ public class FeedService implements FeedGetUseCase {
                         command.getRegionIds(),
                         ageGroups,
                         command.getSortBy(),
-                        isLocalReviewFlag
+                        isLocalReviewFlag,
+                        cursor,
+                        size
                 );
             }
         } catch (Exception e) {
@@ -163,7 +169,12 @@ public class FeedService implements FeedGetUseCase {
                 })
                 .collect(Collectors.toList());
 
-        return new FilteredFeedResponseListDTO(feedResponseList);
+        // ✅ nextCursor 계산 (마지막 postId)
+        Long nextCursor = filteredPosts.isEmpty() ? null :
+                filteredPosts.get(filteredPosts.size() - 1).getPostId();
+
+        logger.info("다음 커서(nextCursor): {}", nextCursor);
+        return new FilteredFeedResponseListDTO(feedResponseList,nextCursor);
     }
 
 

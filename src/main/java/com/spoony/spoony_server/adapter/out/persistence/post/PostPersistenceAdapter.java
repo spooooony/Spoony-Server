@@ -23,7 +23,11 @@ import com.spoony.spoony_server.global.message.business.CategoryErrorMessage;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -258,33 +262,49 @@ public class PostPersistenceAdapter implements
     }
     @Transactional
     @Override
-    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, List<AgeGroup> ageGroups, String sortBy, boolean isLocalReview) {
+    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, List<AgeGroup> ageGroups, String sortBy, boolean isLocalReview,Long cursor, int size) {
         Logger logger = LoggerFactory.getLogger(getClass());
         logger.info("🟢findFilteredPosts 호출됨");
         logger.info("🟢categoryIds: {}", categoryIds);
         logger.info("🟢regionIds: {}", regionIds);
         logger.info("🟢ageGroups: {}", ageGroups);
         logger.info("🟢isLocalReview: {}", isLocalReview);
+        logger.info("🟢cursor: {}", cursor);
+        logger.info("🟢size: {}", size);
         // 카테고리, 지역, 연령대, 로컬리뷰 필터 결합
         Specification<PostEntity> spec = PostSpecification.buildFilterSpec(
                 categoryIds,
                 regionIds,
                 ageGroups,
                 isLocalReview,
-                sortBy
+                sortBy,
+                cursor
         );
-        logger.debug("🟢Specification 생성됨: {}", spec);
-        // 쿼리 실행 및 정렬
-        List<PostEntity> filteredPostEntities = postRepository.findAll(spec);
-        logger.info("findAll 실행 완료. 필터링된 게시물 수: {}", filteredPostEntities.size());
+        // 커서가 있을 경우 커서 기반 페이징 처리 추가
+//        if (cursor != null) {
+//            Specification<PostEntity> finalSpec = spec;  // Specification을 람다 내에서 사용할 수 있도록 final로 선언
+//            spec = (root, query, cb) -> {
+//                Predicate cursorPredicate = cb.lessThan(root.get("postId"), cursor);  // cursor보다 큰 postId 조회
+//                return cb.and(cursorPredicate, finalSpec.toPredicate(root, query, cb));  // 기존 필터와 결합
+//            };
+//        }
+
+        // Pageable 생성 (페이지 번호는 0부터 시작)
+        Pageable pageable = PageRequest.of(0, size); // 기본적으로 최신순으로 정렬
+
+        // 쿼리 실행 및 결과 반환 (페이징 처리)
+        Page<PostEntity> page = postRepository.findAll(spec, pageable);
 
         // 엔티티를 도메인 객체로 변환 후 반환
-        List<Post> result = filteredPostEntities.stream()
+        List<Post> result = page.getContent().stream()
                 .map(PostMapper::toDomain)
                 .collect(Collectors.toList());
-        logger.info("도메인 객체로 변환 완료. 반환할 게시물 수: {}", result.size());
+
+        logger.info("🟢총 게시물 수: {}", page.getTotalElements());
+        logger.info("🟢현재 페이지 게시물 수: {}", result.size());
 
         return result;
+
     }
 
 
