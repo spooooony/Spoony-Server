@@ -16,4 +16,7 @@ public class FeedFilterCommand {
     private final String sortBy;
     private final boolean isLocalReview;
 
+    private final Long cursor;
+    private final int size;
+
 }

@@ -94,7 +94,9 @@ public class FeedController {
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> regionIds,
             @RequestParam(required = false) List<AgeGroup> ageGroups,
-            @RequestParam(defaultValue = "createdAt") String sortBy
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "5") int size
     ) {
         Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -134,7 +136,7 @@ public class FeedController {
             logger.info("ageGroups가 비어 있어 null로 설정됨");
         }
         // 4. FeedFilterCommand에 필터된 카테고리와 지역 정보, 정렬 기준을 전달
-        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview);
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview, cursor, size);
         logger.info("🟢FeedFilterCommand 생성 완료: {}", command);
         // 5. 필터링된 피드를 가져오기 위해 UseCase 호출
         try {

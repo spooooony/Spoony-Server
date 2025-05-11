@@ -82,10 +82,10 @@ public class PostSpecification {
 
                 // region_id가 null인 경우도 포함하는 조건 추가
                 Predicate regionPredicate = placeJoin.get("region").get("id").in(regionIds);
-                Predicate nullRegionPredicate = cb.isNull(placeJoin.get("region")); // region_id가 null인 경우
+                //Predicate nullRegionPredicate = cb.isNull(placeJoin.get("region")); // region_id가 null인 경우
 
                 // 두 조건을 OR로 결합하여 region_id가 null인 경우도 필터링
-                predicates.add(cb.or(regionPredicate, nullRegionPredicate));
+                predicates.add(regionPredicate);
                 logger.debug("지역 id가 {} 또는 region이 null인 경우 필터링 추가", regionIds);
             }
 
@@ -117,7 +117,8 @@ public class PostSpecification {
             List<Long> regionIds,
             List<AgeGroup> ageGroups,
             boolean isLocalReview,
-            String sortBy) {
+            String sortBy,
+            Long cursor) {
 
         // 로컬리뷰 필터
         Specification<PostEntity> localReviewSpec = withLocalReview(categoryIds);
@@ -149,51 +150,32 @@ public class PostSpecification {
             // 기본 필터링된 조건
             Predicate predicate = spec.toPredicate(root, query, cb);
 
+
+            // ✅ 커서 조건 추가
+            if (cursor != null) {
+                Path<Long> postIdPath = root.get("postId");
+                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);  // 커서 기준으로 게시물 조회
+                predicate = cb.and(predicate, cursorPredicate);
+            }
+
             // 정렬 조건 추가
             if ("zzimCount".equalsIgnoreCase(sortBy)) {
-                // 찜한 개수 기준으로 정렬 (JOIN 후 카운트로 정렬)
                 Join<PostEntity, ZzimPostEntity> zzimPostJoin = root.join("zzims", JoinType.LEFT);
                 Expression<Long> zzimCount = cb.count(zzimPostJoin.get("post"));
 
                 query.groupBy(root.get("postId"));
-                query.orderBy(cb.desc(zzimCount));  // 찜한 개수가 많은 순으로 정렬
-
+                query.orderBy(cb.desc(zzimCount), cb.desc(root.get("createdAt")));
             } else {
-                // 최신순으로 정렬 (createdAt 기준)
-                query.orderBy(cb.desc(root.get("createdAt")));
+                query.orderBy(cb.desc(root.get("postId")));
+                //query.orderBy(cb.desc(root.get("createdAt")));  // 최신순으로 정렬
             }
 
-            return predicate;  // 필터링된 결과에 정렬 조건을 추가한 쿼리 반환
+            return predicate;
         };
     }
 
 
 
-//    public static Specification<PostEntity> buildFilterSpec(List<Long> categoryIds, List<Long> regionIds,List<AgeGroup> ageGroups, boolean isLocalReview) {
-//        Specification<PostEntity> spec = Specification.where(null);
-//
-//
-//        // 로컬리뷰 필터
-//        spec = spec.and(withLocalReview(categoryIds));
-//
-//        // 지역 필터
-//        spec = spec.and(withRegionIds(regionIds));
-//
-//        //연령대 필터
-//        if (ageGroups != null && !ageGroups.isEmpty()) {
-//            spec = spec.and(PostSpecification.withAgeGroup(ageGroups));
-//        }
-//
-//
-//        // ✅ category_id = 2 단독일 경우, 카테고리 필터는 적용하지 않음
-//        boolean onlyLocalCategory = categoryIds.size() == 1 && categoryIds.contains(2L);
-//        if (!onlyLocalCategory) {
-//            spec = spec.and(withCategoryIds(categoryIds));
-//        }
-//
-//        //return spec;
-//
-//    }
 
 
 
