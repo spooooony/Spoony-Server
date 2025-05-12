@@ -1,6 +1,14 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
+import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockEntity;
+import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.ScoopPostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.report.db.UserReportEntity;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonBalanceEntity;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonDrawEntity;
+import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonHistoryEntity;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.ProfileImage;
@@ -73,8 +81,51 @@ public class UserEntity {
         this.ageGroup = ageGroup;
     }
 
+    // Cascade 설정
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PostEntity> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ZzimPostEntity> zzimPosts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ScoopPostEntity> scoopPosts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<SpoonHistoryEntity> spoonHistories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<SpoonBalanceEntity> spoonBalance = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<SpoonDrawEntity> spoonDraws = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<FeedEntity> feeds = new ArrayList<>();
+
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<BlockEntity> blocker = new ArrayList<>();
+
+    @OneToMany(mappedBy = "blocked", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<BlockEntity> blocked = new ArrayList<>();
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<FollowEntity> followers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<FollowEntity> followings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "newFollower", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<NewFollowEntity> newFollowers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "newFollowing", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<NewFollowEntity> newFollowings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "targetUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserReportEntity> targetUsers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reporter", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserReportEntity> reporters = new ArrayList<>();
 
     public void updateProfile(String userName, RegionEntity region, String introduction, LocalDate birth,Long profileImageLevel) {
         this.userName = userName;

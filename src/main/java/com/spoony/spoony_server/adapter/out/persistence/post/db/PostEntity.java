@@ -66,6 +66,9 @@ public class PostEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ZzimPostEntity> zzims = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScoopPostEntity> scoopPosts = new ArrayList<>();
+
     @Builder
     public PostEntity(Long postId, UserEntity user, PlaceEntity place, String description, Double value, String cons) {
         this.postId = postId;
