@@ -16,6 +16,7 @@ import com.spoony.spoony_server.domain.post.Category;
 import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.post.PostCategory;
+import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
@@ -103,6 +104,10 @@ public class FeedService implements FeedGetUseCase {
         List<Post> filteredPosts;
         List<Long> categoryIds = command.getCategoryIds();
         boolean isLocalReviewFlag = command.isLocalReview();
+        List<AgeGroup> ageGroups = command.getAgeGroups();
+        Long cursor = command.getCursor();
+        int size = command.getSize();
+        Long currentUserId = command.getCurrentUserId();
 
         try {
             if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
@@ -110,27 +115,37 @@ public class FeedService implements FeedGetUseCase {
                 filteredPosts = postPort.findFilteredPosts(
                         categoryIds,   // 카테고리 필터는 [2]로만 전달 (실제로는 [2]가 단독일 경우 category 필터를 제외할 것)
                         command.getRegionIds(),
+                        ageGroups,
                         command.getSortBy(),
-                        isLocalReviewFlag // 로컬리뷰 플래그 그대로 전달
+                        isLocalReviewFlag,
+                        cursor,
+                        size
                 );
             } else {
                 logger.info(isLocalReviewFlag ? "✅✅✅ 로컬리뷰: 필터링 로직 실행" : "일반리뷰: 필터링 로직 실행");
                 filteredPosts = postPort.findFilteredPosts(
                         categoryIds,
                         command.getRegionIds(),
+                        ageGroups,
                         command.getSortBy(),
-                        isLocalReviewFlag
+                        isLocalReviewFlag,
+                        cursor,
+                        size
                 );
             }
         } catch (Exception e) {
+            logger.error("피드 조회 중 오류 발생: {}", e.getMessage(), e);
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
         logger.info("필터링된 게시물 수: {}", filteredPosts.size());
 
+
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
+                    boolean isMine = currentUserId != null && currentUserId.equals(author.getUserId()); //작성자 식별
+
                     List<PostCategory> postCategories = postCategoryPort.findAllByPostId(post.getPostId());
                     Category mainCategory = postCategories.isEmpty() ? null : postCategories.get(0).getCategory();
 
@@ -153,12 +168,18 @@ public class FeedService implements FeedGetUseCase {
                                     .map(Photo::getPhotoUrl)
                                     .collect(Collectors.toList()),
                             post.getCreatedAt(),
-                            isLocalReviewFlag  // 여기서 command의 플래그 그대로 사용
+                            isLocalReviewFlag,
+                            isMine
                     );
                 })
                 .collect(Collectors.toList());
 
-        return new FilteredFeedResponseListDTO(feedResponseList);
+        // ✅ nextCursor 계산 (마지막 postId)
+        Long nextCursor = filteredPosts.isEmpty() ? null :
+                filteredPosts.get(filteredPosts.size() - 1).getPostId();
+
+        logger.info("다음 커서(nextCursor): {}", nextCursor);
+        return new FilteredFeedResponseListDTO(feedResponseList,nextCursor);
     }
 
 

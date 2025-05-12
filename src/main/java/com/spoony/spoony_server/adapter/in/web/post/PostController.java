@@ -162,3 +162,4 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postSearchList));
     }
 }
+

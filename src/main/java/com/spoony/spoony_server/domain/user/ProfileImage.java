@@ -31,5 +31,5 @@ public enum ProfileImage {
             }
         }
         throw new IllegalArgumentException("Invalid image level: " + imageLevel);
-    }
+    } //test
 }

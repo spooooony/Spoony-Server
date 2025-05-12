@@ -4,6 +4,7 @@ import com.spoony.spoony_server.adapter.dto.report.ReportUserRequestDTO;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
+import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.report.ReportRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,10 +27,11 @@ public class ReportController {
     @PostMapping("/user")
     @Operation(summary = "사용자 신고 API", description = "사용자 마이페이지를 신고하는 API")
     public ResponseEntity<ResponseDTO<Void>> createUserReport(
+            @UserId Long userId,
             @RequestBody ReportUserRequestDTO reportUserRequestDTO) {
         UserReportCreateCommand command = new UserReportCreateCommand(
                 reportUserRequestDTO.targetUserId(),
-                reportUserRequestDTO.userId(),
+                userId,
                 reportUserRequestDTO.userReportType(),
                 reportUserRequestDTO.reportDetail()
         );
@@ -41,10 +43,11 @@ public class ReportController {
     @Operation(summary = "게시물 신고 API", description = "특정 게시물을 신고하는 API")
 
     public ResponseEntity<ResponseDTO<Void>> createPostReport(
+            @UserId Long userId,
             @RequestBody ReportRequestDTO reportRequestDTO) {
         ReportCreateCommand command = new ReportCreateCommand(
                 reportRequestDTO.postId(),
-                reportRequestDTO.userId(),
+                userId,
                 reportRequestDTO.reportType(),
                 reportRequestDTO.reportDetail()
         );
