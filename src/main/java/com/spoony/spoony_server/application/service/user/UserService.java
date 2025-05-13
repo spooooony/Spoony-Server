@@ -57,12 +57,14 @@ public class UserService implements
             );
         }
 
+        String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
+
         return UserResponseDTO.from(
                 user.getUserId(),
                 user.getPlatform(),
                 user.getPlatformId(),
                 user.getUserName(),
-                user.getRegion().getRegionName(),
+                regionName,
                 user.getIntroduction(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
