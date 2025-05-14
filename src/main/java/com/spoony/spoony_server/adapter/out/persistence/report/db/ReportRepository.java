@@ -9,6 +9,7 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
 
-    @Query("SELECT DISTINCT r.post.postId FROM Report r WHERE r.user.userId = :userId")
-    List<Long> findReportedPostIdsByUserId(@Param("userId") Long userId); //@Param("userId") => JPQL 쿼리의 파라미터 이름(:userId)과 자바 메서드 인자 (Long userId)를 연결해주는 역할
+    @Query("SELECT DISTINCT r.post.postId FROM ReportEntity r WHERE r.user.userId = :userId")
+    List<Long> findReportedPostIdsByUserId(@Param("userId") Long userId);
+
 }

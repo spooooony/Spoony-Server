@@ -70,6 +70,7 @@ public class FeedService implements FeedGetUseCase {
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = postCategory.getCategory();
 
+                    boolean isMine = currentUserId != null && currentUserId.equals(author.getUserId()); //작성자 식별
                     List<Photo> photoList = postPort.findPhotoById(post.getPostId());
                     List<String> photoUrlList = photoList.stream()
                             .map(Photo::getPhotoUrl)
@@ -92,7 +93,9 @@ public class FeedService implements FeedGetUseCase {
                             ),
                             zzimPostPort.countZzimByPostId(post.getPostId()),
                             photoUrlList,
-                            post.getCreatedAt()
+                            post.getCreatedAt(),
+                            isMine
+
                     );
                 }).sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt())).toList();
         return new FeedListResponseDTO(feedResponseList);
@@ -112,7 +115,6 @@ public class FeedService implements FeedGetUseCase {
         Long cursor = command.getCursor();
         int size = command.getSize();
         Long currentUserId = command.getCurrentUserId();
-
 
         try {
             if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
@@ -165,7 +167,8 @@ public class FeedService implements FeedGetUseCase {
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
-                    boolean isMine = currentUserId != null && currentUserId.equals(author.getUserId()); //작성자 식별
+                    boolean isMine = currentUserId != null && currentUserId.equals(author.getUserId());
+
 
                     List<PostCategory> postCategories = postCategoryPort.findAllByPostId(post.getPostId());
                     Category mainCategory = postCategories.isEmpty() ? null : postCategories.get(0).getCategory();
@@ -207,48 +210,48 @@ public class FeedService implements FeedGetUseCase {
 
 
 
-    private List<FeedResponseDTO> buildFeedResponseDTOList(List<Post> postList) {
-        return postList.stream()
-                .map(this::toFeedResponseDTO)
-                .sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt()))
-                .toList();
-    }
+//    private List<FeedResponseDTO> buildFeedResponseDTOList(List<Post> postList) {
+//        return postList.stream()
+//                .map(this::toFeedResponseDTO)
+//                .sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt()))
+//                .toList();
+//    }
 
-    private FeedResponseDTO toFeedResponseDTO(Post post) {
-        User author = post.getUser();
-
-        List<PostCategory> postCategories = postCategoryPort.findPostCategoriesByPostId(post.getPostId());
-        if (postCategories.isEmpty()) {
-            Category defaultCategory = categoryPort.findCategoryById(1L);
-            postCategories.add(new PostCategory(post, defaultCategory));
-        }
-
-        Category category = postCategories.get(0).getCategory();
-
-        List<String> photoUrlList = postPort.findPhotoById(post.getPostId()).stream()
-                .map(Photo::getPhotoUrl)
-                .toList();
-
-        String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
-
-        return new FeedResponseDTO(
-                author.getUserId(),
-                author.getUserName(),
-                regionName,
-                post.getPostId(),
-                post.getDescription(),
-                new CategoryColorResponseDTO(
-                        category.getCategoryId(),
-                        category.getCategoryName(),
-                        category.getIconUrlColor(),
-                        category.getTextColor(),
-                        category.getBackgroundColor()
-                ),
-                zzimPostPort.countZzimByPostId(post.getPostId()),
-                photoUrlList,
-                post.getCreatedAt()
-        );
-    }
+//    private FeedResponseDTO toFeedResponseDTO(Post post) {
+//        User author = post.getUser();
+//
+//        List<PostCategory> postCategories = postCategoryPort.findPostCategoriesByPostId(post.getPostId());
+//        if (postCategories.isEmpty()) {
+//            Category defaultCategory = categoryPort.findCategoryById(1L);
+//            postCategories.add(new PostCategory(post, defaultCategory));
+//        }
+//
+//        Category category = postCategories.get(0).getCategory();
+//
+//        List<String> photoUrlList = postPort.findPhotoById(post.getPostId()).stream()
+//                .map(Photo::getPhotoUrl)
+//                .toList();
+//
+//        String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
+//
+//        return new FeedResponseDTO(
+//                author.getUserId(),
+//                author.getUserName(),
+//                regionName,
+//                post.getPostId(),
+//                post.getDescription(),
+//                new CategoryColorResponseDTO(
+//                        category.getCategoryId(),
+//                        category.getCategoryName(),
+//                        category.getIconUrlColor(),
+//                        category.getTextColor(),
+//                        category.getBackgroundColor()
+//                ),
+//                zzimPostPort.countZzimByPostId(post.getPostId()),
+//                photoUrlList,
+//                post.getCreatedAt()
+//        );
+//    }
 
 
 }
