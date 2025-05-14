@@ -6,6 +6,7 @@ import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
+import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
@@ -58,6 +59,7 @@ public class PostService implements
     private final PhotoPort photoPort;
     private final BlockPort blockPort;
     private final ApplicationEventPublisher eventPublisher;
+    private final ReportPort reportPort;
 
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
@@ -178,11 +180,16 @@ public class PostService implements
     @Override
     public PostSearchResultListDTO searchReviewsByQuery(UserGetCommand userGetCommand,PostSearchCommand postSearchCommand){
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userGetCommand.getUserId());
+        List<Long> blockingUserIds = blockPort.getBlockerUserIds(userGetCommand.getUserId());
+        List<Long> reportedPostIds = reportPort.findReportedPostIdsByUserId(userGetCommand.getUserId());
+
         List<Post> postList = postPort.findByPostDescriptionContaining(postSearchCommand.getQuery());
 
 
         List<FeedResponseDTO> postSearchResultList = postList.stream()
-                .filter(post -> !blockedUserIds.contains(post.getUser().getUserId())) // 🔥 추가 (차단한 유저 제외)
+                .filter(post -> !blockedUserIds.contains(post.getUser().getUserId())&&
+                !blockingUserIds.contains(post.getUser().getUserId()) &&
+                !reportedPostIds.contains(post.getPostId()))
                 .map(post -> {
                     List<String> photoUrlList = postPort.findPhotoById(post.getPostId()).stream()
                             .map(Photo::getPhotoUrl)

@@ -15,7 +15,7 @@ public interface FeedGetUseCase {
     //FeedListResponseDTO getAllPosts();
 
     FilteredFeedResponseListDTO getFilteredFeed(FeedFilterCommand command);
-    //FeedListResponseDTO getPostsFromFollowingUsers(UserGetCommand command);
+
 
 }
 

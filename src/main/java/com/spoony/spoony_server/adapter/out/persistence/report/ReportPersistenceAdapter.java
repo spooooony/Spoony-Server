@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Adapter
 @Transactional
 @RequiredArgsConstructor
@@ -53,5 +55,10 @@ public class ReportPersistenceAdapter implements ReportPort {
                 .userReportType(userReport.getUserReportType()).userReportDetail(userReport.getUserReportDetail())
                 .build();
         userReportRepository.save(userReportEntity);
+    }
+
+    @Override
+    public List<Long> findReportedPostIdsByUserId(Long userId) {
+        return reportRepository.findReportedPostIdsByUserId(userId);
     }
 }

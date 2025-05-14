@@ -9,6 +9,7 @@ import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.CategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
+import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.feed.Feed;
@@ -40,6 +41,7 @@ public class FeedService implements FeedGetUseCase {
     private final ZzimPostPort zzimPostPort;
     private final BlockPort blockPort;
     private final CategoryPort categoryPort;
+    private final ReportPort reportPort;
 
 
     @Transactional
@@ -111,6 +113,7 @@ public class FeedService implements FeedGetUseCase {
         int size = command.getSize();
         Long currentUserId = command.getCurrentUserId();
 
+
         try {
             if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
                 logger.info("✅✅✅ 로컬리뷰 전체 조회 (category 필터 제거)");
@@ -142,6 +145,22 @@ public class FeedService implements FeedGetUseCase {
 
         logger.info("필터링된 게시물 수: {}", filteredPosts.size());
 
+        // 차단 유저 필터링
+        List<Long> userIdsBlockedByMe = blockPort.findBlockedUserIds(currentUserId);
+        List<Long> userIdsBlockingMe = blockPort.findBlockingUserIds(currentUserId);
+
+        //신고한 게시물 필터링
+        List<Long> reportedPostIds = reportPort.findReportedPostIdsByUserId(currentUserId);
+
+        filteredPosts = filteredPosts.stream()
+                .filter(post -> {
+                    Long authorId = post.getUser().getUserId();
+                    Long postId = post.getPostId();
+                    return !userIdsBlockedByMe.contains(authorId) && !userIdsBlockingMe.contains(authorId)&& !reportedPostIds.contains(postId);
+                })
+                .toList();
+
+        logger.info("차단 유저 제외 후 게시물 수: {}", filteredPosts.size());
 
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {

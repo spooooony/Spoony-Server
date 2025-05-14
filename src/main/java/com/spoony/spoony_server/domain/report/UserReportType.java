@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum UserReportType {
-    ADVERTISEMENT("영리 목적/홍보성 후기"),
+    PROMOTIONAL_CONTENT("영리 목적/홍보성 후기"),
     INSULT("욕설/인신 공격"),
     DUPLICATE("도배"),
     REPUTATION_AND_COPYRIGHT_VIOLATION("명예 회손 및 저작권 침해"),

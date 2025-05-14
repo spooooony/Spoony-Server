@@ -10,13 +10,15 @@ public interface BlockPort {
     void deleteUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status);
     boolean existsBlockUserRelation(Long fromUserId, Long toUserId);
     List<Long> getBlockedUserIds(Long userId);
+    List<Long> getBlockerUserIds(Long userId);
+
     Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId);
-    //void deleteBlockRelation(Long fromUserId, Long toUserId, BlockStatus status);
+
     void updateUserBlockRelation(Long userId, Long targetUserId, BlockStatus status);
 
-    List<Long> findBlockedUserIds(Long userId);
 
-    List<Long> findBlockingUserIds(Long userId);
+
+
     void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status);
 
 
