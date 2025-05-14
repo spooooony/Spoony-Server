@@ -18,6 +18,7 @@ import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.Follow;
+import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
@@ -29,6 +30,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,26 +111,28 @@ public class PostService implements
                         category.getBackgroundColor())
         );
     }
+
     public FeedListResponseDTO getPostsByUserId(UserReviewGetCommand command){
         Long userId = command.getUserId();
         Boolean isLocalReview = command.getIsLocalReview();
         //1. 유저가 작성한 게시물 모두 조회
         List<Post> postList = postPort.findPostsByUserId(userId);
 
-
         //2. localReview가 true일 경우, 활동 지역과 식당 지역이 같은 게시물만 필터링
-        if(Boolean.TRUE.equals(isLocalReview)){
-            postList = postList.stream().filter(post -> {
-                String userRegionName = post.getUser().getRegion().getRegionName();
+        if (Boolean.TRUE.equals(isLocalReview)) {
+            postList = postList.stream()
+                    .filter(post -> {
+                        Region region = post.getUser().getRegion();
+                        if (region == null) return false;
 
+                        String regionName = region.getRegionName();
+                        if (regionName == null) return false;
 
-                String placeAddress = post.getPlace().getPlaceAddress();
-
-                System.out.println("일치 여부: " + userRegionName.equals(placeAddress));
-                return placeAddress.contains(userRegionName);
-            }).toList();
+                        String placeAddress = post.getPlace().getPlaceAddress();
+                        return placeAddress != null && placeAddress.contains(regionName);
+                    })
+                    .toList();
         }
-
 
         //3. 각 Post -> Feed
         List<FeedResponseDTO> feedResponseList = postList.stream().map(post -> {
@@ -139,10 +143,13 @@ public class PostService implements
                     List<String> photoUrlList = photoList.stream()
                             .map(Photo::getPhotoUrl)
                             .toList();
+
+                    String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
+
                     return new FeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
-                            author.getRegion().getRegionName(),
+                            regionName,
                             post.getPostId(),
                             post.getDescription(),
                             new CategoryColorResponseDTO(category.getCategoryId(),
@@ -184,7 +191,7 @@ public class PostService implements
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
                     Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
-                    String userRegion = post.getUser().getRegion().getRegionName();
+                    String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
 
                     LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())
                             ? post.getUpdatedAt() : post.getCreatedAt();
@@ -192,7 +199,7 @@ public class PostService implements
                     return new FeedResponseDTO(
                             post.getUser().getUserId(),
                             post.getUser().getUserName(),
-                            userRegion,
+                            regionName,
                             post.getPostId(),
                             post.getDescription(),
                             new CategoryColorResponseDTO(

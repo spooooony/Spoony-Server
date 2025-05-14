@@ -79,9 +79,12 @@ public class UserService implements
     @Override
     public UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand command) {
         User user = userPort.findUserById(command.getUserId());
+
+        String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
+
         return new UserProfileUpdateResponseDTO(
                 user.getUserName(),
-                user.getRegion().getRegionName(),
+                regionName,
                 user.getIntroduction(),
                 user.getBirth(),
                 user.getImageLevel()
@@ -117,10 +120,12 @@ public class UserService implements
             User followerUser = follow.getFollower();
             boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
 
+            String regionName = followerUser.getRegion() != null ? followerUser.getRegion().getRegionName() : null;
+
             return UserSimpleResponseDTO.from(
                     followerUser.getUserId(),
                     followerUser.getUserName(),
-                    followerUser.getRegion().getRegionName(),
+                    regionName,
                     isFollowing,
                     followerUser.getImageLevel().intValue()
             );
@@ -136,10 +141,12 @@ public class UserService implements
             User followingUser = follow.getFollowing();
             boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
 
+            String regionName = followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
+
             return UserSimpleResponseDTO.from(
                     followingUser.getUserId(),
                     followingUser.getUserName(),
-                    followingUser.getRegion().getRegionName(),
+                    regionName,
                     isFollowing,
                     followingUser.getImageLevel().intValue()
             );
@@ -155,10 +162,12 @@ public class UserService implements
             User blockedUser = block.getBlocked();
             boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
 
+            String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
+
             return UserSimpleResponseDTO.from(
                     blockedUser.getUserId(),
                     blockedUser.getUserName(),
-                    blockedUser.getRegion().getRegionName(),
+                    regionName,
                     isBlocked,
                     blockedUser.getImageLevel().intValue()
             );
@@ -227,11 +236,13 @@ public class UserService implements
                 .filter(user -> !blockedUserIds.contains(user.getUserId())) // 차단된 사용자 제외
                 .map(user -> {
 
+                    String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
+
                     // UserSearchResultDTO를 반환
                     return UserSearchResultDTO.from(
                             user.getUserId(),
                             user.getUserName(),
-                            user.getRegion().getRegionName(),
+                            regionName,
                             user.getImageLevel().intValue() // 추가된 profileImageUrl
                     );
                 })

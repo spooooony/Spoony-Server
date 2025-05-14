@@ -135,12 +135,14 @@ public class ZzimPostService implements
                             .map(Photo::getPhotoUrl)
                             .toList();
 
+                    String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
+
                     return new ZzimFocusResponseDTO(
                             postPlace.getPlaceId(),
                             postPlace.getPlaceName(),
                             categoryColorResponse,
                             post.getUser().getUserName(),
-                            post.getUser().getRegion().getRegionName(),
+                            regionName,
                             post.getPostId(),
                             post.getDescription(),
                             zzimCount,

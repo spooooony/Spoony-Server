@@ -73,10 +73,12 @@ public class FeedService implements FeedGetUseCase {
                             .map(Photo::getPhotoUrl)
                             .toList();
 
+                    String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
+
                     return new FeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
-                            author.getRegion().getRegionName(),
+                            regionName,
                             post.getPostId(),
                             post.getDescription(),
                             new CategoryColorResponseDTO(
@@ -149,10 +151,12 @@ public class FeedService implements FeedGetUseCase {
                     List<PostCategory> postCategories = postCategoryPort.findAllByPostId(post.getPostId());
                     Category mainCategory = postCategories.isEmpty() ? null : postCategories.get(0).getCategory();
 
+                    String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
+
                     return new FilteredFeedResponseDTO(
                             author.getUserId(),
                             author.getUserName(),
-                            author.getRegion() != null ? author.getRegion().getRegionName() : "Unknown",
+                            regionName,
                             post.getPostId(),
                             post.getDescription(),
                             mainCategory != null ?
@@ -206,10 +210,12 @@ public class FeedService implements FeedGetUseCase {
                 .map(Photo::getPhotoUrl)
                 .toList();
 
+        String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
+
         return new FeedResponseDTO(
                 author.getUserId(),
                 author.getUserName(),
-                author.getRegion().getRegionName(),
+                regionName,
                 post.getPostId(),
                 post.getDescription(),
                 new CategoryColorResponseDTO(
