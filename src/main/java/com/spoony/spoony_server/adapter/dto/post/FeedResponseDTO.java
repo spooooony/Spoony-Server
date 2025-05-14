@@ -14,6 +14,8 @@ public record FeedResponseDTO(
         CategoryColorResponseDTO categoryColorResponse,
         Long zzimCount,
         List<String> photoUrlList,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        Boolean isMine
+
 ) {
 }

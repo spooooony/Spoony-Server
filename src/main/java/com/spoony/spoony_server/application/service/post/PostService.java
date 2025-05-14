@@ -141,6 +141,7 @@ public class PostService implements
                     User author = post.getUser();
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = postCategory.getCategory();
+                    boolean isMine = author.getUserId().equals(command.getUserId());
                     List<Photo> photoList = postPort.findPhotoById(post.getPostId());
                     List<String> photoUrlList = photoList.stream()
                             .map(Photo::getPhotoUrl)
@@ -163,7 +164,8 @@ public class PostService implements
                     ),
                             zzimPostPort.countZzimByPostId(post.getPostId()),
                             photoUrlList,
-                            post.getCreatedAt()
+                            post.getCreatedAt(),
+                            isMine
                     );
                 })
                 .collect(Collectors.toList());
@@ -199,7 +201,7 @@ public class PostService implements
                     Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
                     Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
                     String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
-
+                    boolean isMine = post.getUser().getUserId().equals(userGetCommand.getUserId());
                     LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())
                             ? post.getUpdatedAt() : post.getCreatedAt();
 
@@ -218,7 +220,8 @@ public class PostService implements
                             ),
                             zzimCount,
                             photoUrlList,
-                            latestDate
+                            latestDate,
+                            isMine
                     );
                 })
                 .toList();
