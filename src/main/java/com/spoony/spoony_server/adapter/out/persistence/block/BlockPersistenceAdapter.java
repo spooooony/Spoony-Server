@@ -49,8 +49,13 @@ public class BlockPersistenceAdapter implements BlockPort {
     }
 
     @Override
-    public List<Long> getBlockedUserIds(Long userId) {
+    public List<Long> getBlockedUserIds(Long userId) { //user에게 차단당한 사람들
         return blockRepository.findBlockedUserIdsByBlockerUserId(userId);
+    }
+
+    @Override
+    public List<Long> getBlockerUserIds(Long userId) { //user를 차단하고있는 사람들
+        return blockRepository.findBlockerIdsByBlockedUserId(userId);
     }
 
     @Override
@@ -68,15 +73,6 @@ public class BlockPersistenceAdapter implements BlockPort {
         blockRepository.save(updatedBlockEntity);  // 상태 저장
     }
 
-    @Override
-    public List<Long> findBlockedUserIds(Long userId) {
-        return List.of();
-    }
-
-    @Override
-    public List<Long> findBlockingUserIds(Long userId) {
-        return List.of();
-    }
 
     @Override
     public void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
@@ -104,42 +100,10 @@ public class BlockPersistenceAdapter implements BlockPort {
             blockRepository.save(newBlock);
         }
     }
+
     @Override
     public void deleteUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
         blockRepository.deleteByBlocker_UserIdAndBlocked_UserIdAndStatus(fromUserId, toUserId, status);
 
     }
-//            // UNFOLLOWED → BLOCKED 변경만 허용
-////            if (blockEntity.getStatus() == BlockStatus.UNFOLLOWED && status == BlockStatus.BLOCKED) {
-////                blockEntity.updateStatus(BlockStatus.BLOCKED);
-////            }else {
-//            // 상태가 다르면 무조건 갱신
-//            if (blockEntity.getStatus() != status) {
-//                blockEntity.updateStatus(status);
-//            }
-//        } else {
-//            UserEntity fromUser = userRepository.findById(fromUserId)
-//                    .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-//            UserEntity toUser = userRepository.findById(toUserId)
-//                    .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-//
-//            BlockEntity newBlock = BlockEntity.builder()
-//                    .blocker(fromUser)
-//                    .blocked(toUser)
-//                    .status(status)
-//                    .time(LocalDateTime.now())
-//                    .build();
-//
-//            blockRepository.save(newBlock);
-//        }
-//    }
 }
-
-
-
-
-//    @Override
-//    public List<Long> findBlockedIdsByBlockerId(Long userId) {
-//        return blockRepository.findBlocked_userIdByBlocker_userId(userId);
-//    }
-

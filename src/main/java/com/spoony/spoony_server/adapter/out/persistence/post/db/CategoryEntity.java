@@ -41,4 +41,5 @@ public class CategoryEntity {
         this.textColor = iconTextColor;
         this.backgroundColor = iconBackgroundColor;
     }
+
 }

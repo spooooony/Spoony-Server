@@ -280,14 +280,6 @@ public class PostPersistenceAdapter implements
                 sortBy,
                 cursor
         );
-        // 커서가 있을 경우 커서 기반 페이징 처리 추가
-//        if (cursor != null) {
-//            Specification<PostEntity> finalSpec = spec;  // Specification을 람다 내에서 사용할 수 있도록 final로 선언
-//            spec = (root, query, cb) -> {
-//                Predicate cursorPredicate = cb.lessThan(root.get("postId"), cursor);  // cursor보다 큰 postId 조회
-//                return cb.and(cursorPredicate, finalSpec.toPredicate(root, query, cb));  // 기존 필터와 결합
-//            };
-//        }
 
         // Pageable 생성 (페이지 번호는 0부터 시작)
         Pageable pageable = PageRequest.of(0, size); // 기본적으로 최신순으로 정렬

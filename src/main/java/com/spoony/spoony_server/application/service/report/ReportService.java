@@ -3,6 +3,7 @@ package com.spoony.spoony_server.application.service.report;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
+import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
@@ -25,6 +26,7 @@ public class ReportService implements ReportCreateUseCase {
     private final ReportPort reportPort;
     private final PostPort postPort;
     private final UserPort userPort;
+    private final FeedPort feedPort;
 
     public void createReport(ReportCreateCommand command) {
         if (command.getReportDetail().trim().isEmpty()) {
@@ -46,6 +48,9 @@ public class ReportService implements ReportCreateUseCase {
         Post post = postPort.findPostById(postId);
         User user = userPort.findUserById(userId);
 
+        //Feed테이블 -> 신고자(user_id) , 게시물(post_id) 삭제 (팔로잉 기반 피드조회시)
+        feedPort.deleteFeedByUserIdAndPostId(userId,postId);
+
         Report report = new Report(reportType,command.getReportDetail(),post,user);
         reportPort.saveReport(report);
     }
@@ -60,7 +65,7 @@ public class ReportService implements ReportCreateUseCase {
         }
         UserReportType userReportType = command.getUserReportType();
         if (userReportType == null){
-            userReportType = UserReportType.ADVERTISEMENT;
+            userReportType = UserReportType.PROMOTIONAL_CONTENT;
         }
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
