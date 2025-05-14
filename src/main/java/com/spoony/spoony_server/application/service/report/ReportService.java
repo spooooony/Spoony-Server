@@ -1,11 +1,13 @@
 package com.spoony.spoony_server.application.service.report;
 
+import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
+import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.report.Report;
@@ -27,6 +29,7 @@ public class ReportService implements ReportCreateUseCase {
     private final PostPort postPort;
     private final UserPort userPort;
     private final FeedPort feedPort;
+    private final BlockPort blockPort;
 
     public void createReport(ReportCreateCommand command) {
         if (command.getReportDetail().trim().isEmpty()) {
@@ -72,6 +75,14 @@ public class ReportService implements ReportCreateUseCase {
 
         User user = userPort.findUserById(userId);
         User targetUser = userPort.findUserById(targetUserId);
+
+
+        blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.REPORT);
+
+        // 2. follow 관계 제거 (양방향)
+        userPort.deleteFollowRelation(userId, targetUserId);
+        userPort.deleteFollowRelation(targetUserId, userId);
+
 
         UserReport userReport = new UserReport(userReportType, command.getReportDetail(),user,targetUser);
         reportPort.saveUserReport(userReport);

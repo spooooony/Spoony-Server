@@ -20,12 +20,23 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
     // 차단 관계가 존재하는지 확인
     boolean existsByBlocker_userIdAndBlocked_userId(Long fromUserId, Long toUserId);
 
-    @Query("SELECT b.blocked.userId FROM BlockEntity b WHERE b.blocker.userId = :blockerUserId")
-    List<Long> findBlockedUserIdsByBlockerUserId(@Param("blockerUserId") Long blockerUserId);
+    @Query("SELECT b.blocked.userId FROM BlockEntity b " +
+            "WHERE b.blocker.userId = :blockerUserId " +
+            "AND b.status IN ('BLOCKED', 'REPORTED')")
+    List<Long> findUserIdsBlockedByBlockOrReport(@Param("blockerUserId") Long blockerUserId);
 
 
-    @Query("SELECT b.blocker.userId FROM BlockEntity b WHERE b.blocked.userId = :blockedUserId")
-    List<Long> findBlockerIdsByBlockedUserId(@Param("blockedUserId") Long blockedUserId);
+    @Query("SELECT b.blocker.userId FROM BlockEntity b " +
+            "WHERE b.blocked.userId = :blockedUserId " +
+            "AND b.status IN ('BLOCKED', 'REPORTED')")
+    List<Long> findUserIdsBlockingByBlockOrReport(@Param("blockedUserId") Long blockedUserId);
+
+//    @Query("SELECT b.blocked.userId FROM BlockEntity b WHERE b.blocker.userId = :blockerUserId")
+//    List<Long> findBlockedUserIdsByBlockerUserId(@Param("blockerUserId") Long blockerUserId);
+//
+//
+//    @Query("SELECT b.blocker.userId FROM BlockEntity b WHERE b.blocked.userId = :blockedUserId")
+//    List<Long> findBlockerIdsByBlockedUserId(@Param("blockedUserId") Long blockedUserId);
 
     void deleteByBlocker_UserIdAndBlocked_UserIdAndStatus(Long blockerId, Long blockedId, BlockStatus status);
 

@@ -115,21 +115,29 @@ public class UserService implements
     @Override
     public FollowListResponseDTO getFollowers(UserGetCommand command) {
         List<Follow> followers = userPort.findFollowersByUserId(command.getUserId());
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
 
-        List<UserSimpleResponseDTO> userDTOList = followers.stream().map(follow -> {
-            User followerUser = follow.getFollower();
-            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
 
-            String regionName = followerUser.getRegion() != null ? followerUser.getRegion().getRegionName() : null;
+        List<UserSimpleResponseDTO> userDTOList = followers.stream()
+                .map(follow -> follow.getFollower())
+                .filter(followerUser ->
+                        !blockedUserIds.contains(followerUser.getUserId()) &&
+                                !blockerUserIds.contains(followerUser.getUserId())
+                )
+                .map(followerUser -> {
+                    boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
+                    String regionName = followerUser.getRegion() != null ? followerUser.getRegion().getRegionName() : null;
 
-            return UserSimpleResponseDTO.from(
-                    followerUser.getUserId(),
-                    followerUser.getUserName(),
-                    regionName,
-                    isFollowing,
-                    followerUser.getImageLevel().intValue()
-            );
-        }).toList();
+                    return UserSimpleResponseDTO.from(
+                            followerUser.getUserId(),
+                            followerUser.getUserName(),
+                            regionName,
+                            isFollowing,
+                            followerUser.getImageLevel().intValue()
+                    );
+                })
+                .toList();
         return new FollowListResponseDTO(userDTOList.size(), userDTOList);
     }
 
@@ -137,21 +145,28 @@ public class UserService implements
     public FollowListResponseDTO getFollowings(UserGetCommand command) {
         List<Follow> followings = userPort.findFollowingsByUserId(command.getUserId());
 
-        List<UserSimpleResponseDTO> userDTOList = followings.stream().map(follow -> {
-            User followingUser = follow.getFollowing();
-            boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
 
-            String regionName = followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
+        List<UserSimpleResponseDTO> userDTOList = followings.stream()
+                .map(follow -> follow.getFollowing())
+                .filter(followingUser ->
+                                !blockedUserIds.contains(followingUser.getUserId()) &&
+                                        !blockerUserIds.contains(followingUser.getUserId())
+                )
+                .map(followingUser -> {
+                    boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
+                    String regionName = followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
 
-            return UserSimpleResponseDTO.from(
-                    followingUser.getUserId(),
-                    followingUser.getUserName(),
-                    regionName,
-                    isFollowing,
-                    followingUser.getImageLevel().intValue()
-            );
-
-        }).toList();
+                    return UserSimpleResponseDTO.from(
+                            followingUser.getUserId(),
+                            followingUser.getUserName(),
+                            regionName,
+                            isFollowing,
+                            followingUser.getImageLevel().intValue()
+                    );
+                })
+                .toList();
         return new FollowListResponseDTO(userDTOList.size(), userDTOList);
     }
 
@@ -229,11 +244,15 @@ public class UserService implements
     @Override
     public UserSearchResultListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
 
+
+        //차단 테이블에 있으면서 + status가 blocked나 reported인 유저
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
+
         List<User> userList = userPort.findByUserNameContaining(searchCommand.getQuery());
 
         List<UserSearchResultDTO> userSearchResultList = userList.stream()
-                .filter(user -> !blockedUserIds.contains(user.getUserId())) // 차단된 사용자 제외
+                .filter(user -> !blockedUserIds.contains(user.getUserId())&& !blockerUserIds.contains(user.getUserId())) // 차단된 사용자 제외
                 .map(user -> {
 
                     String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
@@ -272,8 +291,6 @@ public class UserService implements
         // 2. follow 관계 제거 (양방향)
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
-
-
 
     }
 
