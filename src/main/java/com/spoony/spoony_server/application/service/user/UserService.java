@@ -11,6 +11,8 @@ import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
+import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Block;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.User;
@@ -40,6 +42,7 @@ public class UserService implements
     private final UserPort userPort;
     private final PostPort postPort;
     private final BlockPort blockPort;
+    private final ZzimPostPort zzimPostPort;
 
     @Override
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
@@ -285,12 +288,52 @@ public class UserService implements
     public void createUserBlock(BlockUserCommand command) {
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
-
         blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.BLOCKED);
+
 
         // 2. follow 관계 제거 (양방향)
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
+
+        //3. zzimPost 관계 제거(양방향)
+
+
+        // 신고된 유저의 게시물 목록 조회 (List<Post>)
+        List<Post> postsByReportedUsers = postPort.findPostsByUserId(targetUserId);
+
+        //신고자의 게시물 목록 조회
+        List<Post> postsByReporter = postPort.findPostsByUserId(userId);
+
+
+        // Post에서 ID만 추출하여 List<Long>으로 변환
+        List<Long> reportedPostIds = postsByReportedUsers.stream()
+                .map(post -> post.getPostId())
+                .toList();  // List<Long>으로 변환
+
+
+        List<Long> reporterPostIds = postsByReporter.stream()
+                .map(post -> post.getPostId())
+                .toList();  // List<Long>으로 변환
+
+
+        //나의 찜리스트에서 -> 내가 신고한 사람의 게시물 삭제
+        reportedPostIds.forEach(postId -> {
+            if (zzimPostPort.existsByUserIdAndPostId(userId,postId)){
+                Post post = postPort.findPostById(postId);
+                User user = userPort.findUserById(userId);
+                zzimPostPort.deleteByUserAndPost(user,post);
+            }
+        });
+
+
+        //신고당한 사람의 찜리스트에서 -> 나의 게시물 삭제
+        reporterPostIds.forEach(postId -> {
+            if (zzimPostPort.existsByUserIdAndPostId(targetUserId,postId)){
+                Post post = postPort.findPostById(postId);
+                User targetUser = userPort.findUserById(targetUserId);
+                zzimPostPort.deleteByUserAndPost(targetUser,post);
+            }
+        });
 
     }
 

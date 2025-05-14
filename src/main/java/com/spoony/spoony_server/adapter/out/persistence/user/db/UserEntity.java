@@ -11,7 +11,6 @@ import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonHistoryEnt
 import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.Platform;
-import com.spoony.spoony_server.domain.user.ProfileImage;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
