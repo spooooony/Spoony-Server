@@ -11,7 +11,7 @@ public record UserSearchResultDTO(
 
     public static UserSearchResultDTO from(Long userId, String username, String regionName, int imageLevel) {
         ProfileImage profileImage = ProfileImage.fromLevel(imageLevel);
-        String profileImageUrl = "/images/" + profileImage.getImage();
+        String profileImageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
 
         return new UserSearchResultDTO(
                 userId,

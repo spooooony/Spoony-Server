@@ -50,13 +50,18 @@ public class BlockPersistenceAdapter implements BlockPort {
 
     @Override
     public List<Long> getBlockedUserIds(Long userId) { //user에게 차단당한 사람들
-        return blockRepository.findBlockedUserIdsByBlockerUserId(userId);
+        return blockRepository.findUserIdsBlockedByBlockOrReport(userId);
     }
 
     @Override
     public List<Long> getBlockerUserIds(Long userId) { //user를 차단하고있는 사람들
-        return blockRepository.findBlockerIdsByBlockedUserId(userId);
+        return blockRepository.findUserIdsBlockingByBlockOrReport(userId);
     }
+
+//    @Override
+//    public List<Long> getReportedUserIds(Long userId) {
+//        return List.of();
+//    }
 
     @Override
     public Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId) {

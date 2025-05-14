@@ -55,10 +55,10 @@ public class FeedService implements FeedGetUseCase {
         List<Feed> feedList = feedPort.findFeedListByFollowing(command.getUserId());
 
         // 2. 내가 차단한 유저들의 ID를 가져옴
-        List<Long> userIdsBlockedByMe = blockPort.findBlockedUserIds(command.getUserId());
+        List<Long> userIdsBlockedByMe = blockPort.getBlockedUserIds(command.getUserId());
 
         // 3. 나를 차단한 유저들의 ID를 가져옴
-        List<Long> userIdsBlockingMe = blockPort.findBlockingUserIds(command.getUserId());
+        List<Long> userIdsBlockingMe = blockPort.getBlockerUserIds(command.getUserId());
 
 
         List<FeedResponseDTO> feedResponseList = feedList.stream()
@@ -146,8 +146,8 @@ public class FeedService implements FeedGetUseCase {
         logger.info("필터링된 게시물 수: {}", filteredPosts.size());
 
         // 차단 유저 필터링
-        List<Long> userIdsBlockedByMe = blockPort.findBlockedUserIds(currentUserId);
-        List<Long> userIdsBlockingMe = blockPort.findBlockingUserIds(currentUserId);
+        List<Long> userIdsBlockedByMe = blockPort.getBlockedUserIds(currentUserId);
+        List<Long> userIdsBlockingMe = blockPort.getBlockerUserIds(currentUserId);
 
         //신고한 게시물 필터링
         List<Long> reportedPostIds = reportPort.findReportedPostIdsByUserId(currentUserId);

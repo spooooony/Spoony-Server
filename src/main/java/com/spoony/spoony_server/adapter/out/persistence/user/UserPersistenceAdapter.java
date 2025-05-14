@@ -62,7 +62,7 @@ public class UserPersistenceAdapter implements UserPort {
     }
 
     @Override
-    public List<Follow> findFollowingsByUserId(Long userId) {
+    public List<Follow> findFollowingsByUserId(Long userId) { //특정 유저(userId)가 팔로우한 사용자 목록을 가져옴
         List<FollowEntity> followingList = followRepository.findByFollower_UserId(userId);
         return followingList.stream()
                 .map(FollowMapper::toDomain).toList();

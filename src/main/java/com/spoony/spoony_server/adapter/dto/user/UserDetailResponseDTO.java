@@ -16,7 +16,7 @@ public record UserDetailResponseDTO(
     public static UserDetailResponseDTO from(Long userId, String username, String regionName,String introduction,Long followerCount,Long followingCount, boolean isFollowing, int imageLevel) {
         ProfileImage profileImage = ProfileImage.fromLevel(imageLevel);
 
-        String profileImageUrl = "/images/" + profileImage.getImage();
+        String profileImageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
 
         return new UserDetailResponseDTO(
                 userId,
