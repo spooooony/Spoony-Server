@@ -30,7 +30,10 @@ public class BlockEntity {
     @JoinColumn(name = "blocked_id")
     private UserEntity blocked;
 
+
+
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private BlockStatus status;
 
     @Column(nullable = false)
