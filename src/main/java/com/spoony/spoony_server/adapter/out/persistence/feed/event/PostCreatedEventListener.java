@@ -33,7 +33,7 @@ public class PostCreatedEventListener {
         Long postId = event.getPostId();
 
         PostEntity postEntity = postRepository.findById(postId)
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalStateException("Post not found. id = " + postId));
 
         UserEntity author = postEntity.getUser();
 
@@ -44,8 +44,8 @@ public class PostCreatedEventListener {
             List<FeedEntity> feedList = followerIds.subList(fromIndex, toIndex).stream()
                     .map(followerId -> {
                         UserEntity userEntity = userRepository.findById(followerId)
-                                .orElseThrow();
-                        return new FeedEntity(userEntity, postEntity,author);
+                                .orElseThrow(() -> new IllegalStateException("Follower not found. id = " + followerId));
+                        return new FeedEntity(userEntity, postEntity, author);
                     })
                     .toList();
 
