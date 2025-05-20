@@ -34,7 +34,7 @@ public class PostController {
     private final PostDeleteUseCase postDeleteUseCase;
     private final PostUpdateUseCase postUpdateUseCase;
     private final PostSearchUseCase postSearchUseCase;
-    ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @GetMapping("/{postId}")
     @Operation(summary = "게시물 조회 API", description = "특정 게시물의 상세 정보를 조회하는 API")
