@@ -241,7 +241,7 @@ public class PostService implements
     }
 
     @Transactional
-    public void createPost(PostCreateCommand command) {
+    public PostCreatedEvent createPost(PostCreateCommand command) {
         // 게시글 업로드
         User user = userPort.findUserById(command.getUserId());
         Category category = categoryPort.findCategoryById(command.getCategoryId());
@@ -299,9 +299,7 @@ public class PostService implements
         List<Follow> followList = userPort.findFollowersByUserId(user.getUserId());
         List<Long> followerIds = followList.stream().map(follow -> follow.getFollower().getUserId()).toList();
 
-        // Event 발행
-        System.out.println("🔥 이벤트 발행 스레드: " + Thread.currentThread().getName());
-        eventPublisher.publishEvent(new PostCreatedEvent(this, followerIds, post.getPostId()));
+        return new PostCreatedEvent(this, followerIds, post.getPostId());
     }
 
     // 모든 카테고리 조회

@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
 import com.spoony.spoony_server.adapter.dto.post.*;
+import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
@@ -11,6 +12,7 @@ import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +34,8 @@ public class PostController {
     private final PostDeleteUseCase postDeleteUseCase;
     private final PostUpdateUseCase postUpdateUseCase;
     private final PostSearchUseCase postSearchUseCase;
-    private final BlockedUserGetUseCase blockedUserGetUseCase;
+    private final ApplicationEventPublisher eventPublisher;
+
     @GetMapping("/{postId}")
     @Operation(summary = "게시물 조회 API", description = "특정 게시물의 상세 정보를 조회하는 API")
     public ResponseEntity<ResponseDTO<PostResponseDTO>> getPost(
@@ -76,7 +79,11 @@ public class PostController {
                 photoUrlList
         );
 
-        postCreateUseCase.createPost(command);
+        PostCreatedEvent postCreatedEvent = postCreateUseCase.createPost(command);
+
+        // Event 발행
+        System.out.println("🔥 이벤트 발행 스레드: " + Thread.currentThread().getName());
+        eventPublisher.publishEvent(postCreatedEvent);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
