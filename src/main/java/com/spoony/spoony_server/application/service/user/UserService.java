@@ -346,7 +346,9 @@ public class UserService implements
 
         // BlockStatus가 BLOCKED일 경우 UNFOLLOWED로 상태 변경
         if (blockStatus.get() == BlockStatus.BLOCKED) {
-            blockPort.updateUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED);
+            blockPort.updateUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED); //순서 1
+            blockPort.deleteUserBlockRelation(userId, targetUserId, BlockStatus.BLOCKED); //순서2
+
         } else {
             // 상태가 이미 UNFOLLOWED라면 아무 동작도 하지 않음
             throw new BusinessException(UserErrorMessage.USER_NOT_FOUND);
@@ -354,7 +356,7 @@ public class UserService implements
     }
 
     @Override
-    public boolean isBlocked(BlockCheckCommand command) {
+    public boolean isBlockedByBlockingOrReporting(BlockCheckCommand command) {
         return blockPort.existsBlockUserRelation(command.getUserId(), command.getTargetUserId());
     }
 

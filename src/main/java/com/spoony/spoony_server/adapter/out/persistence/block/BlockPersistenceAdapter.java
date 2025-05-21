@@ -44,8 +44,7 @@ public class BlockPersistenceAdapter implements BlockPort {
 
     @Override
     public boolean existsBlockUserRelation(Long fromUserId, Long toUserId) {
-        return blockRepository.existsByBlocker_userIdAndBlocked_userId(fromUserId, toUserId);
-
+        return blockRepository.findActiveBlockByUsers(fromUserId, toUserId).isPresent();
     }
 
     @Override

@@ -56,7 +56,7 @@ public class UserController {
 
         BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
 
-        if (blockCheckUseCase.isBlocked(blockCheckCommand)) {
+        if (blockCheckUseCase.isBlockedByBlockingOrReporting(blockCheckCommand)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
         }
@@ -171,7 +171,7 @@ public class UserController {
         UserReviewGetCommand command = new UserReviewGetCommand(targetUserId,isLocalReview);
         BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
 
-        if (blockCheckUseCase.isBlocked(blockCheckCommand)) {
+        if (blockCheckUseCase.isBlockedByBlockingOrReporting(blockCheckCommand)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
         }
