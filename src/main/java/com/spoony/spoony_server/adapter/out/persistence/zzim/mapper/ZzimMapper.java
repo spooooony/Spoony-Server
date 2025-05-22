@@ -20,13 +20,15 @@ public class ZzimMapper {
                         zzimPostEntity.getUser().getProfileImageLevel(),
                         zzimPostEntity.getUser().getLevel(),
                         zzimPostEntity.getUser().getUserName(),
-                        RegionMapper.toDomain(zzimPostEntity.getUser().getRegion()),
+                        zzimPostEntity.getUser().getRegion() != null
+                                ? RegionMapper.toDomain(zzimPostEntity.getUser().getRegion())
+                                : null,
                         zzimPostEntity.getUser().getIntroduction(),
                         zzimPostEntity.getUser().getBirth(),
                         zzimPostEntity.getUser().getAgeGroup(),
                         zzimPostEntity.getUser().getCreatedAt(),
                         zzimPostEntity.getUser().getUpdatedAt()
-             ),
+                ),
                 new Post(
                         zzimPostEntity.getPost().getPostId(),
                         UserMapper.toDomain(zzimPostEntity.getPost().getUser()),
