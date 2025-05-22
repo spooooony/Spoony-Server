@@ -13,18 +13,19 @@ public class PostMapper {
     public static Post toDomain(PostEntity postEntity) {
         Logger logger = LoggerFactory.getLogger(PostMapper.class);
         logger.info("PostEntity to Domain 변환 시작");
+
         return new Post(
                 postEntity.getPostId(),
                 new User(
                         postEntity.getUser().getUserId(),
                         postEntity.getUser().getPlatform(),
-
                         postEntity.getUser().getPlatformId(),
                         postEntity.getUser().getProfileImageLevel(),
                         postEntity.getUser().getLevel(),
-
                         postEntity.getUser().getUserName(),
-                        RegionMapper.toDomain(postEntity.getUser().getRegion()),
+                        postEntity.getUser().getRegion() != null
+                                ? RegionMapper.toDomain(postEntity.getUser().getRegion())
+                                : null,
                         postEntity.getUser().getIntroduction(),
                         postEntity.getUser().getBirth(),
                         postEntity.getUser().getAgeGroup(),
