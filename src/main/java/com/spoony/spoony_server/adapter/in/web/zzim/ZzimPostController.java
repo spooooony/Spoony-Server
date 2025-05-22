@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.in.web.zzim;
 
+import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListWithCursorResponseDTO;
 import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,10 +43,13 @@ public class ZzimPostController {
 
     @GetMapping
     @Operation(summary = "북마크 조회 API", description = "북마크 장소 리스트를 조회하는 API")
-    public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimCardList(
-            @UserId Long userId) {
-        ZzimGetCardCommand command = new ZzimGetCardCommand(userId);
-        ZzimCardListResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimCardList(command);
+    public ResponseEntity<ResponseDTO<ZzimCardListWithCursorResponseDTO >> getZzimCardList(
+            @UserId Long userId,
+            @RequestParam(defaultValue = "1") Long categoryId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "10") int size) {
+        ZzimGetCardCommand command = new ZzimGetCardCommand(userId,categoryId, cursor, size);
+        ZzimCardListWithCursorResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimCardList(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
 

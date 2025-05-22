@@ -176,7 +176,9 @@ public class UserService implements
     @Override
     public BlockListResponseDTO getBlockings(UserGetCommand command) {
         List<Block> blockeds = userPort.findBlockedByUserId(command.getUserId());
-        List<UserSimpleResponseDTO> userDTOList = blockeds.stream().map(block ->{
+        List<UserSimpleResponseDTO> userDTOList = blockeds.stream()
+                .filter(block -> block.getStatus() == BlockStatus.BLOCKED)
+                .map(block ->{
             User blockedUser = block.getBlocked();
             boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
 

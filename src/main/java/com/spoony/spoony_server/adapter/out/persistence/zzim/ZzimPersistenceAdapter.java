@@ -18,6 +18,11 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +47,27 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         return zzimPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }
 
+
     @Override
-    public List<ZzimPost> findUserByUserId(Long userId) {
+    public List<ZzimPost> findZzimPostsByUserId(Long userId) {
         return zzimPostRepository.findByUser_UserId(userId)
                 .stream()
+                .map(ZzimMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId,Long cursor, int size) {
+        Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdCategoryIdAndCursor(userId, categoryId,cursor);
+
+
+        // Pageable 생성: 페이지 번호 0, size 만큼만 조회, 최신순 내림차순 정렬 (id 내림차순)
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "zzimId"));
+
+        // 쿼리 실행 (페이징 및 커서 조건 적용)
+        Page<ZzimPostEntity> page = zzimPostRepository.findAll(spec, pageable);
+
+        return page.getContent().stream()
                 .map(ZzimMapper::toDomain)
                 .toList();
     }
@@ -85,4 +107,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     public void deleteByUserAndPost(User user, Post post) {
         zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
     }
+
+
 }

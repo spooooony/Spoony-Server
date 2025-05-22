@@ -10,7 +10,8 @@ public class BlockMapper {
         return new Block(
                 blockEntity.getBlockId(),
                 UserMapper.toDomain(blockEntity.getBlocker()),
-                UserMapper.toDomain(blockEntity.getBlocked())
+                UserMapper.toDomain(blockEntity.getBlocked()),
+                blockEntity.getStatus()
         );
     }
 }

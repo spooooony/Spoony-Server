@@ -210,48 +210,4 @@ public class FeedService implements FeedGetUseCase {
 
 
 
-//    private List<FeedResponseDTO> buildFeedResponseDTOList(List<Post> postList) {
-//        return postList.stream()
-//                .map(this::toFeedResponseDTO)
-//                .sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt()))
-//                .toList();
-//    }
-
-//    private FeedResponseDTO toFeedResponseDTO(Post post) {
-//        User author = post.getUser();
-//
-//        List<PostCategory> postCategories = postCategoryPort.findPostCategoriesByPostId(post.getPostId());
-//        if (postCategories.isEmpty()) {
-//            Category defaultCategory = categoryPort.findCategoryById(1L);
-//            postCategories.add(new PostCategory(post, defaultCategory));
-//        }
-//
-//        Category category = postCategories.get(0).getCategory();
-//
-//        List<String> photoUrlList = postPort.findPhotoById(post.getPostId()).stream()
-//                .map(Photo::getPhotoUrl)
-//                .toList();
-//
-//        String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
-//
-//        return new FeedResponseDTO(
-//                author.getUserId(),
-//                author.getUserName(),
-//                regionName,
-//                post.getPostId(),
-//                post.getDescription(),
-//                new CategoryColorResponseDTO(
-//                        category.getCategoryId(),
-//                        category.getCategoryName(),
-//                        category.getIconUrlColor(),
-//                        category.getTextColor(),
-//                        category.getBackgroundColor()
-//                ),
-//                zzimPostPort.countZzimByPostId(post.getPostId()),
-//                photoUrlList,
-//                post.getCreatedAt()
-//        );
-//    }
-
-
 }

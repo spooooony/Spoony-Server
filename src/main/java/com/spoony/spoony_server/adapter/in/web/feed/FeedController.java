@@ -97,7 +97,7 @@ public class FeedController {
             @RequestParam(required = false) List<AgeGroup> ageGroups,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "10") int size
     ) {
         Logger logger = LoggerFactory.getLogger(getClass());
 
