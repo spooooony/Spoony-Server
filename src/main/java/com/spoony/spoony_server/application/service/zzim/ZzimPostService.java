@@ -53,74 +53,7 @@ public class ZzimPostService implements
         zzimPostPort.saveZzimPost(user,post);
     }
 
-//    @Transactional
-//    public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand command) {
-//        Logger logger = LoggerFactory.getLogger(getClass());
-//        logger.info("getZzimCardList 호출됨");
-//        logger.info("ZzimGetCardCommand: {}", command);
-//
-//        // size + 1개를 조회해서 페이징 여부 확인
-//        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
-//                command.getUserId(),
-//                command.getCategoryId(),
-//                command.getCursor(),
-//                command.getSize() + 1
-//        );
-//
-//        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
-//
-//        for (ZzimPost zzimPost : zzimPostList) {
-//            Place place = zzimPost.getPost().getPlace();
-//            if (place == null) {
-//                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
-//            }
-//
-//            Long placeId = place.getPlaceId();
-//            if (!uniquePlacePostMap.containsKey(placeId)) {
-//                uniquePlacePostMap.put(placeId, zzimPost);
-//            }
-//        }
-//
-//        // size 만큼만 자르기
-//        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
-//                .limit(command.getSize())
-//                .map(zzimPost -> {
-//                    Post post = zzimPost.getPost();
-//                    Place place = post.getPlace();
-//                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
-//                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-//
-//                    CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
-//                            postCategory.getCategory().getCategoryId(),
-//                            postCategory.getCategory().getCategoryName(),
-//                            postCategory.getCategory().getIconUrlColor(),
-//                            postCategory.getCategory().getTextColor(),
-//                            postCategory.getCategory().getBackgroundColor()
-//                    );
-//
-//                    return new ZzimCardResponseDTO(
-//                            place.getPlaceId(),
-//                            place.getPlaceName(),
-//                            place.getPlaceAddress(),
-//                            photo.getPhotoUrl(),
-//                            place.getLatitude(),
-//                            place.getLongitude(),
-//                            categoryColorResponse
-//                    );
-//                })
-//                .collect(Collectors.toList());
-//
-//        // nextCursor 계산: 마지막 아이템의 placeId
-//        Long nextCursor = null;
-//        if (zzimCardResponses.size() == command.getSize()) {
-//            nextCursor = zzimCardResponses.get(zzimCardResponses.size() - 1).placeId();
-//        }
-//
-//        logger.info("필터링된 찜 카드 수: {}", zzimCardResponses.size());
-//        logger.info("다음 커서(nextCursor): {}", nextCursor);
-//
-//        return new ZzimCardListWithCursorResponseDTO(zzimCardResponses.size(), zzimCardResponses, nextCursor);
-//    }
+
 @Transactional
 public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand command) {
     Logger logger = LoggerFactory.getLogger(getClass());
