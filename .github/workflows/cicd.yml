@@ -90,23 +90,33 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << EOF
           #!/bin/bash
 
+          echo "🔍 현재 실행 중인 포트 확인"
+          ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
+
           echo "🌐 Docker 네트워크 존재 여부 확인"
           if ! sudo docker network inspect spoony-network > /dev/null 2>&1; then
+            echo "➕ 네트워크 spoony-network 생성"
             sudo docker network create spoony-network
+          else
+            echo "✅ 네트워크 spoony-network 이미 존재"
           fi
 
-          echo "🔍 Redis 컨테이너 상태 확인"
-          REDIS_EXISTS=\$(sudo docker ps -a -q -f name=^redis\$)
-          REDIS_RUNNING=\$(sudo docker ps -q -f name=^redis\$)
-
-          if [ -n "\$REDIS_EXISTS" ]; then
-            if [ -n "\$REDIS_RUNNING" ]; then
+          REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
+          REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
+          
+          if [ -n "$REDIS_EXISTS" ]; then
+            echo "🔗 Redis 컨테이너가 존재합니다."
+          
+            if [ -n "$REDIS_RUNNING" ]; then
+              echo "🔄 Redis 컨테이너 실행 중 → 네트워크 연결 시도"
               sudo docker network connect spoony-network redis || true
             else
+              echo "⏯ Redis 컨테이너가 정지 상태 → 시작 및 네트워크 연결"
               sudo docker start redis
               sudo docker network connect spoony-network redis || true
             fi
           else
+            echo "🚀 Redis 컨테이너 없음 → 새로 생성 및 실행"
             sudo docker run -d --name redis --network spoony-network redis
           fi
 
