@@ -41,9 +41,6 @@ public class ReportController {
         // 신고된 유저가 작성한 게시물이 내가 찜한 목록에 있는지 확인하고 삭제
         reportCreateUseCase.createUserReport(command);
 
-
-
-
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
     @PostMapping("/post")
