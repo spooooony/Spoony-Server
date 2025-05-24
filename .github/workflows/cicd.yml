@@ -75,36 +75,32 @@ jobs:
       - name: Create SSH Key File
         run: |
           if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-          echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
-          echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+            echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
+            echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
           else
-          echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
-          echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+            echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
+            echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
           fi
           chmod 600 ssh_key.pem
 
       - name: SSH into EC2 and Deploy
         run: |
-          EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)    
+          EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
+
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << EOF
           #!/bin/bash
 
-      - name: SSH into EC2 and Deploy
-        run: |
-          EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
-
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
-          
           echo "🌐 Docker 네트워크 존재 여부 확인"
           if ! sudo docker network inspect spoony-network > /dev/null 2>&1; then
             sudo docker network create spoony-network
           fi
 
-          REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
-          REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
+          echo "🔍 Redis 컨테이너 상태 확인"
+          REDIS_EXISTS=\$(sudo docker ps -a -q -f name=^redis\$)
+          REDIS_RUNNING=\$(sudo docker ps -q -f name=^redis\$)
 
-          if [ -n "$REDIS_EXISTS" ]; then
-            if [ -n "$REDIS_RUNNING" ]; then
+          if [ -n "\$REDIS_EXISTS" ]; then
+            if [ -n "\$REDIS_RUNNING" ]; then
               sudo docker network connect spoony-network redis || true
             else
               sudo docker start redis
@@ -115,18 +111,15 @@ jobs:
           fi
 
           if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+            echo "🚀 dev 환경 배포 시작"
             sudo docker pull yh0872/sopt_collaboration:latest
             sudo docker rm -f sopt-collaboration-container || true
             sudo docker run -d -p 8080:8080 \
               --name sopt-collaboration-container \
               --network spoony-network \
               yh0872/sopt_collaboration
-
-            sudo docker image prune -af
-            sudo docker container prune -f
-            sudo docker volume prune -f
-
           else
+            echo "🚀 prod 환경 무중단 배포 시작"
             ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
             if [[ -z "\$ACTIVE_PORT" ]]; then ACTIVE_PORT="8081"; fi
             if [[ "\$ACTIVE_PORT" == "8081" ]]; then NEW_PORT="8082"; else NEW_PORT="8081"; fi
@@ -144,9 +137,10 @@ jobs:
 
             sudo docker stop spoony-dev-\$ACTIVE_PORT
             sudo docker rm spoony-dev-\$ACTIVE_PORT
-
-            sudo docker image prune -af
-            sudo docker container prune -f
-            sudo docker volume prune -f
           fi
+
+          echo "🧹 Docker 정리"
+          sudo docker image prune -af
+          sudo docker container prune -f
+          sudo docker volume prune -f
           EOF
