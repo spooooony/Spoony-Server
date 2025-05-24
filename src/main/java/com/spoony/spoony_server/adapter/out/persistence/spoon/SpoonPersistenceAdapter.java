@@ -154,4 +154,11 @@ public class SpoonPersistenceAdapter implements
                 .map(SpoonDrawMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public SpoonDraw findByUserIdAndDrawDate(Long userId, LocalDate today) {
+        return spoonDrawRepository.findByUser_UserIdAndDrawDate(userId, today)
+                .map(SpoonDrawMapper::toDomain)
+                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.SPOON_DRAW_NOT_FOUND));
+    }
 }

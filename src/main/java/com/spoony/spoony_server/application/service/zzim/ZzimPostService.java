@@ -20,8 +20,6 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,9 +121,6 @@ public class ZzimPostService implements
 //    }
 @Transactional
 public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand command) {
-    Logger logger = LoggerFactory.getLogger(getClass());
-    logger.info("getZzimCardList 호출됨");
-    logger.info("ZzimGetCardCommand: {}", command);
 
     // 1. DB에서 size 만큼만 조회 (size+1 하지 않음)
     List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
@@ -183,9 +178,6 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
     if (zzimCardResponses.size() == command.getSize()) {
         nextCursor = zzimCardResponses.get(zzimCardResponses.size() - 1).placeId();
     }
-
-    logger.info("필터링된 찜 카드 수: {}", zzimCardResponses.size());
-    logger.info("다음 커서(nextCursor): {}", nextCursor);
 
     return new ZzimCardListWithCursorResponseDTO(zzimCardResponses.size(), zzimCardResponses, nextCursor);
 }

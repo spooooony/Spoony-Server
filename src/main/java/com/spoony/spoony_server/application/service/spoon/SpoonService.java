@@ -54,7 +54,13 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
         // 중복 뽑기 확인
         boolean alreadyDrawn = spoonDrawPort.existsByUserIdAndDrawDate(command.getUserId(), today);
         if (alreadyDrawn) {
-            throw new BusinessException(SpoonErrorMessage.ALREADY_DRAWN);
+            SpoonDraw existingDraw = spoonDrawPort.findByUserIdAndDrawDate(command.getUserId(), today);
+            return new SpoonDrawResponseDTO(
+                    existingDraw.getDrawId(),
+                    existingDraw.getSpoonType(),
+                    existingDraw.getDrawDate(),
+                    existingDraw.getWeekStartDate(),
+                    existingDraw.getCreatedAt());
         }
 
         // 모든 스푼 타입 조회
