@@ -37,7 +37,6 @@ jobs:
           cat ./src/main/resources/application.yml
 
       - name: Generate environment-specific yml files
-        if: ${{ github.event.inputs.environment == 'prod' }}
         run: |
           echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
           echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
