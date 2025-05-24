@@ -101,13 +101,13 @@ jobs:
             echo "✅ 네트워크 spoony-network 이미 존재"
           fi
 
-          REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
-          REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
-          
-          if [ -n "$REDIS_EXISTS" ]; then
+          REDIS_EXISTS=\$(sudo docker ps -a -q -f name=^redis\$)
+          REDIS_RUNNING=\$(sudo docker ps -q -f name=^redis\$)
+
+          if [ -n "\$REDIS_EXISTS" ]; then
             echo "🔗 Redis 컨테이너가 존재합니다."
-          
-            if [ -n "$REDIS_RUNNING" ]; then
+
+            if [ -n "\$REDIS_RUNNING" ]; then
               echo "🔄 Redis 컨테이너 실행 중 → 네트워크 연결 시도"
               sudo docker network connect spoony-network redis || true
             else
@@ -129,7 +129,7 @@ jobs:
               --name spoony-dev-container \
               --network spoony-network \
               yh0872/spoony-dev
-          
+
           else
             echo "🚀 prod 환경 무중단 배포 시작"
             ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
@@ -138,40 +138,41 @@ jobs:
               echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8082)으로 설정합니다."
               ACTIVE_PORT="8082"
             fi
-  
+
             if [[ "\$ACTIVE_PORT" == "8081" ]]; then
               NEW_PORT="8082"
             else
               NEW_PORT="8081"
             fi
             echo "🔄 새로운 컨테이너를 \$NEW_PORT 포트에서 실행"
-  
+
             echo "🚀 최신 이미지 가져오기"
             sudo docker pull yh0872/spoony-prod:latest
-  
+
             echo "🔧 새로운 컨테이너 실행 (spoony-network 포함)"
             sudo docker run -d -p \$NEW_PORT:8080 \
               --name spoony-prod-\$NEW_PORT \
               --network spoony-network \
               yh0872/spoony-prod
-  
+
             echo "⌛️ 컨테이너 실행 대기 (30 sec)"
             sleep 30
-            
+
             echo "🛠 Nginx 설정 포트 교체"
             sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:\$NEW_PORT/" /etc/nginx/sites-available/default
-  
+
             echo "🔁 Nginx 설정 적용"
             sudo nginx -t && sudo nginx -s reload
-            
+
             echo "🗑️ 이전 컨테이너 제거"
             sudo docker stop spoony-prod-\$ACTIVE_PORT
             sudo docker rm spoony-prod-\$ACTIVE_PORT
-          
-          echo "🧹 Docker 시스템 정리"
-          sudo docker image prune -f
-          sudo docker container prune -f
-          sudo docker volume prune -f
 
-          echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-prod-\$NEW_PORT"
+            echo "🧹 Docker 시스템 정리"
+            sudo docker image prune -f
+            sudo docker container prune -f
+            sudo docker volume prune -f
+
+            echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-prod-\$NEW_PORT"
+          fi
           EOF
