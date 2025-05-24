@@ -117,6 +117,7 @@ jobs:
             fi
           else
             echo "🚀 Redis 컨테이너 없음 → 새로 생성 및 실행"
+            sudo docker rm -f redis || true
             sudo docker run -d --name redis --network spoony-network redis
           fi
 
