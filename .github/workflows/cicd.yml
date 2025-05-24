@@ -123,12 +123,20 @@ jobs:
 
           if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
             echo "🚀 dev 환경 배포 시작"
+            
+            echo "📥 최신 이미지 가져오기"
             sudo docker pull yh0872/spoony-dev:latest
+            
+            echo "🗑️ 이전 컨테이너 제거"
             sudo docker rm -f spoony-dev-container || true
+          
+            echo "🔧 새로운 컨테이너 실행"
             sudo docker run -d -p 8080:8080 \
               --name spoony-dev-container \
               --network spoony-network \
               yh0872/spoony-dev
+            
+            echo "✅ dev 서버 배포 완료."
 
           else
             echo "🚀 prod 환경 무중단 배포 시작"
@@ -146,10 +154,10 @@ jobs:
             fi
             echo "🔄 새로운 컨테이너를 \$NEW_PORT 포트에서 실행"
 
-            echo "🚀 최신 이미지 가져오기"
+            echo "📥 최신 이미지 가져오기"
             sudo docker pull yh0872/spoony-prod:latest
 
-            echo "🔧 새로운 컨테이너 실행 (spoony-network 포함)"
+            echo "🔧 새로운 컨테이너 실행"
             sudo docker run -d -p \$NEW_PORT:8080 \
               --name spoony-prod-\$NEW_PORT \
               --network spoony-network \
@@ -168,11 +176,14 @@ jobs:
             sudo docker stop spoony-prod-\$ACTIVE_PORT
             sudo docker rm spoony-prod-\$ACTIVE_PORT
 
-            echo "🧹 Docker 시스템 정리"
-            sudo docker image prune -f
-            sudo docker container prune -f
-            sudo docker volume prune -f
-
-            echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-prod-\$NEW_PORT"
+            echo "✅ prod 서버 배포 완료. 현재 활성 컨테이너: spoony-prod-\$NEW_PORT"
           fi
+          
+          echo "🧹 Docker 시스템 정리"
+          sudo docker image prune -f
+          sudo docker container prune -f
+          sudo docker volume prune -f
+          
+          echo "✅ 모든 배포 작업이 정상적으로 완료되었습니다."
+          
           EOF
