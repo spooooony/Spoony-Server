@@ -135,6 +135,12 @@ jobs:
               --name spoony-dev-container \
               --network spoony-network \
               yh0872/spoony-dev
+          
+            echo "🛠 Nginx 설정 포트 교체 (8080으로 고정)"
+            sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:8080/" /etc/nginx/sites-available/default
+            
+            echo "🔁 Nginx 설정 적용"
+            sudo nginx -t && sudo nginx -s reload
             
             echo "✅ dev 서버 배포 완료."
 
