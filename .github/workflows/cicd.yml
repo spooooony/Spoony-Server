@@ -34,15 +34,14 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.CD_APPLICATION }}" > ./src/main/resources/application.yml
+          cat ./src/main/resources/application.yml
 
-      - name: Generate application-aws.yml
-        run: echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
-
-      - name: Generate application-naver.yml
-        run: echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
-
-      - name: Generate application-oath.yml
-        run: echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
+      - name: Generate environment-specific yml files
+        if: ${{ github.event.inputs.environment == 'prod' }}
+        run: |
+          echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
+          echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
+          echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
 
       - name: Build Project
         run: ./gradlew clean build -x test
@@ -51,10 +50,20 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t yh0872/spoony-dev:latest .
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+            docker build -t yh0872/sopt_collaboration .
+          else
+            docker build -t yh0872/spoony-dev:latest .
+          fi
 
       - name: Publish Image to Docker Hub
-        run: docker push yh0872/spoony-dev:latest
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+            docker push yh0872/sopt_collaboration:latest
+          else
+            docker push yh0872/spoony-dev:latest
+          fi
 
   deploy:
     needs: build
@@ -66,8 +75,8 @@ jobs:
       - name: Create SSH Key File
         run: |
           if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-            echo "${{ secrets.DEV_EC2_SSH_KEY }}" > ssh_key.pem
-            echo "${{ secrets.DEV_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
+            echo "${{ secrets.EC2_SSH_KEY }}" > ssh_key.pem
+            echo "${{ secrets.EC2_PUBLIC_IP }}" > ec2_public_ip.txt
           else
             echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ssh_key.pem
             echo "${{ secrets.PROD_EC2_PUBLIC_IP }}" > ec2_public_ip.txt
@@ -78,11 +87,8 @@ jobs:
         run: |
           EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
 
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << EOF
-          #!/bin/bash
-          
-          echo "🔍 현재 실행 중인 포트 확인"
-          ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
+          sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
           echo "🌐 Docker 네트워크 존재 여부 확인"
           if ! sudo docker network inspect spoony-network > /dev/null 2>&1; then
@@ -94,15 +100,14 @@ jobs:
 
           REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
           REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
-          
+
           if [ -n "$REDIS_EXISTS" ]; then
             echo "🔗 Redis 컨테이너가 존재합니다."
-        
             if [ -n "$REDIS_RUNNING" ]; then
               echo "🔄 Redis 컨테이너 실행 중 → 네트워크 연결 시도"
               sudo docker network connect spoony-network redis || true
             else
-              echo "⏯ Redis 컨테이너가 정지 상태 → 시작 및 네트워크 연결"
+              echo "⏯ Redis 컨테이너 정지 상태 → 시작 및 네트워크 연결"
               sudo docker start redis
               sudo docker network connect spoony-network redis || true
             fi
@@ -111,44 +116,46 @@ jobs:
             sudo docker run -d --name redis --network spoony-network redis
           fi
 
-          if [[ -z "\$ACTIVE_PORT" ]]; then
-            echo "⚠️ 현재 실행 중인 포트를 찾을 수 없습니다. 기본값(8081)으로 설정합니다."
-            ACTIVE_PORT="8081"
-          fi
-
-          if [[ "\$ACTIVE_PORT" == "8081" ]]; then
-            NEW_PORT="8082"
+          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+            echo "🚀 dev 환경 배포 시작"
+            sudo docker pull yh0872/sopt_collaboration:latest
+            sudo docker rm -f sopt-collaboration-container || true
+            sudo docker run -d -p 8080:8080 \
+              --name sopt-collaboration-container \
+              --network spoony-network \
+              yh0872/sopt_collaboration
           else
-            NEW_PORT="8081"
+            echo "🚀 prod 환경 무중단 배포 시작"
+
+            ACTIVE_PORT=$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
+
+            if [[ -z "$ACTIVE_PORT" ]]; then
+              ACTIVE_PORT="8081"
+            fi
+
+            if [[ "$ACTIVE_PORT" == "8081" ]]; then
+              NEW_PORT="8082"
+            else
+              NEW_PORT="8081"
+            fi
+
+            sudo docker pull yh0872/spoony-dev:latest
+
+            sudo docker run -d -p $NEW_PORT:8080 \
+              --name spoony-dev-$NEW_PORT \
+              --network spoony-network \
+              yh0872/spoony-dev:latest
+
+            sleep 30
+
+            sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:$NEW_PORT/" /etc/nginx/sites-available/default
+            sudo nginx -t && sudo nginx -s reload
+
+            sudo docker stop spoony-dev-$ACTIVE_PORT
+            sudo docker rm spoony-dev-$ACTIVE_PORT
+
+            sudo docker image prune -f
+            sudo docker container prune -f
+            sudo docker volume prune -f
           fi
-          echo "🔄 새로운 컨테이너를 \$NEW_PORT 포트에서 실행"
-
-          echo "🚀 최신 이미지 가져오기"
-          sudo docker pull yh0872/spoony-dev:latest
-
-          echo "🔧 새로운 컨테이너 실행 (spoony-network 포함)"
-          sudo docker run -d -p \$NEW_PORT:8080 \
-            --name spoony-dev-\$NEW_PORT \
-            --network spoony-network \
-            yh0872/spoony-dev
-
-          echo "⌛️ 컨테이너 실행 대기 (30 sec)"
-          sleep 30
-          
-          echo "🛠 Nginx 설정 포트 교체"
-          sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:\$NEW_PORT/" /etc/nginx/sites-available/default
-
-          echo "🔁 Nginx 설정 적용"
-          sudo nginx -t && sudo nginx -s reload
-          
-          echo "🗑️ 이전 컨테이너 제거"
-          sudo docker stop spoony-dev-\$ACTIVE_PORT
-          sudo docker rm spoony-dev-\$ACTIVE_PORT
-          
-          echo "🧹 Docker 시스템 정리"
-          sudo docker image prune -f
-          sudo docker container prune -f
-          sudo docker volume prune -f
-
-          echo "✅ 배포 완료. 현재 활성 컨테이너: spoony-dev-\$NEW_PORT"
           EOF
