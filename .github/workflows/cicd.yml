@@ -88,73 +88,58 @@ jobs:
           EC2_PUBLIC_IP=$(cat ec2_public_ip.txt)
 
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
-          sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
+          
           echo "🌐 Docker 네트워크 존재 여부 확인"
           if ! sudo docker network inspect spoony-network > /dev/null 2>&1; then
-            echo "➕ 네트워크 spoony-network 생성"
             sudo docker network create spoony-network
-          else
-            echo "✅ 네트워크 spoony-network 이미 존재"
           fi
 
           REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
           REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
 
           if [ -n "$REDIS_EXISTS" ]; then
-            echo "🔗 Redis 컨테이너가 존재합니다."
             if [ -n "$REDIS_RUNNING" ]; then
-              echo "🔄 Redis 컨테이너 실행 중 → 네트워크 연결 시도"
               sudo docker network connect spoony-network redis || true
             else
-              echo "⏯ Redis 컨테이너 정지 상태 → 시작 및 네트워크 연결"
               sudo docker start redis
               sudo docker network connect spoony-network redis || true
             fi
           else
-            echo "🚀 Redis 컨테이너 없음 → 새로 생성 및 실행"
             sudo docker run -d --name redis --network spoony-network redis
           fi
 
           if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-            echo "🚀 dev 환경 배포 시작"
             sudo docker pull yh0872/sopt_collaboration:latest
             sudo docker rm -f sopt-collaboration-container || true
             sudo docker run -d -p 8080:8080 \
               --name sopt-collaboration-container \
               --network spoony-network \
               yh0872/sopt_collaboration
+
+            sudo docker image prune -af
+            sudo docker container prune -f
+            sudo docker volume prune -f
+
           else
-            echo "🚀 prod 환경 무중단 배포 시작"
-
-            ACTIVE_PORT=$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
-
-            if [[ -z "$ACTIVE_PORT" ]]; then
-              ACTIVE_PORT="8081"
-            fi
-
-            if [[ "$ACTIVE_PORT" == "8081" ]]; then
-              NEW_PORT="8082"
-            else
-              NEW_PORT="8081"
-            fi
+            ACTIVE_PORT=\$(sudo docker ps --format "{{.Ports}}" | grep -oE '0.0.0.0:808[12]' | cut -d':' -f2 | cut -d'-' -f1)
+            if [[ -z "\$ACTIVE_PORT" ]]; then ACTIVE_PORT="8081"; fi
+            if [[ "\$ACTIVE_PORT" == "8081" ]]; then NEW_PORT="8082"; else NEW_PORT="8081"; fi
 
             sudo docker pull yh0872/spoony-dev:latest
-
-            sudo docker run -d -p $NEW_PORT:8080 \
-              --name spoony-dev-$NEW_PORT \
+            sudo docker run -d -p \$NEW_PORT:8080 \
+              --name spoony-dev-\$NEW_PORT \
               --network spoony-network \
               yh0872/spoony-dev:latest
 
             sleep 30
 
-            sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:$NEW_PORT/" /etc/nginx/sites-available/default
+            sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:\$NEW_PORT/" /etc/nginx/sites-available/default
             sudo nginx -t && sudo nginx -s reload
 
-            sudo docker stop spoony-dev-$ACTIVE_PORT
-            sudo docker rm spoony-dev-$ACTIVE_PORT
+            sudo docker stop spoony-dev-\$ACTIVE_PORT
+            sudo docker rm spoony-dev-\$ACTIVE_PORT
 
-            sudo docker image prune -f
+            sudo docker image prune -af
             sudo docker container prune -f
             sudo docker volume prune -f
           fi
