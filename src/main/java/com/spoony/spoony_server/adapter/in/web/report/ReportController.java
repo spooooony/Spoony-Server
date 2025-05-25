@@ -1,13 +1,13 @@
 package com.spoony.spoony_server.adapter.in.web.report;
 
-import com.spoony.spoony_server.adapter.dto.report.ReportUserRequestDTO;
+import com.spoony.spoony_server.adapter.dto.report.request.ReportUserRequestDTO;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.report.ReportRequestDTO;
+import com.spoony.spoony_server.adapter.dto.report.request.ReportRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

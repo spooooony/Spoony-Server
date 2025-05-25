@@ -6,9 +6,9 @@ import com.spoony.spoony_server.application.port.in.place.PlaceDuplicateCheckUse
 import com.spoony.spoony_server.application.port.in.place.PlaceSearchUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.place.PlaceCheckRequestDTO;
-import com.spoony.spoony_server.adapter.dto.place.PlaceCheckResponseDTO;
-import com.spoony.spoony_server.adapter.dto.place.PlaceListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.place.request.PlaceCheckRequestDTO;
+import com.spoony.spoony_server.adapter.dto.place.response.PlaceCheckResponseDTO;
+import com.spoony.spoony_server.adapter.dto.place.response.PlaceListResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,7 +44,7 @@ public class PlaceController {
                 placeCheckRequestDTO.longitude()
         );
         boolean isDuplicate = placeDuplicateCheckUseCase.isDuplicate(command);
-        PlaceCheckResponseDTO placeCheckResponseDTO = new PlaceCheckResponseDTO(isDuplicate);
+        PlaceCheckResponseDTO placeCheckResponseDTO = PlaceCheckResponseDTO.of(isDuplicate);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(placeCheckResponseDTO));
     }
 }

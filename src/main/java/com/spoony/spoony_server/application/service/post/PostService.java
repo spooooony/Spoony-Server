@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.application.service.post;
 
-import com.spoony.spoony_server.adapter.dto.post.*;
+import com.spoony.spoony_server.adapter.dto.post.response.*;
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
@@ -31,7 +31,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,7 +88,7 @@ public class PostService implements
                 .map(Menu::getMenuName)
                 .toList();
 
-        return new PostResponseDTO(command.getPostId(),
+        return PostResponseDTO.of(command.getPostId(),
                 post.getUser().getUserId(),
                 photoUrlList,
                 latestDate,
@@ -105,7 +104,7 @@ public class PostService implements
                 isMine,
                 isZzim,
                 isScoop,
-                new CategoryColorResponseDTO(
+                CategoryColorResponseDTO.of(
                         category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlColor(),
@@ -149,13 +148,13 @@ public class PostService implements
 
                     String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
 
-                    return new FeedResponseDTO(
+                    return FeedResponseDTO.of(
                             author.getUserId(),
                             author.getUserName(),
                             regionName,
                             post.getPostId(),
                             post.getDescription(),
-                            new CategoryColorResponseDTO(category.getCategoryId(),
+                            CategoryColorResponseDTO.of(category.getCategoryId(),
                                     category.getCategoryName(),
                                     category.getIconUrlColor(),
                                     category.getTextColor(),
@@ -169,16 +168,17 @@ public class PostService implements
                     );
                 })
                 .collect(Collectors.toList());
-        return new FeedListResponseDTO(feedResponseList);
+        return FeedListResponseDTO.of(feedResponseList);
     }
 
     @Override
     public ReviewAmountResponseDTO getPostAmountByUserId(UserGetCommand command) {
         Long userId = command.getUserId();
         Long reviewCount = postPort.countPostsByUserId(userId);
-        return new ReviewAmountResponseDTO(reviewCount);
+        return ReviewAmountResponseDTO.of(reviewCount);
 
     }
+
     @Override
     public PostSearchResultListDTO searchReviewsByQuery(UserGetCommand userGetCommand,PostSearchCommand postSearchCommand){
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userGetCommand.getUserId());
@@ -205,13 +205,13 @@ public class PostService implements
                     LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())
                             ? post.getUpdatedAt() : post.getCreatedAt();
 
-                    return new FeedResponseDTO(
+                    return FeedResponseDTO.of(
                             post.getUser().getUserId(),
                             post.getUser().getUserName(),
                             regionName,
                             post.getPostId(),
                             post.getDescription(),
-                            new CategoryColorResponseDTO(
+                            CategoryColorResponseDTO.of(
                                     category.getCategoryId(),
                                     category.getCategoryName(),
                                     category.getIconUrlColor(),
@@ -226,13 +226,7 @@ public class PostService implements
                 })
                 .toList();
 
-        return new PostSearchResultListDTO(postSearchResultList);
-    }
-
-
-    @Override
-    public PostSearchHistoryResponseDTO getReviewSearchHistory(UserGetCommand command) {
-        return null;
+        return PostSearchResultListDTO.of(postSearchResultList);
     }
 
     public List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException {
@@ -306,28 +300,28 @@ public class PostService implements
     @Transactional
     public CategoryMonoListResponseDTO getAllCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryPort.findAllCategories().stream()
-                .map(category -> new CategoryMonoResponseDTO(
+                .map(category -> CategoryMonoResponseDTO.of(
                         category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
                 .toList();
 
-        return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
+        return CategoryMonoListResponseDTO.of(categoryMonoResponseDTOList);
     }
 
     // 음식 카테고리 조회
     @Transactional
     public CategoryMonoListResponseDTO getFoodCategories() {
         List<CategoryMonoResponseDTO> categoryMonoResponseDTOList = categoryPort.findFoodCategories().stream()
-                .map(category -> new CategoryMonoResponseDTO(
+                .map(category -> CategoryMonoResponseDTO.of(
                         category.getCategoryId(),
                         category.getCategoryName(),
                         category.getIconUrlBlack(),
                         category.getIconUrlWhite()))
                 .toList();
 
-        return new CategoryMonoListResponseDTO(categoryMonoResponseDTOList);
+        return CategoryMonoListResponseDTO.of(categoryMonoResponseDTOList);
     }
 
     @Transactional

@@ -1,14 +1,17 @@
 package com.spoony.spoony_server.adapter.in.web.post;
 
-import com.spoony.spoony_server.adapter.dto.post.*;
+import com.spoony.spoony_server.adapter.dto.post.request.PostCreateRequestDTO;
+import com.spoony.spoony_server.adapter.dto.post.request.PostUpdateRequestDTO;
+import com.spoony.spoony_server.adapter.dto.post.response.CategoryMonoListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.response.PostResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.response.PostSearchResultListDTO;
 import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
-import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.spoon.ScoopPostRequestDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.request.ScoopPostRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;

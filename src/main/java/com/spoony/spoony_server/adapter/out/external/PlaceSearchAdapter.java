@@ -2,8 +2,8 @@ package com.spoony.spoony_server.adapter.out.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spoony.spoony_server.adapter.dto.place.PlaceListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.place.PlaceResponseDTO;
+import com.spoony.spoony_server.adapter.dto.place.response.PlaceListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.place.response.PlaceResponseDTO;
 import com.spoony.spoony_server.application.port.out.place.PlaceSearchPort;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -44,10 +44,10 @@ public class PlaceSearchAdapter implements PlaceSearchPort {
 
                 if (!address.contains("서울")) return;
 
-                places.add(new PlaceResponseDTO(title, address, roadAddress, mapy / 10000000, mapx / 10000000));
+                places.add(PlaceResponseDTO.of(title, address, roadAddress, mapy / 10000000, mapx / 10000000));
             });
 
-            return new PlaceListResponseDTO(places);
+            return PlaceListResponseDTO.of(places);
 
         } catch (Exception e) {
             throw new BusinessException(PlaceErrorMessage.JSON_PARSE_ERROR);

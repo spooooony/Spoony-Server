@@ -1,13 +1,13 @@
 package com.spoony.spoony_server.adapter.in.web.feed;
 
-import com.spoony.spoony_server.adapter.dto.post.FilteredFeedResponseListDTO;
+import com.spoony.spoony_server.adapter.dto.post.response.FilteredFeedResponseListDTO;
 import com.spoony.spoony_server.application.port.command.feed.FeedFilterCommand;
 import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.response.FeedListResponseDTO;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor

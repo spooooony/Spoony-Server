@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.application.service.zzim;
 
-import com.spoony.spoony_server.adapter.dto.zzim.*;
+import com.spoony.spoony_server.adapter.dto.zzim.response.*;
 import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
@@ -18,7 +18,7 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.domain.zzim.ZzimPost;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
-import com.spoony.spoony_server.adapter.dto.post.CategoryColorResponseDTO;
+import com.spoony.spoony_server.adapter.dto.post.response.CategoryColorResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,7 +86,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                 Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
                 PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
-                CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
+                CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                         postCategory.getCategory().getCategoryId(),
                         postCategory.getCategory().getCategoryName(),
                         postCategory.getCategory().getIconUrlColor(),
@@ -94,7 +94,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                         postCategory.getCategory().getBackgroundColor()
                 );
 
-                return new ZzimCardResponseDTO(
+                return ZzimCardResponseDTO.of(
                         place.getPlaceId(),
                         place.getPlaceName(),
                         place.getPlaceAddress(),
@@ -112,7 +112,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
         nextCursor = zzimCardResponses.get(zzimCardResponses.size() - 1).placeId();
     }
 
-    return new ZzimCardListWithCursorResponseDTO(zzimCardResponses.size(), zzimCardResponses, nextCursor);
+    return ZzimCardListWithCursorResponseDTO.of(zzimCardResponses.size(), zzimCardResponses, nextCursor);
 }
 
 
@@ -137,7 +137,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
-                    CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
+                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                             postCategory.getCategory().getCategoryId(),
                             postCategory.getCategory().getCategoryName(),
                             postCategory.getCategory().getIconUrlColor(),
@@ -153,7 +153,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
                     String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
 
-                    return new ZzimFocusResponseDTO(
+                    return ZzimFocusResponseDTO.of(
                             postPlace.getPlaceId(),
                             postPlace.getPlaceName(),
                             categoryColorResponse,
@@ -167,7 +167,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimFocusListResponseDTO(zzimFocusResponseList);
+        return ZzimFocusListResponseDTO.of(zzimFocusResponseList);
     }
 
     @Transactional
@@ -221,14 +221,14 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
-                    CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
+                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                             postCategory.getCategory().getCategoryId(),
                             postCategory.getCategory().getCategoryName(),
                             postCategory.getCategory().getIconUrlColor(),
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
 
-                    return new ZzimCardResponseDTO(
+                    return ZzimCardResponseDTO.of(
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
@@ -240,7 +240,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
+        return ZzimCardListResponseDTO.of(zzimCardResponses.size(), zzimCardResponses);
     }
 
     private ZzimCardListResponseDTO getZzimByAreaDong(Long userId, Double longitude, Double latitude) {
@@ -276,14 +276,14 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
-                    CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
+                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                             postCategory.getCategory().getCategoryId(),
                             postCategory.getCategory().getCategoryName(),
                             postCategory.getCategory().getIconUrlColor(),
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
 
-                    return new ZzimCardResponseDTO(
+                    return ZzimCardResponseDTO.of(
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
@@ -295,7 +295,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
+        return ZzimCardListResponseDTO.of(zzimCardResponses.size(), zzimCardResponses);
     }
 
     private ZzimCardListResponseDTO getZzimByAreaStation(Long userId, Double longitude, Double latitude) {
@@ -333,14 +333,14 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
-                    CategoryColorResponseDTO categoryColorResponse = new CategoryColorResponseDTO(
+                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                             postCategory.getCategory().getCategoryId(),
                             postCategory.getCategory().getCategoryName(),
                             postCategory.getCategory().getIconUrlColor(),
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
 
-                    return new ZzimCardResponseDTO(
+                    return ZzimCardResponseDTO.of(
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
                             place.getPlaceAddress(),
@@ -352,7 +352,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                 })
                 .collect(Collectors.toList());
 
-        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
+        return ZzimCardListResponseDTO.of(zzimCardResponses.size(), zzimCardResponses);
     }
 
     // 두 좌표 간의 거리를 계산하는 메서드 (단위: km)

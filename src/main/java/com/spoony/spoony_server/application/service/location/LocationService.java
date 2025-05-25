@@ -2,8 +2,8 @@ package com.spoony.spoony_server.application.service.location;
 
 import com.spoony.spoony_server.application.port.command.location.LocationSearchCommand;
 import com.spoony.spoony_server.application.port.in.location.LocationSearchUseCase;
-import com.spoony.spoony_server.adapter.dto.location.LocationResponseDTO;
-import com.spoony.spoony_server.adapter.dto.location.LocationResponseListDTO;
+import com.spoony.spoony_server.adapter.dto.location.response.LocationResponseDTO;
+import com.spoony.spoony_server.adapter.dto.location.response.LocationResponseListDTO;
 import com.spoony.spoony_server.adapter.dto.location.LocationTypeDTO;
 import com.spoony.spoony_server.application.port.out.location.LocationPort;
 import com.spoony.spoony_server.domain.location.Location;
@@ -24,11 +24,11 @@ public class LocationService implements
         List<Location> locationList = locationPort.findByLocationNameContaining(command.getQuery());
 
         List<LocationResponseDTO> locationResponseList = locationList.stream()
-                .map(location -> new LocationResponseDTO(
+                .map(location -> LocationResponseDTO.of(
                         location.getLocationId(),
                         location.getLocationName(),
                         location.getLocationAddress(),
-                        new LocationTypeDTO(
+                        LocationTypeDTO.of(
                                 location.getLocationType().getLocationTypeId(),
                                 location.getLocationType().getLocationTypeName(),
                                 location.getLocationType().getScope()
@@ -38,6 +38,6 @@ public class LocationService implements
                 ))
                 .toList();
 
-        return new LocationResponseListDTO(locationResponseList);
+        return LocationResponseListDTO.of(locationResponseList);
     }
 }

@@ -6,7 +6,7 @@ import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.application.port.out.place.PlaceSearchPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.domain.post.Post;
-import com.spoony.spoony_server.adapter.dto.place.PlaceListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.place.response.PlaceListResponseDTO;
 import lombok.RequiredArgsConstructor;
 import com.spoony.spoony_server.application.port.in.place.PlaceDuplicateCheckUseCase;
 import com.spoony.spoony_server.application.port.in.place.PlaceSearchUseCase;

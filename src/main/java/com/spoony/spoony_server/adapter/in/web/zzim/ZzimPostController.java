@@ -1,22 +1,20 @@
 package com.spoony.spoony_server.adapter.in.web.zzim;
 
-import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListWithCursorResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.response.ZzimCardListWithCursorResponseDTO;
 import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.zzim.ZzimPostAddRequestDTO;
-import com.spoony.spoony_server.adapter.dto.zzim.ZzimCardListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.zzim.ZzimFocusListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.request.ZzimPostAddRequestDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.response.ZzimCardListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.zzim.response.ZzimFocusListResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

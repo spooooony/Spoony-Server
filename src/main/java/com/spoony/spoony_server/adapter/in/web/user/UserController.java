@@ -1,7 +1,10 @@
 package com.spoony.spoony_server.adapter.in.web.user;
 
-import com.spoony.spoony_server.adapter.dto.post.FeedListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.adapter.dto.post.response.FeedListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.request.UserBlockRequestDTO;
+import com.spoony.spoony_server.adapter.dto.user.request.UserFollowRequestDTO;
+import com.spoony.spoony_server.adapter.dto.user.request.UserProfileUpdateRequestDTO;
+import com.spoony.spoony_server.adapter.dto.user.response.*;
 import com.spoony.spoony_server.application.port.command.user.BlockCheckCommand;
 import com.spoony.spoony_server.application.port.command.user.BlockUserCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
@@ -256,21 +259,21 @@ public class UserController {
 
     @GetMapping("/search")
     @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색하는 API")
-    public ResponseEntity<ResponseDTO<UserSearchResultListDTO>> searchLocations(
+    public ResponseEntity<ResponseDTO<UserSearchResponseListDTO>> searchLocations(
                 @UserId Long userId,
                 @RequestParam String query) {
 
         UserGetCommand command = new UserGetCommand(userId);
         UserSearchCommand searchCommand = new UserSearchCommand(query);
-        UserSearchResultListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command, searchCommand);
+        UserSearchResponseListDTO userSearchList = userSearchUseCase.searchUsersByQuery(command, searchCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userSearchList));
     }
 
     @GetMapping("/region")
     @Operation(summary = "유저 활동 지역 리스트 API", description = "모든 유저 활동 지역 종류를 반환하는 API (?? 수저)")
-    public ResponseEntity<ResponseDTO<RegionListDTO>> getRegion() {
-        RegionListDTO regionListDTO = regionGetUseCase.getRegionList();
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(regionListDTO));
+    public ResponseEntity<ResponseDTO<RegionListResponseDTO>> getRegion() {
+        RegionListResponseDTO regionListResponseDTO = regionGetUseCase.getRegionList();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(regionListResponseDTO));
     }
 
 

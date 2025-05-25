@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.application.service.feed;
 
 
-import com.spoony.spoony_server.adapter.dto.post.*;
+import com.spoony.spoony_server.adapter.dto.post.response.*;
 import com.spoony.spoony_server.application.port.command.feed.FeedFilterCommand;
 import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
 import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
@@ -78,13 +78,13 @@ public class FeedService implements FeedGetUseCase {
 
                     String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
 
-                    return new FeedResponseDTO(
+                    return FeedResponseDTO.of(
                             author.getUserId(),
                             author.getUserName(),
                             regionName,
                             post.getPostId(),
                             post.getDescription(),
-                            new CategoryColorResponseDTO(
+                            CategoryColorResponseDTO.of(
                                     category.getCategoryId(),
                                     category.getCategoryName(),
                                     category.getIconUrlColor(),
@@ -98,7 +98,7 @@ public class FeedService implements FeedGetUseCase {
 
                     );
                 }).sorted((dto1, dto2) -> dto2.createdAt().compareTo(dto1.createdAt())).toList();
-        return new FeedListResponseDTO(feedResponseList);
+        return FeedListResponseDTO.of(feedResponseList);
     }
 
 
@@ -175,14 +175,14 @@ public class FeedService implements FeedGetUseCase {
 
                     String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
 
-                    return new FilteredFeedResponseDTO(
+                    return FilteredFeedResponseDTO.of(
                             author.getUserId(),
                             author.getUserName(),
                             regionName,
                             post.getPostId(),
                             post.getDescription(),
                             mainCategory != null ?
-                                    new CategoryColorResponseDTO(
+                                    CategoryColorResponseDTO.of(
                                             mainCategory.getCategoryId(),
                                             mainCategory.getCategoryName(),
                                             mainCategory.getIconUrlColor(),
@@ -205,7 +205,7 @@ public class FeedService implements FeedGetUseCase {
                 filteredPosts.get(filteredPosts.size() - 1).getPostId();
 
         logger.info("다음 커서(nextCursor): {}", nextCursor);
-        return new FilteredFeedResponseListDTO(feedResponseList,nextCursor);
+        return FilteredFeedResponseListDTO.of(feedResponseList,nextCursor);
     }
 
 

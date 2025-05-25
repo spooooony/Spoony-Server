@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.application.service.user;
 
-import com.spoony.spoony_server.adapter.dto.post.RegionDTO;
-import com.spoony.spoony_server.adapter.dto.user.*;
+import com.spoony.spoony_server.adapter.dto.post.response.RegionDTO;
+import com.spoony.spoony_server.adapter.dto.user.response.*;
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
@@ -62,7 +62,7 @@ public class UserService implements
 
         String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
 
-        return UserResponseDTO.from(
+        return UserResponseDTO.of(
                 user.getUserId(),
                 user.getPlatform(),
                 user.getPlatformId(),
@@ -85,13 +85,12 @@ public class UserService implements
 
         String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
 
-        return new UserProfileUpdateResponseDTO(
+        return UserProfileUpdateResponseDTO.of(
                 user.getUserName(),
                 regionName,
                 user.getIntroduction(),
                 user.getBirth(),
                 user.getImageLevel()
-
         );
     }
 
@@ -111,11 +110,6 @@ public class UserService implements
     }
 
     @Override
-    public UserSearchHistoryResponseDTO getUserSearchHistory(UserGetCommand command) {
-        return null;
-    }
-
-    @Override
     public FollowListResponseDTO getFollowers(UserGetCommand command) {
         List<Follow> followers = userPort.findFollowersByUserId(command.getUserId());
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
@@ -132,7 +126,7 @@ public class UserService implements
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
                     String regionName = followerUser.getRegion() != null ? followerUser.getRegion().getRegionName() : null;
 
-                    return UserSimpleResponseDTO.from(
+                    return UserSimpleResponseDTO.of(
                             followerUser.getUserId(),
                             followerUser.getUserName(),
                             regionName,
@@ -141,7 +135,7 @@ public class UserService implements
                     );
                 })
                 .toList();
-        return new FollowListResponseDTO(userDTOList.size(), userDTOList);
+        return FollowListResponseDTO.of(userDTOList.size(), userDTOList);
     }
 
     @Override
@@ -161,7 +155,7 @@ public class UserService implements
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
                     String regionName = followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
 
-                    return UserSimpleResponseDTO.from(
+                    return UserSimpleResponseDTO.of(
                             followingUser.getUserId(),
                             followingUser.getUserName(),
                             regionName,
@@ -170,7 +164,7 @@ public class UserService implements
                     );
                 })
                 .toList();
-        return new FollowListResponseDTO(userDTOList.size(), userDTOList);
+        return FollowListResponseDTO.of(userDTOList.size(), userDTOList);
     }
 
     @Override
@@ -184,7 +178,7 @@ public class UserService implements
 
             String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
 
-            return UserSimpleResponseDTO.from(
+            return UserSimpleResponseDTO.of(
                     blockedUser.getUserId(),
                     blockedUser.getUserName(),
                     regionName,
@@ -192,7 +186,7 @@ public class UserService implements
                     blockedUser.getImageLevel().intValue()
             );
         }).toList();
-            return new BlockListResponseDTO(userDTOList);
+            return BlockListResponseDTO.of(userDTOList);
     }
 
     @Override
@@ -247,7 +241,7 @@ public class UserService implements
     }
 
     @Override
-    public UserSearchResultListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
+    public UserSearchResponseListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
 
 
         //차단 테이블에 있으면서 + status가 blocked나 reported인 유저
@@ -256,14 +250,14 @@ public class UserService implements
 
         List<User> userList = userPort.findByUserNameContaining(searchCommand.getQuery());
 
-        List<UserSearchResultDTO> userSearchResultList = userList.stream()
+        List<UserSearchResponseDTO> userSearchResultList = userList.stream()
                 .filter(user -> !blockedUserIds.contains(user.getUserId())&& !blockerUserIds.contains(user.getUserId())) // 차단된 사용자 제외
                 .map(user -> {
 
                     String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
 
                     // UserSearchResultDTO를 반환
-                    return UserSearchResultDTO.from(
+                    return UserSearchResponseDTO.of(
                             user.getUserId(),
                             user.getUserName(),
                             regionName,
@@ -273,17 +267,17 @@ public class UserService implements
                 .collect(Collectors.toList()); // 리스트로 수집
 
         // UserSearchResultListDTO로 반환
-        return new UserSearchResultListDTO(userSearchResultList);
+        return UserSearchResponseListDTO.of(userSearchResultList);
     }
 
     @Transactional
     @Override
-    public RegionListDTO getRegionList() {
+    public RegionListResponseDTO getRegionList() {
         List<RegionDTO> regionList = userPort.findAllRegions().stream()
-                .map(region -> new RegionDTO(region.getRegionId(), region.getRegionName()))
+                .map(region -> RegionDTO.of(region.getRegionId(), region.getRegionName()))
                 .toList();
 
-        return new RegionListDTO(regionList);
+        return new RegionListResponseDTO(regionList);
     }
 
     @Override

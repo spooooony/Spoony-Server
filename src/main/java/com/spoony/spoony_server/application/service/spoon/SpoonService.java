@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.application.service.spoon;
 
-import com.spoony.spoony_server.adapter.dto.spoon.SpoonDrawResponseDTO;
-import com.spoony.spoony_server.adapter.dto.spoon.SpoonDrawListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.response.SpoonDrawResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.response.SpoonDrawListResponseDTO;
 import com.spoony.spoony_server.application.port.command.spoon.SpoonDrawCommand;
 import com.spoony.spoony_server.application.port.command.spoon.SpoonGetCommand;
 import com.spoony.spoony_server.application.port.in.spoon.SpoonDrawUseCase;
@@ -12,7 +12,7 @@ import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonTypePort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.spoon.SpoonBalance;
-import com.spoony.spoony_server.adapter.dto.spoon.SpoonResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.response.SpoonResponseDTO;
 
 import com.spoony.spoony_server.domain.spoon.SpoonDraw;
 import com.spoony.spoony_server.domain.spoon.SpoonType;
@@ -25,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -43,7 +41,7 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
     @Transactional
     public SpoonResponseDTO getAmountById(SpoonGetCommand command){
         SpoonBalance spoonBalance = spoonBalancePort.findBalanceByUserId(command.getUserId());
-        return new SpoonResponseDTO(spoonBalance.getAmount());
+        return SpoonResponseDTO.of(spoonBalance.getAmount());
     }
 
     @Transactional
@@ -55,7 +53,7 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
         boolean alreadyDrawn = spoonDrawPort.existsByUserIdAndDrawDate(command.getUserId(), today);
         if (alreadyDrawn) {
             SpoonDraw existingDraw = spoonDrawPort.findByUserIdAndDrawDate(command.getUserId(), today);
-            return new SpoonDrawResponseDTO(
+            return SpoonDrawResponseDTO.of(
                     existingDraw.getDrawId(),
                     existingDraw.getSpoonType(),
                     existingDraw.getDrawDate(),
@@ -96,7 +94,7 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
         spoonPort.updateSpoonBalance(user, amount);
         spoonPort.updateSpoonHistory(user, amount);
 
-        return new SpoonDrawResponseDTO(
+        return SpoonDrawResponseDTO.of(
                 spoonDraw.getDrawId(),
                 spoonDraw.getSpoonType(),
                 spoonDraw.getDrawDate(),
@@ -114,7 +112,7 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
         List<SpoonDrawResponseDTO> spoonDrawResponseDTOList = spoonDrawList.stream()
                 .map(spoonDraw -> {
                     weeklyBalance.addAndGet(spoonDraw.getSpoonType().getSpoonAmount());
-                    return new SpoonDrawResponseDTO(
+                    return SpoonDrawResponseDTO.of(
                             spoonDraw.getDrawId(),
                             spoonDraw.getSpoonType(),
                             spoonDraw.getDrawDate(),
@@ -127,6 +125,6 @@ public class SpoonService implements SpoonGetUseCase, SpoonDrawUseCase {
         SpoonBalance spoonBalance = spoonBalancePort.findBalanceByUserId(command.getUserId());
         Long weeklyBalanceValue = weeklyBalance.get();
 
-        return new SpoonDrawListResponseDTO(spoonDrawResponseDTOList, spoonBalance.getAmount(), weeklyBalanceValue);
+        return SpoonDrawListResponseDTO.of(spoonDrawResponseDTOList, spoonBalance.getAmount(), weeklyBalanceValue);
     }
 }

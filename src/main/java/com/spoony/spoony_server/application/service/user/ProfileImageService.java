@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.application.service.user;
 
-import com.spoony.spoony_server.adapter.dto.user.ProfileImageListResponseDTO;
-import com.spoony.spoony_server.adapter.dto.user.ProfileImageResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.response.ProfileImageListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.user.response.ProfileImageResponseDTO;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.user.ProfileImageGetUseCase;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
@@ -43,7 +43,7 @@ public class ProfileImageService implements ProfileImageGetUseCase {
                 break;
             }
         }
-        return new ProfileImageListResponseDTO(unlockedImages);
+        return ProfileImageListResponseDTO.of(unlockedImages);
 
     }
 }

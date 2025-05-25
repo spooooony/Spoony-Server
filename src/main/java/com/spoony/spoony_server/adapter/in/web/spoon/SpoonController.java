@@ -1,14 +1,14 @@
 package com.spoony.spoony_server.adapter.in.web.spoon;
 
-import com.spoony.spoony_server.adapter.dto.spoon.SpoonDrawResponseDTO;
-import com.spoony.spoony_server.adapter.dto.spoon.SpoonDrawListResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.response.SpoonDrawResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.response.SpoonDrawListResponseDTO;
 import com.spoony.spoony_server.application.port.command.spoon.SpoonDrawCommand;
 import com.spoony.spoony_server.application.port.command.spoon.SpoonGetCommand;
 import com.spoony.spoony_server.application.port.in.spoon.SpoonDrawUseCase;
 import com.spoony.spoony_server.application.port.in.spoon.SpoonGetUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
-import com.spoony.spoony_server.adapter.dto.spoon.SpoonResponseDTO;
+import com.spoony.spoony_server.adapter.dto.spoon.response.SpoonResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
