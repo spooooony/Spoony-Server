@@ -48,6 +48,7 @@ public class ZzimPostService implements
 
         Post post = postPort.findPostById(postId);
         User user = userPort.findUserById(userId);
+
         zzimPostPort.saveZzimPost(user,post);
     }
 

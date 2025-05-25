@@ -26,7 +26,7 @@ public record FeedResponseDTO(
                                      List<String> photoUrlList,
                                      LocalDateTime createdAt,
                                      Boolean isMine) {
-        return FeedResponseDTO.of(userId, userName, userRegion, postId, description, categoryColorResponse,
+        return new FeedResponseDTO(userId, userName, userRegion, postId, description, categoryColorResponse,
                 zzimCount, photoUrlList, createdAt, isMine);
     }
 }

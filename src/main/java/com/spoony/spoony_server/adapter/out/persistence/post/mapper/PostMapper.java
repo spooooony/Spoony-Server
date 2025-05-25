@@ -1,7 +1,9 @@
 package com.spoony.spoony_server.adapter.out.persistence.post.mapper;
 
+import com.spoony.spoony_server.adapter.out.persistence.place.mapper.PlaceMapper;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper;
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.User;
@@ -41,5 +43,17 @@ public class PostMapper {
                 postEntity.getCreatedAt(),
                 postEntity.getUpdatedAt()
         );
+    }
+    public static PostEntity toEntity(Post post) {
+        if (post == null) return null;
+
+        return PostEntity.builder()
+                .postId(post.getPostId())
+                .user(UserMapper.toEntity(post.getUser()))
+                .place(PlaceMapper.toEntity(post.getPlace()))
+                .description(post.getDescription())
+                .value(post.getValue())
+                .cons(post.getCons())
+                .build();
     }
 }

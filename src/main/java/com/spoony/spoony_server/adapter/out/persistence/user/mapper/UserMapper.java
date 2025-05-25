@@ -22,4 +22,18 @@ public class UserMapper {
                 userEntity.getUpdatedAt()
         );
     }
+    public static UserEntity toEntity(User user) {
+        return UserEntity.builder()
+                .userId(user.getUserId())
+                .platform(user.getPlatform())
+                .platformId(user.getPlatformId())
+                .profileImageLevel(user.getImageLevel())
+                .level(user.getLevel())
+                .userName(user.getUserName())
+                .region(user.getRegion() != null ? RegionMapper.toEntity(user.getRegion()) : null)
+                .introduction(user.getIntroduction())
+                .birth(user.getBirth())
+                .ageGroup(user.getAgeGroup())
+                .build();
+    }
 }

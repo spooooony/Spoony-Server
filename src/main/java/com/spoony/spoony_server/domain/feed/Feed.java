@@ -10,5 +10,6 @@ import lombok.Getter;
 public class Feed {
     private Long feedId;
     private User user;
+    private User author;
     private Post post;
 }

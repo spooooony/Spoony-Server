@@ -11,11 +11,13 @@ import com.spoony.spoony_server.adapter.out.persistence.user.db.NewFollowEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.NewFollowRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionEntity;
 
+import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -46,29 +48,6 @@ public class FeedPersistenceAdapter implements FeedPort {
                 .toList();
     }
 
-    @Override
-    public void updateFeedFromNewFollowers(Long userId) {
-        List<NewFollowEntity> newFollows = newFollowRepository.findByNewFollower_UserId(userId);
-
-        for (NewFollowEntity newFollow : newFollows) {
-            Long newFollowingUserId = newFollow.getNewFollowing().getUserId();
-
-            // 새로 팔로우한 사용자의 모든 게시물 가져오기
-            List<PostEntity> posts = postRepository.findByUser_UserId(newFollowingUserId);
-
-            List<FeedEntity> feedEntities = posts.stream()
-                    .map(post -> FeedEntity.builder()
-                            .user(newFollow.getNewFollower())
-                            .post(post)
-                            .build())
-                    .toList();
-
-            feedRepository.saveAll(feedEntities);
-        }
-
-        // 처리 후 new_follower에서 삭제
-        newFollowRepository.deleteAll(newFollows);
-    }
 
 
 
@@ -78,5 +57,28 @@ public class FeedPersistenceAdapter implements FeedPort {
         feedRepository.deleteByUser_UserIdAndPost_PostId(userId, postId);
     }
 
+    @Override
+    public void addFeedsIfNotExists(User user, List<Post> posts) {
+        Long userId = user.getUserId();
+        List<Long> postIds = posts.stream()
+                .map(Post::getPostId)
+                .toList();
 
-}
+        //기존 피드 조회
+        List<Long> existingPostIds = feedRepository.findPostIdsByUserIdAndPostIds(userId, postIds);
+        List<FeedEntity> newFeeds = posts.stream()
+                .filter(post -> !existingPostIds.contains(post.getPostId()))
+                .map(post -> FeedEntity.builder()
+                        .user(UserMapper.toEntity(user))
+                        .post(PostMapper.toEntity(post))
+                        .author(PostMapper.toEntity(post).getUser()) // 또는 Post에서 작성자 유저 꺼내기
+                        .build())
+                .toList();
+        if (!newFeeds.isEmpty()) {
+            feedRepository.saveAll(newFeeds);
+        }
+    }
+
+
+    }
+

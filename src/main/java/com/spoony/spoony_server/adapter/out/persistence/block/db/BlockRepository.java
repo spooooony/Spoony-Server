@@ -33,7 +33,7 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
 
 
 
-    void deleteByBlocker_UserIdAndBlocked_UserIdAndStatus(Long blockerId, Long blockedId, BlockStatus status);
+    void deleteByBlockerUserIdAndBlockedUserIdAndStatus(Long blockerId, Long blockedId, BlockStatus status);
 
     List<BlockEntity> findByBlocker_UserId(Long userId);
 
@@ -44,4 +44,9 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
     Optional<BlockEntity> findActiveBlockByUsers(
             @Param("blockerId") Long blockerId,
             @Param("blockedId") Long blockedId);
+
+
+    @Query("SELECT b.blocked.userId FROM BlockEntity b " +
+            "WHERE b.blocker.userId = :userId AND b.status = 'UNFOLLOWED'")
+    List<Long> findUnfollowedUserIds(@Param("userId") Long userId);
 }

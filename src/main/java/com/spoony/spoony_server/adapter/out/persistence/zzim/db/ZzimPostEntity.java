@@ -22,12 +22,17 @@ public class ZzimPostEntity {
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private UserEntity author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostEntity post;
 
     @Builder
-    public ZzimPostEntity(UserEntity user, Long zzimId, PostEntity post) {
+    public ZzimPostEntity(UserEntity user, UserEntity author, Long zzimId, PostEntity post) {
         this.user = user;
+        this.author = author;
         this.zzimId = zzimId;
         this.post = post;
     }

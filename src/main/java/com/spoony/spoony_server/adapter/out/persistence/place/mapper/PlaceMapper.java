@@ -15,4 +15,16 @@ public class PlaceMapper {
                 placeEntity.getLongitude()
         );
     }
+    public static PlaceEntity toEntity(Place place) {
+        if (place == null) return null;
+
+        return PlaceEntity.builder()
+                .placeId(place.getPlaceId())  // 빌더에서 자동 생성이면 생략 가능
+                .placeName(place.getPlaceName())
+                .placeAddress(place.getPlaceAddress())
+                .placeRoadAddress(place.getPlaceRoadAddress())
+                .latitude(place.getLatitude())
+                .longitude(place.getLongitude())
+                .build();
+    }
 }

@@ -11,7 +11,9 @@ public interface BlockPort {
     boolean existsBlockUserRelation(Long fromUserId, Long toUserId);
     List<Long> getBlockedUserIds(Long userId);
     List<Long> getBlockerUserIds(Long userId);
+    List<Long> getUnfollowedUserIds(Long userId);
     Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId);
     void updateUserBlockRelation(Long userId, Long targetUserId, BlockStatus status);
     void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status);
 }
+

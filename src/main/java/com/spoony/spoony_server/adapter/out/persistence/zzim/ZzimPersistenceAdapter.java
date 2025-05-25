@@ -76,11 +76,14 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     public void saveZzimPost(User user, Post post) {
         UserEntity userEntity = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        UserEntity userEntity_author =  userRepository.findById(post.getUser().getUserId())
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PostEntity postEntity = postRepository.findById(post.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
         ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder()
                 .user(userEntity)
+                .author(userEntity_author)
                 .post(postEntity)
                 .build();
 

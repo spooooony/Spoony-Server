@@ -57,10 +57,12 @@ public class BlockPersistenceAdapter implements BlockPort {
         return blockRepository.findUserIdsBlockingByBlockOrReport(userId);
     }
 
-//    @Override
-//    public List<Long> getReportedUserIds(Long userId) {
-//        return List.of();
-//    }
+    @Override
+
+    public List<Long> getUnfollowedUserIds(Long userId) {
+        return blockRepository.findUnfollowedUserIds(userId);
+    }
+
 
     @Override
     public Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId) {
@@ -107,7 +109,7 @@ public class BlockPersistenceAdapter implements BlockPort {
 
     @Override
     public void deleteUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
-        blockRepository.deleteByBlocker_UserIdAndBlocked_UserIdAndStatus(fromUserId, toUserId, status);
+        blockRepository.deleteByBlockerUserIdAndBlockedUserIdAndStatus(fromUserId, toUserId, status);
 
     }
 }

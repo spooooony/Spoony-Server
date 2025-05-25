@@ -8,10 +8,12 @@ import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
 import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
 import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
+import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
+import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Block;
 import com.spoony.spoony_server.domain.user.Follow;
@@ -42,6 +44,7 @@ public class UserService implements
     private final UserPort userPort;
     private final PostPort postPort;
     private final BlockPort blockPort;
+    private final FeedPort feedPort;
     private final ZzimPostPort zzimPostPort;
 
     @Override
@@ -183,10 +186,12 @@ public class UserService implements
     public void createFollow(UserFollowCommand command) {
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
+
         // 1. 이미 팔로우 중인지 확인
         if (userPort.existsFollowRelation(userId, targetUserId)) {
             throw new BusinessException(UserErrorMessage.ALEADY_FOLLOW);
         }
+
 
         Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId,targetUserId);
 
@@ -204,6 +209,12 @@ public class UserService implements
             userPort.saveNewFollowRelation(userId, targetUserId);
             userPort.saveFollowRelation(userId, targetUserId);
         }
+
+        //feed 부분 추가
+        User user = userPort.findUserById(userId); //유저
+        List<Post> targetUserPosts = postPort.findPostsByUserId(targetUserId); // targetUser가 작성한 게시물 목록
+        feedPort.addFeedsIfNotExists(user, targetUserPosts);
+
     }
 
     @Override
@@ -211,10 +222,17 @@ public class UserService implements
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
 
-        // 1. block 테이블에 저장 (상태: UNFOLLOWED)
+        // 1. 이미 팔로우 → 언팔로우 관계 존재하는지 block 테이블에서 확인
+        Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId, targetUserId);
+
+        if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.UNFOLLOWED) {
+            throw new BusinessException(UserErrorMessage.ALEADY_UNFOLLOWED);
+        }
+
+        // 2. block 테이블에 저장 (상태: UNFOLLOWED)
         blockPort.saveUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED);
 
-        // 2. follow 관계 제거 (양방향)
+        // 3. follow 관계 제거 (양방향)
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
     }

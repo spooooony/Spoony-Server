@@ -42,10 +42,10 @@ public class FeedService implements FeedGetUseCase {
     public FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command) {
         Long currentUserId = command.getUserId();
 
-        //새 팔로우 관계에 대한 Feed 반영
-        feedPort.updateFeedFromNewFollowers(currentUserId);
 
-        // 1. 팔로우한 유저들의 게시물 리스트를 가져옴
+        //feedPort.updateFeedFromNewFollowers(currentUserId);
+
+        // 1. 팔로우한 유저들의 게시물 리스트를 가져옴(이 경우, 언팔로우 상태가 반영x)
         List<Feed> feedList = feedPort.findFeedListByFollowing(command.getUserId());
 
         // 2. 내가 차단한 유저들의 ID를 가져옴
@@ -54,9 +54,15 @@ public class FeedService implements FeedGetUseCase {
         // 3. 나를 차단한 유저들의 ID를 가져옴
         List<Long> userIdsBlockingMe = blockPort.getBlockerUserIds(command.getUserId());
 
+        //4. feed테이블엔 남아있지만, 언팔로우 상태 반영해서 필터링
+        List<Long> unfollowedUserIds = blockPort.getUnfollowedUserIds(currentUserId);
+
+
         List<FeedResponseDTO> feedResponseList = feedList.stream()
                 .filter(feed -> !userIdsBlockedByMe.contains(feed.getPost().getUser().getUserId())// 내가 차단한 유저의 게시물 제외
-                        && !userIdsBlockingMe.contains(feed.getPost().getUser().getUserId())) // 나를 차단한 유저의 게시물 제외
+                        && !userIdsBlockingMe.contains(feed.getPost().getUser().getUserId())// 나를 차단한 유저의 게시물 제외
+
+                )
                 .map(feed -> {
                     Post post = feed.getPost();
                     User author = post.getUser();

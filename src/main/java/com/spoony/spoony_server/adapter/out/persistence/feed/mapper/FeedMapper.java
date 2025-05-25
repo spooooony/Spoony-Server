@@ -11,6 +11,7 @@ public class FeedMapper {
         return new Feed(
                 feedEntity.getFeedId(),
                 UserMapper.toDomain(feedEntity.getUser()),
+                UserMapper.toDomain(feedEntity.getAuthor()),
                 PostMapper.toDomain(feedEntity.getPost())
         );
     }

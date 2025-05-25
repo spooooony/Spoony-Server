@@ -10,5 +10,12 @@ public class RegionMapper {
                 regionEntity.getRegionId(),
                 regionEntity.getRegionName());
     }
+    public static RegionEntity toEntity(final Region region) {
+        if (region == null) return null;
 
+        return RegionEntity.builder()
+                .regionId(region.getRegionId())
+                .regionName(region.getRegionName())
+                .build();
+    }
 }
