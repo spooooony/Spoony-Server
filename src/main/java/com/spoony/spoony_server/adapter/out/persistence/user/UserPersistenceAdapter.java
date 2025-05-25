@@ -6,12 +6,15 @@ import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockEntity;
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockRepository;
 import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.FollowRepository;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.*;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.BlockMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.FollowMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
+import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostRepository;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.*;
 import com.spoony.spoony_server.global.exception.BusinessException;
@@ -40,6 +43,8 @@ public class UserPersistenceAdapter implements UserPort {
     private final NewFollowRepository newFollowRepository;
     private final FeedRepository feedRepository;
     private final BlockRepository blockRepository;
+    private final PostRepository postRepository;
+    private final ZzimPostRepository zzimPostRepository;
 
     @Override
     public User findUserById(Long userId) {
@@ -236,6 +241,29 @@ public class UserPersistenceAdapter implements UserPort {
     public List<Block> findBlockedByUserId(Long userId) {
         List<BlockEntity> blockingList = blockRepository.findByBlocker_UserId(userId);
         return blockingList.stream().map(BlockMapper::toDomain).toList();
+    }
+
+    @Override
+    public void removeZzimRelationsBetweenUsers(Long userId, Long targetUserId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        UserEntity targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+        List<PostEntity> postsByTargetUser = postRepository.findByUser_UserId(targetUserId);
+        List<PostEntity> postsByUser = postRepository.findByUser_UserId(userId);
+
+        // 내가 찜한 상대방의 게시물 제거
+        for (PostEntity post : postsByTargetUser) {
+            zzimPostRepository.deleteByUserAndAuthorAndPost(user, targetUser, post);
+        }
+
+        // 상대방이 찜한 나의 게시물 제거
+        for (PostEntity post : postsByUser) {
+            zzimPostRepository.deleteByUserAndAuthorAndPost(targetUser, user, post);
+        }
+
+
     }
 }
 

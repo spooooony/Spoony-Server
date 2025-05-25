@@ -60,7 +60,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     public List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId,Long cursor, int size) {
         Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdCategoryIdAndCursor(userId, categoryId,cursor);
 
-
         // Pageable 생성: 페이지 번호 0, size 만큼만 조회, 최신순 내림차순 정렬 (id 내림차순)
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "zzimId"));
 

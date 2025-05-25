@@ -61,7 +61,7 @@ public class FeedService implements FeedGetUseCase {
         List<FeedResponseDTO> feedResponseList = feedList.stream()
                 .filter(feed -> !userIdsBlockedByMe.contains(feed.getPost().getUser().getUserId())// 내가 차단한 유저의 게시물 제외
                         && !userIdsBlockingMe.contains(feed.getPost().getUser().getUserId())// 나를 차단한 유저의 게시물 제외
-
+                        && !unfollowedUserIds.contains(feed.getPost().getUser().getUserId())
                 )
                 .map(feed -> {
                     Post post = feed.getPost();

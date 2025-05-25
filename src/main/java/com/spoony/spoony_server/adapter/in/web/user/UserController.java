@@ -78,15 +78,15 @@ public class UserController {
     @GetMapping("/followers")
     @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getMyFollowers(@UserId Long userId) {
-        UserGetCommand command = new UserGetCommand(userId);
+        FollowGetCommand command = new FollowGetCommand(userId,userId);
         FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
         return ResponseEntity.ok(ResponseDTO.success(followListResponse));
     }
 
     @GetMapping("/followers/{targetUserId}")
     @Operation(summary = "팔로워 조회 API", description = "타유저를 팔로우하는 유저 목록을 조회합니다.")
-    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowers(@PathVariable Long targetUserId) {
-        UserGetCommand command = new UserGetCommand(targetUserId);
+    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowers(@UserId Long userId,@PathVariable Long targetUserId) {
+        FollowGetCommand command = new FollowGetCommand(userId,targetUserId);
         FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
         return ResponseEntity.ok(ResponseDTO.success(followListResponse));
     }
@@ -94,15 +94,15 @@ public class UserController {
     @GetMapping("/followings")
     @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getMyFollowings(@UserId Long userId) {
-        UserGetCommand command = new UserGetCommand(userId);
+        FollowGetCommand command = new FollowGetCommand(userId,userId);
         FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
         return ResponseEntity.ok(ResponseDTO.success(followings));
     }
 
     @GetMapping("/followings/{targetUserId}")
     @Operation(summary = "팔로잉 조회 API", description = "타유저가 팔로우하는 유저 목록을 조회합니다.")
-    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowings(@PathVariable Long targetUserId) {
-        UserGetCommand command = new UserGetCommand(targetUserId);
+    public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowings(@UserId Long userId, @PathVariable Long targetUserId) {
+        FollowGetCommand command = new FollowGetCommand(userId,targetUserId);
         FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
         return ResponseEntity.ok(ResponseDTO.success(followings));
     }

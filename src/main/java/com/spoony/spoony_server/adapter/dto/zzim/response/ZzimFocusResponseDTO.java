@@ -23,7 +23,7 @@ public record ZzimFocusResponseDTO(long placeId,
                                           String description,
                                           Long zzimCount,
                                           List<String> photoUrlList) {
-        return ZzimFocusResponseDTO.of(placeId, placeName, categoryColorResponse, authorName,
+        return new ZzimFocusResponseDTO(placeId, placeName, categoryColorResponse, authorName,
                 authorRegionName, postId, description, zzimCount, photoUrlList);
     }
 }

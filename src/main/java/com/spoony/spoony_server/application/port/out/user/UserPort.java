@@ -29,4 +29,5 @@ public interface UserPort {
     void deleteUser(Long userId);
     void saveNewFollowRelation(Long userId, Long targetUserId);
     List<Block> findBlockedByUserId(Long userId);
+    void removeZzimRelationsBetweenUsers(Long userId, Long targetUserId);
 }

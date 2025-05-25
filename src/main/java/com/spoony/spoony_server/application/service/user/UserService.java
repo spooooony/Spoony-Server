@@ -45,7 +45,7 @@ public class UserService implements
     private final PostPort postPort;
     private final BlockPort blockPort;
     private final FeedPort feedPort;
-    private final ZzimPostPort zzimPostPort;
+
 
     @Override
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
@@ -103,7 +103,7 @@ public class UserService implements
     }
 
     @Override
-    public FollowListResponseDTO getFollowers(UserGetCommand command) {
+    public FollowListResponseDTO getFollowers(FollowGetCommand command) {
         List<Follow> followers = userPort.findFollowersByUserId(command.getUserId());
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
         List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
@@ -132,11 +132,13 @@ public class UserService implements
     }
 
     @Override
-    public FollowListResponseDTO getFollowings(UserGetCommand command) {
-        List<Follow> followings = userPort.findFollowingsByUserId(command.getUserId());
+    public FollowListResponseDTO getFollowings(FollowGetCommand command) {
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
+        List<Follow> followings = userPort.findFollowingsByUserId(targetUserId);
 
-        List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
-        List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
 
         List<UserSimpleResponseDTO> userDTOList = followings.stream()
                 .map(follow -> follow.getFollowing())
@@ -292,44 +294,7 @@ public class UserService implements
         userPort.deleteFollowRelation(targetUserId, userId);
 
         //3. zzimPost 관계 제거(양방향)
-
-
-        // 신고된 유저의 게시물 목록 조회 (List<Post>)
-        List<Post> postsByReportedUsers = postPort.findPostsByUserId(targetUserId);
-
-        //신고자의 게시물 목록 조회
-        List<Post> postsByReporter = postPort.findPostsByUserId(userId);
-
-
-        // Post에서 ID만 추출하여 List<Long>으로 변환
-        List<Long> reportedPostIds = postsByReportedUsers.stream()
-                .map(post -> post.getPostId())
-                .toList();  // List<Long>으로 변환
-
-
-        List<Long> reporterPostIds = postsByReporter.stream()
-                .map(post -> post.getPostId())
-                .toList();  // List<Long>으로 변환
-
-
-        //나의 찜리스트에서 -> 내가 신고한 사람의 게시물 삭제
-        reportedPostIds.forEach(postId -> {
-            if (zzimPostPort.existsByUserIdAndPostId(userId,postId)){
-                Post post = postPort.findPostById(postId);
-                User user = userPort.findUserById(userId);
-                zzimPostPort.deleteByUserAndPost(user,post);
-            }
-        });
-
-
-        //신고당한 사람의 찜리스트에서 -> 나의 게시물 삭제
-        reporterPostIds.forEach(postId -> {
-            if (zzimPostPort.existsByUserIdAndPostId(targetUserId,postId)){
-                Post post = postPort.findPostById(postId);
-                User targetUser = userPort.findUserById(targetUserId);
-                zzimPostPort.deleteByUserAndPost(targetUser,post);
-            }
-        });
+        userPort.removeZzimRelationsBetweenUsers(userId,targetUserId);
 
     }
 
@@ -360,5 +325,39 @@ public class UserService implements
     public List<Long> searchUsersByQuery(UserGetCommand command) {
         return blockPort.getBlockedUserIds(command.getUserId());
     }
+
+
+    //userId와 targetUserId 사이의 찜 관계 제거 (양방향)
+//    private void removeZzimRelationsBetweenUsers(BlockUserCommand command) {
+//        Long userId = command.getUserId();
+//        Long targetUserId = command.getTargetUserId();
+//
+//        List<Long> reportedPostIds = postPort.findPostsByUserId(targetUserId).stream()
+//                .map(Post::getPostId)
+//                .toList();
+//
+//        List<Long> reporterPostIds = postPort.findPostsByUserId(userId).stream()
+//                .map(Post::getPostId)
+//                .toList();
+//
+//        reportedPostIds.forEach(postId -> {
+//            if (zzimPostPort.existsByUserIdAndPostId(userId, postId)) {
+//                zzimPostPort.deleteByUserAndPost(
+//                        userPort.findUserById(userId),
+//                        postPort.findPostById(postId)
+//                );
+//            }
+//        });
+//
+//        reporterPostIds.forEach(postId -> {
+//            if (zzimPostPort.existsByUserIdAndPostId(targetUserId, postId)) {
+//                zzimPostPort.deleteByUserAndPost(
+//                        userPort.findUserById(targetUserId),
+//                        postPort.findPostById(postId)
+//                );
+//            }
+//        });
+//    }
+
 }
 

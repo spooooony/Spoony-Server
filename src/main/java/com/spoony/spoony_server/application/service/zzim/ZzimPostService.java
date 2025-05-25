@@ -105,7 +105,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                         categoryColorResponse
                 );
             })
-            .collect(Collectors.toList());
+            .toList();
 
     // 4. nextCursor 계산 (결과가 size 미만이면 null 처리)
     Long nextCursor = null;
