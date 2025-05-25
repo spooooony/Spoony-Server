@@ -24,7 +24,7 @@ public class SpoonController {
     private final SpoonDrawUseCase spoonDrawUseCase;
 
     @GetMapping
-    @Operation(summary = "스푼 개수 조회 API", description = "특정 사용자의 스푼 개수를 조회하는 API")
+    @Operation(summary = "스푼 개수 조회 API", description = "특정 사용자의 스푼 개수를 조회합니다.")
     public ResponseEntity<ResponseDTO<SpoonResponseDTO>> getSpoonBalance(
             @UserId Long userId) {
         SpoonGetCommand command = new SpoonGetCommand(userId);
@@ -33,7 +33,7 @@ public class SpoonController {
     }
 
     @PostMapping("/draw")
-    @Operation(summary = "스푼 뽑기 API", description = "스푼 뽑기를 진행하는 API")
+    @Operation(summary = "스푼 뽑기 API", description = "스푼 뽑기를 진행합니다.")
     public ResponseEntity<ResponseDTO<SpoonDrawResponseDTO>> createSpoonDraw(
             @UserId Long userId) {
         SpoonDrawCommand command = new SpoonDrawCommand(userId);
@@ -42,7 +42,7 @@ public class SpoonController {
     }
 
     @GetMapping("/draw")
-    @Operation(summary = "스푼 뽑기 기록 조회 API", description = "스푼 뽑기 주간 기록을 조회하는 API")
+    @Operation(summary = "스푼 뽑기 기록 조회 API", description = "스푼 뽑기 주간 기록을 조회합니다.")
     public ResponseEntity<ResponseDTO<SpoonDrawListResponseDTO>> getWeeklySpoonDraw(
             @UserId Long userId) {
         SpoonDrawCommand command = new SpoonDrawCommand(userId);

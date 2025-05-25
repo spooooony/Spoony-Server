@@ -26,7 +26,7 @@ public class ZzimPostController {
     private final ZzimDeleteUseCase zzimRemoveUseCase;
 
     @PostMapping
-    @Operation(summary = "북마크 추가 API", description = "북마크에 새로운 게시물을 추가하는 API")
+    @Operation(summary = "북마크 추가 API", description = "북마크에 새로운 게시물을 추가합니다.")
     public ResponseEntity<ResponseDTO<Void>> addZzimPost(
             @UserId Long userId,
             @RequestBody ZzimPostAddRequestDTO zzimPostAddRequestDTO) {
@@ -38,9 +38,8 @@ public class ZzimPostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
-
     @GetMapping
-    @Operation(summary = "북마크 조회 API", description = "북마크 장소 리스트를 조회하는 API")
+    @Operation(summary = "북마크 조회 API", description = "북마크 장소 리스트를 조회합니다.")
     public ResponseEntity<ResponseDTO<ZzimCardListWithCursorResponseDTO >> getZzimCardList(
             @UserId Long userId,
             @RequestParam(defaultValue = "1") Long categoryId,
@@ -52,7 +51,7 @@ public class ZzimPostController {
     }
 
     @GetMapping("/{placeId}")
-    @Operation(summary = "특정 장소의 북마크 리스트 조회 API", description = "특정 장소의 북마크 장소 리스트를 조회하는 API")
+    @Operation(summary = "특정 장소의 북마크 리스트 조회 API", description = "특정 장소의 북마크 장소 리스트를 조회합니다.")
     public ResponseEntity<ResponseDTO<ZzimFocusListResponseDTO>> getZzimFocusList(
             @UserId Long userId,
             @PathVariable long placeId) {
@@ -62,7 +61,7 @@ public class ZzimPostController {
     }
 
     @GetMapping("/location/{locationId}")
-    @Operation(summary = "특정 지역의 북마크 조회 API", description = "특정 지역의 북마크 장소 리스트를 조회하는 API")
+    @Operation(summary = "특정 지역의 북마크 조회 API", description = "특정 지역의 북마크 장소 리스트를 조회합니다.")
     public ResponseEntity<ResponseDTO<ZzimCardListResponseDTO>> getZzimLocationCardList(
             @UserId Long userId,
             @PathVariable long locationId) {
@@ -72,7 +71,7 @@ public class ZzimPostController {
     }
 
     @DeleteMapping("/{postId}")
-    @Operation(summary = "북마크 삭제 API", description = "북마크에서 특정 게시물을 삭제하는 API")
+    @Operation(summary = "북마크 삭제 API", description = "북마크에서 특정 게시물을 삭제합니다.")
     public ResponseEntity<ResponseDTO<Void>> deleteZzim(
             @UserId Long userId,
             @PathVariable long postId) {

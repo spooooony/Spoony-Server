@@ -4,7 +4,6 @@ import com.spoony.spoony_server.adapter.dto.report.request.ReportUserRequestDTO;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;
-import com.spoony.spoony_server.application.port.in.zzim.ZzimDeleteUseCase;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.report.request.ReportRequestDTO;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportController {
 
     public final ReportCreateUseCase reportCreateUseCase;
-    private final ZzimDeleteUseCase zzimRemoveUseCase;
 
     @PostMapping("/user")
     @Operation(summary = "사용자 신고 API", description = "사용자 마이페이지를 신고하는 API")
@@ -37,15 +35,14 @@ public class ReportController {
                 reportUserRequestDTO.reportDetail()
         );
 
-
         // 신고된 유저가 작성한 게시물이 내가 찜한 목록에 있는지 확인하고 삭제
         reportCreateUseCase.createUserReport(command);
 
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
+
     @PostMapping("/post")
     @Operation(summary = "게시물 신고 API", description = "특정 게시물을 신고하는 API")
-
     public ResponseEntity<ResponseDTO<Void>> createPostReport(
             @UserId Long userId,
             @RequestBody ReportRequestDTO reportRequestDTO) {
@@ -57,7 +54,5 @@ public class ReportController {
         );
         reportCreateUseCase.createReport(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
-
     }
-
 }

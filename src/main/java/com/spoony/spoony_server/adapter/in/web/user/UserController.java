@@ -36,8 +36,6 @@ public class UserController {
     private final RegionGetUseCase regionGetUseCase;
     private final BlockUserCreateUseCase blockUserCreateUseCase;
     private final BlockCheckUseCase blockCheckUseCase;
-    private final BlockedUserGetUseCase blockedUserGetUseCase;
-
 
     @GetMapping
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
@@ -69,7 +67,7 @@ public class UserController {
     }
 
     @GetMapping("/exists")
-    @Operation(summary = "사용자 닉네임 중복 확인 API", description = "사용자의 닉네임이 중복되는지 확인하는 API")
+    @Operation(summary = "사용자 닉네임 중복 확인 API", description = "사용자의 닉네임이 중복되는지 확인합니다.")
     public ResponseEntity<ResponseDTO<Boolean>> checkUsernameDuplicate(
             @RequestParam String userName) {
         UserNameCheckCommand command = new UserNameCheckCommand(userName);
@@ -78,7 +76,7 @@ public class UserController {
     }
 
     @GetMapping("/followers")
-    @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회하는 API입니다.")
+    @Operation(summary = "팔로워 조회 API", description = "로그인한 사용자를 팔로우하는 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getMyFollowers(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
         FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
@@ -86,7 +84,7 @@ public class UserController {
     }
 
     @GetMapping("/followers/{targetUserId}")
-    @Operation(summary = "팔로워 조회 API", description = "타유저를 팔로우하는 유저 목록을 조회하는 API입니다.")
+    @Operation(summary = "팔로워 조회 API", description = "타유저를 팔로우하는 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowers(@PathVariable Long targetUserId) {
         UserGetCommand command = new UserGetCommand(targetUserId);
         FollowListResponseDTO followListResponse = userGetUseCase.getFollowers(command);
@@ -94,7 +92,7 @@ public class UserController {
     }
 
     @GetMapping("/followings")
-    @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회하는 API입니다.")
+    @Operation(summary = "팔로잉 조회 API", description = "로그인한 사용자가 팔로우하는 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getMyFollowings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
         FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
@@ -102,7 +100,7 @@ public class UserController {
     }
 
     @GetMapping("/followings/{targetUserId}")
-    @Operation(summary = "팔로잉 조회 API", description = "타유저가 팔로우하는 유저 목록을 조회하는 API입니다.")
+    @Operation(summary = "팔로잉 조회 API", description = "타유저가 팔로우하는 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<FollowListResponseDTO>> getTargetUserFollowings(@PathVariable Long targetUserId) {
         UserGetCommand command = new UserGetCommand(targetUserId);
         FollowListResponseDTO followings = userGetUseCase.getFollowings(command);
@@ -112,13 +110,7 @@ public class UserController {
     @GetMapping("/profile")
     @Operation(
             summary = "프로필 수정 진입 시 사용자 기본 정보 조회 API",
-            description = """
-        프로필 수정 페이지 진입 시, 사용자의 기존 입력 정보를 조회합니다.
-        
-        - 닉네임, 생일, 활동지역 등 프로필 구성 필드를 반환합니다.
-        - 생일과 활동지역은 사용자가 스킵할 수 있기 때문에, 기본값이 포함되어 반환됩니다.
-        """
-    )
+            description = "프로필 수정 페이지 진입 시, 사용자의 기존 입력 정보를 조회합니다.")
     public ResponseEntity<ResponseDTO<UserProfileUpdateResponseDTO>> getUserEditInfo(
             @UserId Long userId
     ) {
@@ -128,7 +120,7 @@ public class UserController {
     }
 
     @PatchMapping("/profile")
-    @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정하는 API입니다.")
+    @Operation(summary = "프로필 수정 API", description = "마이페이지에서 사용자의 프로필을 수정합니다.")
     public ResponseEntity<ResponseDTO<Void>> updateUserProfile(
             @UserId Long userId,
             @RequestBody UserProfileUpdateRequestDTO userUpdateRequestDTO
@@ -148,11 +140,7 @@ public class UserController {
     @GetMapping("/reviews")
     @Operation(
             summary = "내가 작성한 리뷰 전체 조회 API",
-            description = """
-    마이페이지에서 **자신이 작성한 리뷰 목록**을 조회하는 API입니다.
-    - 서버는 로그인된 사용자 정보를 기준으로 리뷰 목록을 조회합니다.
-    
-    """
+            description = "마이페이지에서 자신이 작성한 리뷰 목록을 조회합니다."
     )
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
         UserReviewGetCommand command = new UserReviewGetCommand(userId,null); //user 객체
@@ -164,11 +152,7 @@ public class UserController {
     @GetMapping(value = "/reviews/{targetUserId}", produces = "application/json; charset=UTF-8")
     @Operation(
             summary = "특정 사용자 리뷰 전체 조회 API",
-            description = """
-    다른 사용자의 마이페이지에서 **해당 사용자가 작성한 리뷰 목록**을 조회하는 API입니다.
-    - **userId**는 path parameter로 전달받습니다.
-    - **localReview** 쿼리 파라미터를 통해 로컬리뷰 필터링 여부를 지정할 수 있습니다 (기본값: false).
-    """
+            description = "다른 사용자의 마이페이지에서 해당 사용자가 작성한 리뷰 목록을 조회합니다."
     )
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@UserId Long userId, @PathVariable Long targetUserId,@RequestParam(defaultValue = "false") boolean isLocalReview) {
         UserReviewGetCommand command = new UserReviewGetCommand(targetUserId,isLocalReview);
@@ -185,8 +169,7 @@ public class UserController {
     @PostMapping("/follow")
     @Operation(
             summary = "유저 팔로우 API",
-            description = "다른 사용자를 팔로우하는 API."
-
+            description = "다른 사용자를 팔로우합니다."
     )
     public ResponseEntity<ResponseDTO<Void>> followUser(
             @UserId Long userId,
@@ -204,7 +187,7 @@ public class UserController {
     @DeleteMapping("/follow")
     @Operation(
             summary = "유저 팔로우 취소 API",
-            description = "다른 사용자에 대한 팔로우를 취소하는 API입니다."
+            description = "다른 사용자에 대한 팔로우를 취소합니다."
     )
     public ResponseEntity<ResponseDTO<Void>> unfollowUser(
             @UserId Long userId,
@@ -219,14 +202,14 @@ public class UserController {
     }
 
     @GetMapping("/blockings")
-    @Operation(summary = "차단한 유저 조회 API", description = "로그인한 사용자가 차단한 유저 목록을 조회하는 API입니다.")
+    @Operation(summary = "차단한 유저 조회 API", description = "로그인한 사용자가 차단한 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<BlockListResponseDTO>> getBlockings(@UserId Long userId) {
         UserGetCommand command = new UserGetCommand(userId);
         BlockListResponseDTO blockedUsers = userGetUseCase.getBlockings(command);
         return ResponseEntity.ok(ResponseDTO.success(blockedUsers));
     }
     @PostMapping("/block")
-    @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단하는 API입니다.")
+    @Operation(summary = "유저 차단 API", description = "다른 사용자를 차단합니다.")
     public ResponseEntity<ResponseDTO<Void>> blockUser(
             @UserId Long userId,
             @RequestBody UserBlockRequestDTO requestDTO
@@ -239,11 +222,10 @@ public class UserController {
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
-
     @DeleteMapping("/block")
     @Operation(
             summary = "유저 차단 해제 API",
-            description = "다른 사용자에 대한 차단을 해제하는 API입니다."
+            description = "다른 사용자에 대한 차단을 해제합니다."
     )
     public ResponseEntity<ResponseDTO<Void>> unBlockUser(
             @UserId Long userId,
@@ -258,7 +240,7 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색하는 API")
+    @Operation(summary = "유저 검색 API", description = "검색어를 통해 유저를 검색합니다.")
     public ResponseEntity<ResponseDTO<UserSearchResponseListDTO>> searchLocations(
                 @UserId Long userId,
                 @RequestParam String query) {
@@ -270,12 +252,9 @@ public class UserController {
     }
 
     @GetMapping("/region")
-    @Operation(summary = "유저 활동 지역 리스트 API", description = "모든 유저 활동 지역 종류를 반환하는 API (?? 수저)")
+    @Operation(summary = "유저 활동 지역 리스트 API", description = "모든 유저 활동 지역 종류를 반환합니다.")
     public ResponseEntity<ResponseDTO<RegionListResponseDTO>> getRegion() {
         RegionListResponseDTO regionListResponseDTO = regionGetUseCase.getRegionList();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(regionListResponseDTO));
     }
-
-
-
 }

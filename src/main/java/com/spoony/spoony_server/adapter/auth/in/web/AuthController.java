@@ -32,7 +32,7 @@ public class AuthController {
     private final RefreshUseCase refreshUseCase;
 
     @PostMapping("/signup")
-    @Operation(summary = "회원가입 API", description = "회원 가입 API, Token Set 발급")
+    @Operation(summary = "회원가입 API", description = "회원 가입 API, Token Set을 발급합니다.")
     public ResponseEntity<ResponseDTO<UserTokenDTO>> signup(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @Valid @RequestBody final UserSignupDTO userSignupDTO
@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "로그인 API", description = "사용자 로그인 API, 성공 시 Token Set, 실패 시 회원가입 필요")
+    @Operation(summary = "로그인 API", description = "사용자 로그인 API, 성공 시 Token Set, 실패 시 회원가입이 필요합니다.")
     public ResponseEntity<ResponseDTO<LoginResponseDTO>> login(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @RequestBody final PlatformRequestDTO platformRequestDTO
@@ -50,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "로그아웃 API", description = "마이페이지 > 설정에서 로그아웃하는 API")
+    @Operation(summary = "로그아웃 API", description = "마이페이지 > 설정에서 로그아웃합니다.")
     public ResponseEntity<ResponseDTO<Void>> logout(
             @UserId Long userId
     ) {
@@ -59,14 +59,14 @@ public class AuthController {
     }
 
     @PostMapping("/withdraw")
-    @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴하는 API")
+    @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴합니다.")
     public ResponseEntity<ResponseDTO<Void>> withdraw(@UserId Long userId) {
         withdrawUseCase.withdraw(userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 통한 토큰 재발급 API, Token Set 발급")
+    @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 통한 토큰 재발급 API, Token Set을 발급합니다.")
     public ResponseEntity<ResponseDTO<JwtTokenDTO>> refreshAccessToken(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) String refreshToken
     ) {
