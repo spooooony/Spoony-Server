@@ -8,8 +8,10 @@ import com.spoony.spoony_server.global.message.business.BusinessErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,6 +30,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(e.getErrorMessage().getHttpStatus())
                 .body(ResponseDTO.fail(e.getErrorMessage()));
+    }
+
+    @ExceptionHandler(value = {NoHandlerFoundException.class})
+    public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleHandlerException(Exception e) {
+        return ResponseEntity
+                .status(BusinessErrorMessage.INVALID_URL_ERROR.getHttpStatus())
+                .body(ResponseDTO.fail(BusinessErrorMessage.INVALID_URL_ERROR));
+    }
+
+    @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
+    public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleHttpException(Exception e) {
+        return ResponseEntity
+                .status(BusinessErrorMessage.METHOD_NOT_ALLOWED_ERROR.getHttpStatus())
+                .body(ResponseDTO.fail(BusinessErrorMessage.METHOD_NOT_ALLOWED_ERROR));
     }
 
     @ExceptionHandler(value = {Exception.class})
