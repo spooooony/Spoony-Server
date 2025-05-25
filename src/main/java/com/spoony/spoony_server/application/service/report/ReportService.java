@@ -95,17 +95,14 @@ public class ReportService implements ReportCreateUseCase {
         //신고자의 게시물 목록 조회
         List<Post> postsByReporter = postPort.findPostsByUserId(userId);
 
-
         // Post에서 ID만 추출하여 List<Long>으로 변환
         List<Long> reportedPostIds = postsByReportedUsers.stream()
                 .map(post -> post.getPostId())
                 .toList();  // List<Long>으로 변환
 
-
         List<Long> reporterPostIds = postsByReporter.stream()
                 .map(post -> post.getPostId())
                 .toList();  // List<Long>으로 변환
-
 
         //나의 찜리스트에서 -> 내가 신고한 사람의 게시물 삭제
         reportedPostIds.forEach(postId -> {
@@ -115,7 +112,6 @@ public class ReportService implements ReportCreateUseCase {
                 zzimPostPort.deleteByUserAndPost(user,post);
             }
         });
-
 
         //신고당한 사람의 찜리스트에서 -> 나의 게시물 삭제
         reporterPostIds.forEach(postId -> {

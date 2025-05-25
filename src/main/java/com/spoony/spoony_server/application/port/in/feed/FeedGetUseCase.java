@@ -7,11 +7,7 @@ import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedG
 
 public interface FeedGetUseCase {
     FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command);
-    //FeedListResponseDTO getAllPosts();
-
     FilteredFeedResponseListDTO getFilteredFeed(FeedFilterCommand command);
-
-
 }
 
 

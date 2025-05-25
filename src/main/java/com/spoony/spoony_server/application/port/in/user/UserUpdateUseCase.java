@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.application.port.in.user;
 
-import com.spoony.spoony_server.application.port.command.user.UserFollowCommand;
 import com.spoony.spoony_server.application.port.command.user.UserUpdateCommand;
 
 public interface UserUpdateUseCase {

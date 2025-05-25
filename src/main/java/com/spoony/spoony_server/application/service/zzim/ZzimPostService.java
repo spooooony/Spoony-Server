@@ -118,7 +118,8 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
 
 
-    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { //command -> userId, placeId
+public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { //command -> userId, placeId
+
         User user = userPort.findUserById(command.getUserId()); //로그인 userId
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(user.getUserId());
         List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(user.getUserId());
@@ -174,7 +175,6 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
     public void deleteZzim(ZzimDeleteCommand command) {
         User user = userPort.findUserById(command.getUserId());
         Post post = postPort.findPostById(command.getPostId());
-
         zzimPostPort.deleteByUserAndPost(user,post);
     }
 
@@ -300,7 +300,6 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
     private ZzimCardListResponseDTO getZzimByAreaStation(Long userId, Double longitude, Double latitude) {
         List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(userId);
-
 
         Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
 

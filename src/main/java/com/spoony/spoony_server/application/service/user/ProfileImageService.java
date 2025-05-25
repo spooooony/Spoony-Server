@@ -20,30 +20,21 @@ public class ProfileImageService implements ProfileImageGetUseCase {
     private final PostPort postPort;
     private final ZzimPostPort zzimPostPort;
 
-
     @Override
     public ProfileImageListResponseDTO getAvailableProfileImages(UserGetCommand command) {
         List<Post> postList = postPort.findPostsByUserId(command.getUserId());
-
-
         Long totalZzimCount = postList.stream().mapToLong(post -> zzimPostPort.countZzimByPostId(post.getPostId())).sum();
-
         List<ProfileImageResponseDTO> unlockedImages = new ArrayList<>();
 
-        for(ProfileImage profileImage : ProfileImage.values()){
-
+        for (ProfileImage profileImage : ProfileImage.values()){
             boolean isUnlocked = totalZzimCount >= profileImage.getRequiredZzimCount();
-
-
             if (isUnlocked){
                 unlockedImages.add(ProfileImageResponseDTO.of(profileImage,true));
             }
-
             if (totalZzimCount < profileImage.getRequiredZzimCount()) {
                 break;
             }
         }
         return ProfileImageListResponseDTO.of(unlockedImages);
-
     }
 }

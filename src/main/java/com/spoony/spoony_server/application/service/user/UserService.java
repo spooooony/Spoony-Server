@@ -95,16 +95,6 @@ public class UserService implements
     }
 
     @Override
-    public List<UserSimpleResponseDTO> getUserSimpleInfo(UserGetCommand command) {
-        return null;
-    }
-
-    @Override
-    public List<UserSimpleResponseDTO> getUserSimpleInfoBySearch(UserSearchCommand command) {
-        return List.of();
-    }
-
-    @Override
     public Boolean isUsernameDuplicate(UserNameCheckCommand command) {
         return userPort.existsByUserName(command.getUsername());
     }
@@ -200,7 +190,6 @@ public class UserService implements
 
         Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId,targetUserId);
 
-
         //어차피 아래 조건문에 도달하지조차 않을테지만(클라 뷰에서 막혀서) 그래도 일단 추가
         if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.BLOCKED) {
             throw new BusinessException(UserErrorMessage.USER_BLOCKED);
@@ -211,15 +200,10 @@ public class UserService implements
             blockPort.deleteUserBlockRelation(userId,targetUserId,BlockStatus.UNFOLLOWED); //block 테이블에서 삭제
             userPort.saveFollowRelation(userId,targetUserId);
 
-            //+ feed 업데이트도 누락된게 있는지 확인해야함
-
-
         } else{  //신규 팔로우
             userPort.saveNewFollowRelation(userId, targetUserId);
             userPort.saveFollowRelation(userId, targetUserId);
-
         }
-
     }
 
     @Override
@@ -242,7 +226,6 @@ public class UserService implements
 
     @Override
     public UserSearchResponseListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
-
 
         //차단 테이블에 있으면서 + status가 blocked나 reported인 유저
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
@@ -270,7 +253,6 @@ public class UserService implements
         return UserSearchResponseListDTO.of(userSearchResultList);
     }
 
-    @Transactional
     @Override
     public RegionListResponseDTO getRegionList() {
         List<RegionDTO> regionList = userPort.findAllRegions().stream()

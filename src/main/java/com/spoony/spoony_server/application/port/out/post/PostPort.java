@@ -32,5 +32,4 @@ public interface PostPort {
     Long countPostsByUserId(Long userId);
     List<Post> findByPostDescriptionContaining(String query);
     List<Post> findAll();
-
 }

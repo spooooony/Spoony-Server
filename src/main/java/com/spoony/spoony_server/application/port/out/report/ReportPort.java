@@ -9,7 +9,6 @@ public interface ReportPort {
     void saveReport(Report report);
     void saveUserReport(UserReport userReport);
     List<Long> findReportedPostIdsByUserId(Long userId);
-
 }
 
 

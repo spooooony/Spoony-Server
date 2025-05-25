@@ -6,5 +6,4 @@ import com.spoony.spoony_server.application.port.command.report.UserReportCreate
 public interface ReportCreateUseCase {
     void createReport(ReportCreateCommand command);
     void createUserReport(UserReportCreateCommand command);
-
 }

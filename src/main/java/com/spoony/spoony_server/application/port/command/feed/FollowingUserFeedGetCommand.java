@@ -7,5 +7,4 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FollowingUserFeedGetCommand {
     private final Long userId;
-
 }

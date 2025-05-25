@@ -4,6 +4,4 @@ import com.spoony.spoony_server.application.port.command.zzim.ZzimDeleteCommand;
 
 public interface ZzimDeleteUseCase {
     void deleteZzim(ZzimDeleteCommand command);
-
-
 }

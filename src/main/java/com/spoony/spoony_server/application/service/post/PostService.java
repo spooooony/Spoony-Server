@@ -8,7 +8,6 @@ import com.spoony.spoony_server.application.port.command.user.UserReviewGetComma
 import com.spoony.spoony_server.application.port.in.post.*;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
-import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.application.port.out.post.*;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
@@ -26,7 +25,6 @@ import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -44,7 +42,6 @@ public class PostService implements
         PostUpdateUseCase,
         PostSearchUseCase
 {
-
     private final PostPort postPort;
     private final PostCreatePort postCreatePort;
     private final PostCategoryPort postCategoryPort;
@@ -53,11 +50,9 @@ public class PostService implements
     private final ZzimPostPort zzimPostPort;
     private final PlacePort placePort;
     private final SpoonPort spoonPort;
-    private final FeedPort feedPort;
     private final PostDeletePort postDeletePort;
     private final PhotoPort photoPort;
     private final BlockPort blockPort;
-    private final ApplicationEventPublisher eventPublisher;
     private final ReportPort reportPort;
 
     @Transactional
@@ -176,7 +171,6 @@ public class PostService implements
         Long userId = command.getUserId();
         Long reviewCount = postPort.countPostsByUserId(userId);
         return ReviewAmountResponseDTO.of(reviewCount);
-
     }
 
     @Override
@@ -186,7 +180,6 @@ public class PostService implements
         List<Long> reportedPostIds = reportPort.findReportedPostIdsByUserId(userGetCommand.getUserId());
 
         List<Post> postList = postPort.findByPostDescriptionContaining(postSearchCommand.getQuery());
-
 
         List<FeedResponseDTO> postSearchResultList = postList.stream()
                 .filter(post -> !blockedUserIds.contains(post.getUser().getUserId())&&
@@ -346,8 +339,6 @@ public class PostService implements
 
         // 스푼 히스토리 기록
         spoonPort.updateSpoonHistoryByActivity(user, activity);
-
-
     }
 
     @Transactional
@@ -391,5 +382,4 @@ public class PostService implements
         List<String> imageUrls = command.getDeleteImageUrlList();
         postDeletePort.deleteImagesFromS3(imageUrls);
     }
-
 }

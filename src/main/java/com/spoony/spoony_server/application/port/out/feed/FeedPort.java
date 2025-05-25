@@ -9,10 +9,5 @@ import java.util.List;
 public interface FeedPort {
     List<Feed> findFeedListByFollowing(Long userId);
     void updateFeedFromNewFollowers(Long userId);
-
-    //List<Feed> findFilteredFeeds(List<Long> categoryIds, List<Long> regionIds, boolean localReviewEnabled);
-
     void deleteFeedByUserIdAndPostId(Long userId, Long postId);
-
-    //List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, boolean localReviewEnabled);
 }

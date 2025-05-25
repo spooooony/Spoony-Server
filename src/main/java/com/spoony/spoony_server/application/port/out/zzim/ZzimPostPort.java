@@ -12,12 +12,8 @@ public interface ZzimPostPort {
     boolean existsByUserIdAndPostId(Long userId, Long postId);
     Photo findFistPhotoById(Long postId);
     List<Photo> findPhotoListById(Long postId);
-
     List<ZzimPost> findZzimPostsByUserId(Long userId);
-
     List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId,Long cursor,int size);
-
     void saveZzimPost(User user, Post post);
     void deleteByUserAndPost(User user, Post post);
-
 }
