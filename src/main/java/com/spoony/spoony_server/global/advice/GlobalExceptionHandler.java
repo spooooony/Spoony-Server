@@ -13,6 +13,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,7 +35,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = {NoHandlerFoundException.class})
-    public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleHandlerException(Exception e) {
+    public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleNoHandlerException(Exception e) {
+        return ResponseEntity
+                .status(BusinessErrorMessage.INVALID_URL_ERROR.getHttpStatus())
+                .body(ResponseDTO.fail(BusinessErrorMessage.INVALID_URL_ERROR));
+    }
+
+    @ExceptionHandler(value = {NoResourceFoundException.class})
+    public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleNoResourceException(Exception e) {
         return ResponseEntity
                 .status(BusinessErrorMessage.INVALID_URL_ERROR.getHttpStatus())
                 .body(ResponseDTO.fail(BusinessErrorMessage.INVALID_URL_ERROR));
@@ -48,10 +56,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+    public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         return ResponseEntity
                 .status(BusinessErrorMessage.BDOY_ERROR.getHttpStatus())
                 .body(ResponseDTO.fail(BusinessErrorMessage.BDOY_ERROR));
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<?> handleNullPointerException(NullPointerException e) {
+        return ResponseEntity
+                .status(BusinessErrorMessage.NULL_ERROR.getHttpStatus())
+                .body(ResponseDTO.fail(BusinessErrorMessage.NULL_ERROR));
     }
 
     @ExceptionHandler(value = {Exception.class})
