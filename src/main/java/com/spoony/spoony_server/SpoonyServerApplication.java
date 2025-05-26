@@ -10,11 +10,6 @@ import java.util.TimeZone;
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class SpoonyServerApplication {
 
-	@PostConstruct
-	public void init() {
-		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(SpoonyServerApplication.class, args);
 	}
