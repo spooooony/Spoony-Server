@@ -21,8 +21,6 @@ public class FeedEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private UserEntity author;
