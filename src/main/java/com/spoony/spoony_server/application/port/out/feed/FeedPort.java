@@ -11,4 +11,9 @@ public interface FeedPort {
     List<Feed> findFeedListByFollowing(Long userId);
     void deleteFeedByUserIdAndPostId(Long userId, Long postId);
     void addFeedsIfNotExists(User user, List<Post> posts);
+    void deleteByUserIdAndAuthorId(Long userId, Long authorId);
+
+
 }
+
+

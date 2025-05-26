@@ -79,6 +79,11 @@ public class FeedPersistenceAdapter implements FeedPort {
         }
     }
 
-
+    @Override
+    public void deleteByUserIdAndAuthorId(Long userId, Long authorId) {
+        feedRepository.deleteByUser_UserIdAndAuthor_UserId(userId, authorId);
     }
+
+
+}
 

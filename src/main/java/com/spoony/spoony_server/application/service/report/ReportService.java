@@ -91,7 +91,11 @@ public class ReportService implements ReportCreateUseCase {
         // 3. zzimPost 양방향 관계 제거
         userPort.removeZzimRelationsBetweenUsers(userId, targetUserId);
 
-        //4. 신고 저장
+        //4. 즉시 feed에서 영구 삭제
+        feedPort.deleteByUserIdAndAuthorId(userId, targetUserId);
+        feedPort.deleteByUserIdAndAuthorId(targetUserId, userId);
+
+        //5. 신고 저장
         UserReport userReport = new UserReport(userReportType, command.getReportDetail(),user,targetUser);
         reportPort.saveUserReport(userReport);
     }

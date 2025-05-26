@@ -104,16 +104,27 @@ public class UserService implements
 
     @Override
     public FollowListResponseDTO getFollowers(FollowGetCommand command) {
-        List<Follow> followers = userPort.findFollowersByUserId(command.getUserId());
-        List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
-        List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
+
+        List<Follow> followers = userPort.findFollowersByUserId(targetUserId);
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
 
 
+        List<Long> reportedUserIds;
+        // 내 팔로우 조회면 신고 필터 불필요, 타인 팔로우 조회면 신고한 유저 필터링
+        if (userId.equals(targetUserId)) {
+            reportedUserIds = List.of();
+        } else {
+            reportedUserIds = blockPort.getRelatedUserIdsByReportStatus(userId);
+        }
         List<UserSimpleResponseDTO> userDTOList = followers.stream()
                 .map(follow -> follow.getFollower())
                 .filter(followerUser ->
                         !blockedUserIds.contains(followerUser.getUserId()) &&
-                                !blockerUserIds.contains(followerUser.getUserId())
+                                !blockerUserIds.contains(followerUser.getUserId())&&
+                                !reportedUserIds.contains(followerUser.getUserId())
                 )
                 .map(followerUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
@@ -135,16 +146,28 @@ public class UserService implements
     public FollowListResponseDTO getFollowings(FollowGetCommand command) {
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
+
         List<Follow> followings = userPort.findFollowingsByUserId(targetUserId);
+
+
 
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
         List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
 
+
+        List<Long> reportedUserIds;
+        // 내 팔로우 조회면 신고 필터 불필요, 타인 팔로우 조회면 신고한 유저 필터링
+        if (userId.equals(targetUserId)) {
+            reportedUserIds = List.of();
+        } else {
+            reportedUserIds = blockPort.getRelatedUserIdsByReportStatus(userId);
+        }
         List<UserSimpleResponseDTO> userDTOList = followings.stream()
                 .map(follow -> follow.getFollowing())
                 .filter(followingUser ->
                                 !blockedUserIds.contains(followingUser.getUserId()) &&
-                                        !blockerUserIds.contains(followingUser.getUserId())
+                                        !blockerUserIds.contains(followingUser.getUserId())&&
+                                        !reportedUserIds.contains(followingUser.getUserId())
                 )
                 .map(followingUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
@@ -326,38 +349,6 @@ public class UserService implements
         return blockPort.getBlockedUserIds(command.getUserId());
     }
 
-
-    //userId와 targetUserId 사이의 찜 관계 제거 (양방향)
-//    private void removeZzimRelationsBetweenUsers(BlockUserCommand command) {
-//        Long userId = command.getUserId();
-//        Long targetUserId = command.getTargetUserId();
-//
-//        List<Long> reportedPostIds = postPort.findPostsByUserId(targetUserId).stream()
-//                .map(Post::getPostId)
-//                .toList();
-//
-//        List<Long> reporterPostIds = postPort.findPostsByUserId(userId).stream()
-//                .map(Post::getPostId)
-//                .toList();
-//
-//        reportedPostIds.forEach(postId -> {
-//            if (zzimPostPort.existsByUserIdAndPostId(userId, postId)) {
-//                zzimPostPort.deleteByUserAndPost(
-//                        userPort.findUserById(userId),
-//                        postPort.findPostById(postId)
-//                );
-//            }
-//        });
-//
-//        reporterPostIds.forEach(postId -> {
-//            if (zzimPostPort.existsByUserIdAndPostId(targetUserId, postId)) {
-//                zzimPostPort.deleteByUserAndPost(
-//                        userPort.findUserById(targetUserId),
-//                        postPort.findPostById(postId)
-//                );
-//            }
-//        });
-//    }
 
 }
 

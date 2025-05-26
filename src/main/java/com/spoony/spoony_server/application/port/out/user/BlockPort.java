@@ -15,5 +15,7 @@ public interface BlockPort {
     Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId);
     void updateUserBlockRelation(Long userId, Long targetUserId, BlockStatus status);
     void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status);
+
+    List<Long> getRelatedUserIdsByReportStatus(Long userId);
 }
 

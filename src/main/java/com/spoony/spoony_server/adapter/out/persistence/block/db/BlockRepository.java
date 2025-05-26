@@ -22,13 +22,13 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
 
     @Query("SELECT b.blocked.userId FROM BlockEntity b " +
             "WHERE b.blocker.userId = :blockerUserId " +
-            "AND b.status IN ('BLOCKED', 'REPORTED')")
+            "AND b.status IN ('BLOCKED', 'REPORT')")
     List<Long> findUserIdsBlockedByBlockOrReport(@Param("blockerUserId") Long blockerUserId);
 
 
     @Query("SELECT b.blocker.userId FROM BlockEntity b " +
             "WHERE b.blocked.userId = :blockedUserId " +
-            "AND b.status IN ('BLOCKED', 'REPORTED')")
+            "AND b.status IN ('BLOCKED', 'REPORT')")
     List<Long> findUserIdsBlockingByBlockOrReport(@Param("blockedUserId") Long blockedUserId);
 
 
@@ -49,4 +49,13 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
     @Query("SELECT b.blocked.userId FROM BlockEntity b " +
             "WHERE b.blocker.userId = :userId AND b.status = 'UNFOLLOWED'")
     List<Long> findUnfollowedUserIds(@Param("userId") Long userId);
+
+
+    @Query("SELECT CASE WHEN b.blocker.userId = :userId THEN b.blocked.userId ELSE b.blocker.userId END " +
+            "FROM BlockEntity b " +
+            "WHERE (b.blocker.userId = :userId OR b.blocked.userId = :userId) " +
+            "AND b.status = :status")
+    List<Long> findRelatedUserIdsByReportStatus(@Param("userId") Long userId, @Param("status") BlockStatus status);
+
+
 }

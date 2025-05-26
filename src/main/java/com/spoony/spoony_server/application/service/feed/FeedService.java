@@ -42,9 +42,6 @@ public class FeedService implements FeedGetUseCase {
     public FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command) {
         Long currentUserId = command.getUserId();
 
-
-        //feedPort.updateFeedFromNewFollowers(currentUserId);
-
         // 1. 팔로우한 유저들의 게시물 리스트를 가져옴(이 경우, 언팔로우 상태가 반영x)
         List<Feed> feedList = feedPort.findFeedListByFollowing(command.getUserId());
 
