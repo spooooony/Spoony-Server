@@ -13,7 +13,8 @@ public enum BusinessErrorMessage implements DefaultErrorMessage {
     NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다."),
 
     INVALID_URL_ERROR(HttpStatus.NOT_FOUND, "지원하지 않는 URL 입니다."),
-    METHOD_NOT_ALLOWED_ERROR(HttpStatus.METHOD_NOT_ALLOWED, "잘못된 HTTP Method 요청입니다.");
+    METHOD_NOT_ALLOWED_ERROR(HttpStatus.METHOD_NOT_ALLOWED, "잘못된 HTTP Method 요청입니다."),
+    BDOY_ERROR(HttpStatus.NOT_FOUND, "올바르지 않은 Body 형식입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
