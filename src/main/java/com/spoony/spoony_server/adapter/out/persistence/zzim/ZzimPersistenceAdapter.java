@@ -57,18 +57,15 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     }
 
     @Override
-    public List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId,Long cursor, int size) {
-        Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdCategoryIdAndCursor(userId, categoryId,cursor);
+    public List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId) {
+        Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdAndCategoryId(userId, categoryId);
+        List<ZzimPostEntity> zzimPostEntities = zzimPostRepository.findAll(spec);
 
-        // Pageable 생성: 페이지 번호 0, size 만큼만 조회, 최신순 내림차순 정렬 (id 내림차순)
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "zzimId"));
-
-        // 쿼리 실행 (페이징 및 커서 조건 적용)
-        Page<ZzimPostEntity> page = zzimPostRepository.findAll(spec, pageable);
-
-        return page.getContent().stream()
+        return zzimPostEntities.stream()
                 .map(ZzimMapper::toDomain)
                 .toList();
+
+
     }
 
     @Override

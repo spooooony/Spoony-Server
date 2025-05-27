@@ -27,19 +27,4 @@ public class ZzimPostSpecification {
         };
     }
 
-    //커서 페이징
-    public static Specification<ZzimPostEntity> withUserIdCategoryIdAndCursor(Long userId, Long categoryId, Long cursor){
-        Specification<ZzimPostEntity> baseSpec = withUserIdAndCategoryId(userId,categoryId);
-
-        if (cursor == null) {
-            return baseSpec;
-        }
-
-        Specification<ZzimPostEntity> cursorSpec = (root, query, cb) ->
-                cb.lessThan(root.get("zzimId"), cursor);
-
-        return baseSpec.and(cursorSpec);
-
-    }
-
 }

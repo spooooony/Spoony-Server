@@ -8,6 +8,4 @@ import lombok.RequiredArgsConstructor;
 public class ZzimGetCardCommand {
     private final long userId;
     private final long categoryId;
-    private final Long cursor;
-    private final int size;
 }

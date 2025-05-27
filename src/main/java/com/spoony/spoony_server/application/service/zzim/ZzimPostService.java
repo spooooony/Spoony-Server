@@ -56,12 +56,10 @@ public class ZzimPostService implements
 @Transactional
 public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand command) {
 
-    // 1. DB에서 size 만큼만 조회 (size+1 하지 않음)
+
     List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
             command.getUserId(),
-            command.getCategoryId(),
-            command.getCursor(),
-            command.getSize()
+            command.getCategoryId()
     );
 
     // 2. 중복 placeId 제거 + 필터링 (필요하면 여기서 차단 등 필터도 적용 가능)
@@ -80,7 +78,6 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
 
     // 3. size 이상인 경우 결과 자르기
     List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
-            .limit(command.getSize())
             .map(zzimPost -> {
                 Post post = zzimPost.getPost();
                 Place place = post.getPlace();
@@ -107,13 +104,8 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
             })
             .toList();
 
-    // 4. nextCursor 계산 (결과가 size 미만이면 null 처리)
-    Long nextCursor = null;
-    if (zzimCardResponses.size() == command.getSize()) {
-        nextCursor = zzimCardResponses.get(zzimCardResponses.size() - 1).placeId();
-    }
 
-    return ZzimCardListWithCursorResponseDTO.of(zzimCardResponses.size(), zzimCardResponses, nextCursor);
+    return new ZzimCardListWithCursorResponseDTO(zzimCardResponses);
 }
 
 

@@ -42,10 +42,9 @@ public class ZzimPostController {
     @Operation(summary = "북마크 조회 API", description = "북마크 장소 리스트를 조회합니다.")
     public ResponseEntity<ResponseDTO<ZzimCardListWithCursorResponseDTO >> getZzimCardList(
             @UserId Long userId,
-            @RequestParam(defaultValue = "1") Long categoryId,
-            @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "10") int size) {
-        ZzimGetCardCommand command = new ZzimGetCardCommand(userId,categoryId, cursor, size);
+            @RequestParam(defaultValue = "1") Long categoryId)
+    {
+        ZzimGetCardCommand command = new ZzimGetCardCommand(userId,categoryId);
         ZzimCardListWithCursorResponseDTO zzimCardListResponse = zzimGetUseCase.getZzimCardList(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(zzimCardListResponse));
     }
