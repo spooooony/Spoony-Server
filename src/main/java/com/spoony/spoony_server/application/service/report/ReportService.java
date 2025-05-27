@@ -58,6 +58,9 @@ public class ReportService implements ReportCreateUseCase {
         //Feed테이블 -> 신고자(user_id) , 게시물(post_id) 삭제 (팔로잉 기반 피드조회시)
         feedPort.deleteFeedByUserIdAndPostId(userId,postId);
 
+        //zzim포스트에서 삭제
+        zzimPostPort.deleteByUserAndPost(user,post);
+
         Report report = new Report(reportType,command.getReportDetail(),post,user);
         reportPort.saveReport(report);
     }
