@@ -4,6 +4,7 @@ import com.spoony.spoony_server.domain.user.ProfileImage;
 
 public record ProfileImageResponseDTO(
         int imageLevel,
+        String spoonName,
         String unlockCondition,
         String imageUrl,
         boolean isUnlocked
@@ -12,6 +13,7 @@ public record ProfileImageResponseDTO(
         String imageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
         return new ProfileImageResponseDTO(
                 profileImage.getImageLevel(),
+                profileImage.getSpoonName(),
                 profileImage.getUnlockCondition(),
                 imageUrl,
                 isUnlocked
