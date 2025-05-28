@@ -8,7 +8,7 @@ import com.spoony.spoony_server.application.port.command.zzim.ZzimGetFocusComman
 import com.spoony.spoony_server.application.port.command.zzim.ZzimGetLocationCardCommand;
 
 public interface ZzimGetUseCase {
-    ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand command);
+    ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command);
     ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command);
     ZzimCardListResponseDTO getZzimByLocation(ZzimGetLocationCardCommand command);
 }

@@ -4,6 +4,7 @@ import com.spoony.spoony_server.adapter.dto.post.response.CategoryColorResponseD
 
 public record ZzimCardResponseDTO(long placeId,
                                   String placeName,
+                                  String description,
                                   String placeAddress,
                                   String photoUrl,
                                   Double latitude,
@@ -12,12 +13,13 @@ public record ZzimCardResponseDTO(long placeId,
 
     public static ZzimCardResponseDTO of(long placeId,
                                          String placeName,
+                                         String description,
                                          String placeAddress,
                                          String photoUrl,
                                          Double latitude,
                                          Double longitude,
                                          CategoryColorResponseDTO categoryColorResponse) {
-        return new ZzimCardResponseDTO(placeId, placeName, placeAddress, photoUrl, latitude, longitude, categoryColorResponse);
+        return new ZzimCardResponseDTO(placeId, placeName,description, placeAddress, photoUrl, latitude, longitude, categoryColorResponse);
     }
 }
 
