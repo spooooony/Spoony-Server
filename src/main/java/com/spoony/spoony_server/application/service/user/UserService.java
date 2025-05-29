@@ -257,9 +257,9 @@ public class UserService implements
         // 2. block 테이블에 저장 (상태: UNFOLLOWED)
         blockPort.saveUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED);
 
-        // 3. follow 관계 제거 (양방향)
+        // 3. follow 관계 제거
         userPort.deleteFollowRelation(userId, targetUserId);
-        userPort.deleteFollowRelation(targetUserId, userId);
+        //userPort.deleteFollowRelation(targetUserId, userId);
     }
 
     @Override
