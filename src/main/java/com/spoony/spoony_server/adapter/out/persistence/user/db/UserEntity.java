@@ -4,6 +4,7 @@ import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockEntity;
 import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.ScoopPostEntity;
+import com.spoony.spoony_server.adapter.out.persistence.report.db.ReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.UserReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonBalanceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.spoon.db.SpoonDrawEntity;
@@ -122,6 +123,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "targetUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<UserReportEntity> targetUsers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<ReportEntity> reports;
 
     @OneToMany(mappedBy = "reporter", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<UserReportEntity> reporters = new ArrayList<>();

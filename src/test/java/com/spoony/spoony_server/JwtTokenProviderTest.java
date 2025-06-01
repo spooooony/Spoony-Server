@@ -17,7 +17,7 @@ class JwtTokenProviderTest {
 
     @Test
     void generateTokenPair_ShouldReturnValidTokens() {
-        Long userId = 67L;
+        Long userId = 98L;
 
         JwtTokenDTO tokenPair = jwtTokenProvider.generateTokenPair(userId);
 
