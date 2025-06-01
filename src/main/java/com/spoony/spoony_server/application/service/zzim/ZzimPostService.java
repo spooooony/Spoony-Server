@@ -54,8 +54,8 @@ public class ZzimPostService implements
 
 
 @Transactional
-public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand command) {
-
+public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
+    Long zzimCardCount = zzimPostPort.countZzimByUserId(command.getUserId());
 
     List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
             command.getUserId(),
@@ -81,6 +81,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
             .map(zzimPost -> {
                 Post post = zzimPost.getPost();
                 Place place = post.getPlace();
+                String description = post.getDescription();
                 Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
                 PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
@@ -95,6 +96,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
                 return ZzimCardResponseDTO.of(
                         place.getPlaceId(),
                         place.getPlaceName(),
+                        description,
                         place.getPlaceAddress(),
                         photo.getPhotoUrl(),
                         place.getLatitude(),
@@ -105,7 +107,7 @@ public ZzimCardListWithCursorResponseDTO getZzimCardList(ZzimGetCardCommand comm
             .toList();
 
 
-    return new ZzimCardListWithCursorResponseDTO(zzimCardResponses);
+    return new ZzimCardListResponseDTO(zzimCardResponses.size(),zzimCardResponses);
 }
 
 
@@ -189,6 +191,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
         List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(userId);
         Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
 
+
         for (ZzimPost zzimPost : zzimPostList) {
             Place place = zzimPost.getPost().getPlace();
             if (place == null) {
@@ -209,6 +212,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                 })
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
+                    String description = post.getDescription();
                     Place place = post.getPlace();
                     Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
 
@@ -224,6 +228,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                     return ZzimCardResponseDTO.of(
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
+                            description,
                             place.getPlaceAddress(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),
@@ -264,6 +269,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                 })
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
+                    String description = post.getDescription();
                     Place place = post.getPlace();
                     Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
 
@@ -279,6 +285,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                     return ZzimCardResponseDTO.of(
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
+                            description,
                             place.getPlaceAddress(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),
@@ -319,6 +326,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                 })
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
+                    String description = post.getDescription();
                     Place place = post.getPlace();
 
                     Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
@@ -335,6 +343,7 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                     return ZzimCardResponseDTO.of(
                             place.getPlaceId(),  // placeId 추가
                             place.getPlaceName(),
+                            description,
                             place.getPlaceAddress(),
                             photo.getPhotoUrl(),
                             place.getLatitude(),

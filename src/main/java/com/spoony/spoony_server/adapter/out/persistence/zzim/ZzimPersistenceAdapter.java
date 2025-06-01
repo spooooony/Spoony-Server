@@ -43,6 +43,11 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         return zzimPostRepository.countByPost_PostId(postId);
     }
 
+    @Override
+    public Long countZzimByUserId(Long userId){
+        return zzimPostRepository.countByUser_UserId(userId);
+    }
+
     public boolean existsByUserIdAndPostId(Long userId, Long postId) {
         return zzimPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }

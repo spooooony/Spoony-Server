@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface ZzimPostRepository extends JpaRepository<ZzimPostEntity, Long>, JpaSpecificationExecutor<ZzimPostEntity> {
     Long countByPost_PostId(Long postId);
+    Long countByUser_UserId(Long userId);
     boolean existsByUser_UserIdAndPost_PostId(Long userId, Long postId);
     List<ZzimPostEntity> findByUser_UserId(Long userId);
     // 게시물 신고에서 사용
