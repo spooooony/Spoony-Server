@@ -30,9 +30,8 @@ public class ProfileImageService implements ProfileImageGetUseCase {
             boolean isUnlocked = totalZzimCount >= profileImage.getRequiredZzimCount();
             if (isUnlocked){
                 unlockedImages.add(ProfileImageResponseDTO.of(profileImage,true));
-            }
-            if (totalZzimCount < profileImage.getRequiredZzimCount()) {
-                break;
+            } else{
+                unlockedImages.add(ProfileImageResponseDTO.of(profileImage,false));
             }
         }
         return ProfileImageListResponseDTO.of(unlockedImages);
