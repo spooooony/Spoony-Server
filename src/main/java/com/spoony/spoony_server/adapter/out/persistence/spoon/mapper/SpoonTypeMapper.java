@@ -11,7 +11,8 @@ public class SpoonTypeMapper {
                 spoonTypeEntity.getSpoonName(),
                 spoonTypeEntity.getSpoonAmount(),
                 spoonTypeEntity.getProbability(),
-                spoonTypeEntity.getSpoonImage()
+                spoonTypeEntity.getSpoonImage(),
+                spoonTypeEntity.getSpoonGetImage()
         );
     }
 }

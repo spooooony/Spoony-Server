@@ -15,4 +15,5 @@ public class SpoonType {
     private int spoonAmount;
     private BigDecimal probability;
     private String spoonImage;
+    private String spoonGetImage;
 }

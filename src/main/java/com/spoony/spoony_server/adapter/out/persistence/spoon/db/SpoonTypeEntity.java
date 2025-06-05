@@ -27,4 +27,7 @@ public class SpoonTypeEntity {
 
     @Column(nullable = false)
     private String spoonImage;
+
+    @Column(nullable = false)
+    private String spoonGetImage;
 }
