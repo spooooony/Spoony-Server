@@ -108,46 +108,28 @@ public class FeedService implements FeedGetUseCase {
         Long currentUserId = command.getCurrentUserId();
 
         try {
-            if (isLocalReviewFlag && categoryIds.size() == 1 && categoryIds.contains(2L)) {
-                filteredPosts = postPort.findFilteredPosts(
-                        categoryIds,   // 카테고리 필터는 [2]로만 전달 (실제로는 [2]가 단독일 경우 category 필터를 제외할 것)
-                        command.getRegionIds(),
-                        ageGroups,
-                        command.getSortBy(),
-                        isLocalReviewFlag,
-                        cursor,
-                        size
-                );
-            } else {
-                filteredPosts = postPort.findFilteredPosts(
-                        categoryIds,
-                        command.getRegionIds(),
-                        ageGroups,
-                        command.getSortBy(),
-                        isLocalReviewFlag,
-                        cursor,
-                        size
-                );
-            }
+            List<Long> blockedUserIds = blockPort.getBlockedUserIds(currentUserId);
+            List<Long> reportedUserIds = blockPort.getBlockerUserIds(currentUserId);
+            List<Long> reportedPostIds = postPort.getReportedPostIds(currentUserId);
+
+            filteredPosts = postPort.findFilteredPosts(
+                    categoryIds,
+                    command.getRegionIds(),
+                    ageGroups,
+                    command.getSortBy(),
+                    isLocalReviewFlag,
+                    cursor,
+                    size,
+                    blockedUserIds,
+                    reportedUserIds,
+                    reportedPostIds
+            );
         } catch (Exception e) {
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
-        // 차단 유저 필터링
-        List<Long> userIdsBlockedByMe = blockPort.getBlockedUserIds(currentUserId);
-        List<Long> userIdsBlockingMe = blockPort.getBlockerUserIds(currentUserId);
 
-        //신고한 게시물 필터링
-        List<Long> reportedPostIds = reportPort.findReportedPostIdsByUserId(currentUserId);
-
-        filteredPosts = filteredPosts.stream()
-                .filter(post -> {
-                    Long authorId = post.getUser().getUserId();
-                    Long postId = post.getPostId();
-                    return !userIdsBlockedByMe.contains(authorId) && !userIdsBlockingMe.contains(authorId)&& !reportedPostIds.contains(postId);
-                })
-                .toList();
-
+        // 🔹 응답용 DTO 변환
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
@@ -186,6 +168,7 @@ public class FeedService implements FeedGetUseCase {
         Long nextCursor = filteredPosts.isEmpty() ? null :
                 filteredPosts.get(filteredPosts.size() - 1).getPostId();
 
-        return FilteredFeedResponseListDTO.of(feedResponseList,nextCursor);
+        return FilteredFeedResponseListDTO.of(feedResponseList, nextCursor);
+
     }
 }
