@@ -68,7 +68,7 @@ public class PostService implements
         Place place = post.getPlace();
         LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt()) ? post.getUpdatedAt() : post.getCreatedAt();
 
-        Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
+        Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId()) - 1L;
         boolean isMine = post.getUser().getUserId().equals(command.getUserId());
         boolean isZzim = zzimPostPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
         boolean isScoop = postPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
@@ -192,7 +192,7 @@ public class PostService implements
 
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
-                    Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId());
+                    Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId()) - 1L;
                     String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
                     boolean isMine = post.getUser().getUserId().equals(userGetCommand.getUserId());
                     LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())
@@ -233,16 +233,24 @@ public class PostService implements
         User user = userPort.findUserById(command.getUserId());
         Category category = categoryPort.findCategoryById(command.getCategoryId());
 
-        Place place = new Place(
+        Place place = placePort.findByPlaceNameAndCoordinates(
                 command.getPlaceName(),
-                command.getPlaceAddress(),
-                command.getPlaceRoadAddress(),
                 command.getLatitude(),
                 command.getLongitude()
         );
 
-        Long placeId = placePort.savePlace(place);
-        place = placePort.findPlaceById(placeId);
+        if (place == null) {
+            // 없으면 새로 생성
+            place = new Place(
+                    command.getPlaceName(),
+                    command.getPlaceAddress(),
+                    command.getPlaceRoadAddress(),
+                    command.getLatitude(),
+                    command.getLongitude()
+            );
+            Long placeId = placePort.savePlace(place);
+            place = placePort.findPlaceById(placeId);
+        }
 
         Post post = new Post(
                 user,
@@ -273,11 +281,11 @@ public class PostService implements
         });
 
         // 작성자 스푼 개수 조정
-        Activity activity = spoonPort.findActivityByActivityId(2L);
-        spoonPort.updateSpoonBalanceByActivity(user, activity);
+//        Activity activity = spoonPort.findActivityByActivityId(2L);
+//        spoonPort.updateSpoonBalanceByActivity(user, activity);
 
         // 스푼 히스토리 기록
-        spoonPort.updateSpoonHistoryByActivity(user, activity);
+//        spoonPort.updateSpoonHistoryByActivity(user, activity);
 
         // 작성자 지도 리스트에 게시물 추가
         zzimPostPort.saveZzimPost(user, post);

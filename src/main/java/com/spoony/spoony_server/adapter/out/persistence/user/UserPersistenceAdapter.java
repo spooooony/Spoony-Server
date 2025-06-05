@@ -154,6 +154,14 @@ public class UserPersistenceAdapter implements UserPort {
     // AUTH
     @Override
     public User create(PlatformUserDTO platformUserDTO, UserSignupDTO userSignupDTO) {
+        UserEntity userEntity = userRepository.findByPlatformAndPlatformId(userSignupDTO.platform(), platformUserDTO.platformId())
+                .orElse(null);
+
+        // 회원가입 직전 (이미 가입된 아이디인지) 마지막 검증
+        if (userEntity != null) {
+            return UserMapper.toDomain(userEntity);
+        }
+
         RegionEntity regionEntity = null;
         AgeGroup ageGroup = null;
 
@@ -166,7 +174,7 @@ public class UserPersistenceAdapter implements UserPort {
             ageGroup = AgeGroup.from(userSignupDTO.birth());
         }
 
-        UserEntity userEntity = UserEntity.builder()
+        userEntity = UserEntity.builder()
                 .platform(userSignupDTO.platform())
                 .platformId(platformUserDTO.platformId())
                 .userName(userSignupDTO.userName())

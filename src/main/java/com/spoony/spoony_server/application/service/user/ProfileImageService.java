@@ -23,7 +23,12 @@ public class ProfileImageService implements ProfileImageGetUseCase {
     @Override
     public ProfileImageListResponseDTO getAvailableProfileImages(UserGetCommand command) {
         List<Post> postList = postPort.findPostsByUserId(command.getUserId());
-        Long totalZzimCount = postList.stream().mapToLong(post -> zzimPostPort.countZzimByPostId(post.getPostId())).sum();
+
+        Long totalZzimCount = postList
+                .stream()
+                .mapToLong(post -> zzimPostPort.countZzimByPostId(post.getPostId()) - 1L)
+                .sum();
+
         List<ProfileImageResponseDTO> unlockedImages = new ArrayList<>();
 
         for (ProfileImage profileImage : ProfileImage.values()){
