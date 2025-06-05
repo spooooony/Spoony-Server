@@ -30,7 +30,6 @@ public class SecurityConfig {
             "/api/v1/auth/refresh",
             "/api/v1/user/exists",
             "/api/v1/user/region",
-            "/api/v1/user/profile/images",
             "/profile-images/**",
             "/swagger-ui/**",
             "/v3/api-docs/**"
