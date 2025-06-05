@@ -260,9 +260,24 @@ public class PostPersistenceAdapter implements
         return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
 
     }
+
+    @Override
+    public List<Long> getReportedPostIds(Long userId) {
+        return postRepository.findReportedPostIdsByUserId(userId);
+    }
     @Transactional
     @Override
-    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, List<AgeGroup> ageGroups, String sortBy, boolean isLocalReview,Long cursor, int size) {
+    public List<Post> findFilteredPosts(List<Long> categoryIds,
+                                        List<Long> regionIds,
+                                        List<AgeGroup> ageGroups,
+                                        String sortBy,
+                                        boolean isLocalReview,
+                                        Long cursor,
+                                        int size,
+                                        List<Long> blockedUserIds,
+                                        List<Long> blockerUserIds,
+                                        List<Long> reportedPostIds) {
+
         Logger logger = LoggerFactory.getLogger(getClass());
         logger.info("🟢findFilteredPosts 호출됨");
         logger.info("🟢categoryIds: {}", categoryIds);
@@ -271,23 +286,30 @@ public class PostPersistenceAdapter implements
         logger.info("🟢isLocalReview: {}", isLocalReview);
         logger.info("🟢cursor: {}", cursor);
         logger.info("🟢size: {}", size);
-        // 카테고리, 지역, 연령대, 로컬리뷰 필터 결합
+
         Specification<PostEntity> spec = PostSpecification.buildFilterSpec(
                 categoryIds,
                 regionIds,
                 ageGroups,
                 isLocalReview,
                 sortBy,
-                cursor
+                cursor, // cursor는 아래에서 직접 처리
+                blockedUserIds,
+                blockerUserIds,
+                reportedPostIds
         );
 
-        // Pageable 생성 (페이지 번호는 0부터 시작)
-        Pageable pageable = PageRequest.of(0, size); // 기본적으로 최신순으로 정렬
+//        // cursor가 있으면 postId < cursor 조건 추가 (ID 역순 페이징 기준)
+//        if (cursor != null) {
+//            Specification<PostEntity> cursorSpec = (root, query, cb) -> cb.lessThan(root.get("postId"), cursor);
+//            spec = spec.and(cursorSpec);
+//        }
 
-        // 쿼리 실행 및 결과 반환 (페이징 처리)
+        // 페이징 처리 : offset 기반이 아닌 cursor 기반이라서 page 번호는 항상 0
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "postId")); // 최신순 정렬
+
         Page<PostEntity> page = postRepository.findAll(spec, pageable);
 
-        // 엔티티를 도메인 객체로 변환 후 반환
         List<Post> result = page.getContent().stream()
                 .map(PostMapper::toDomain)
                 .collect(Collectors.toList());
@@ -296,8 +318,52 @@ public class PostPersistenceAdapter implements
         logger.info("🟢현재 페이지 게시물 수: {}", result.size());
 
         return result;
-
     }
+
+
+//    @Transactional
+//    @Override
+//    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, List<AgeGroup> ageGroups, String sortBy, boolean isLocalReview,Long cursor, int size,List<Long> blockedUserIds,
+//                                        List<Long> blockerUserIds,
+//                                        List<Long> reportedPostIds) {
+//        Logger logger = LoggerFactory.getLogger(getClass());
+//        logger.info("🟢findFilteredPosts 호출됨");
+//        logger.info("🟢categoryIds: {}", categoryIds);
+//        logger.info("🟢regionIds: {}", regionIds);
+//        logger.info("🟢ageGroups: {}", ageGroups);
+//        logger.info("🟢isLocalReview: {}", isLocalReview);
+//        logger.info("🟢cursor: {}", cursor);
+//        logger.info("🟢size: {}", size);
+//        // 카테고리, 지역, 연령대, 로컬리뷰 필터 결합
+//        Specification<PostEntity> spec = PostSpecification.buildFilterSpec(
+//                categoryIds,
+//                regionIds,
+//                ageGroups,
+//                isLocalReview,
+//                sortBy,
+//                cursor,
+//                blockedUserIds,
+//                blockerUserIds,
+//                reportedPostIds
+//        );
+//
+//        // Pageable 생성 (페이지 번호는 0부터 시작)
+//        Pageable pageable = PageRequest.of(0, size); // 기본적으로 최신순으로 정렬
+//
+//        // 쿼리 실행 및 결과 반환 (페이징 처리)
+//        Page<PostEntity> page = postRepository.findAll(spec, pageable);
+//
+//        // 엔티티를 도메인 객체로 변환 후 반환
+//        List<Post> result = page.getContent().stream()
+//                .map(PostMapper::toDomain)
+//                .collect(Collectors.toList());
+//
+//        logger.info("🟢총 게시물 수: {}", page.getTotalElements());
+//        logger.info("🟢현재 페이지 게시물 수: {}", result.size());
+//
+//        return result;
+//
+//    }
 
 
     @Override

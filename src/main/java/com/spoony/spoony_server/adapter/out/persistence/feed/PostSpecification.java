@@ -94,6 +94,8 @@ public class PostSpecification {
         };
     }
 
+
+
     public static Specification<PostEntity> withAgeGroup(List<AgeGroup> ageGroups){
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -111,6 +113,32 @@ public class PostSpecification {
         };
     }
 
+    public static Specification<PostEntity> excludeBlockedAndReported(
+            List<Long> blockedUserIds,  // 내가 차단/신고한 유저 ID
+            List<Long> blockerUserIds,  // 나를 차단/신고한 유저 ID
+            List<Long> reportedPostIds  // 내가 신고한 게시물 ID
+    ) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (blockedUserIds != null && !blockedUserIds.isEmpty()) {
+                predicates.add(cb.not(root.get("user").get("userId").in(blockedUserIds)));
+            }
+
+            if (blockerUserIds != null && !blockerUserIds.isEmpty()) {
+                predicates.add(cb.not(root.get("user").get("userId").in(blockerUserIds)));
+            }
+
+            if (reportedPostIds != null && !reportedPostIds.isEmpty()) {
+                predicates.add(cb.not(root.get("postId").in(reportedPostIds)));
+            }
+
+            if (predicates.isEmpty()) {
+                return null;  // 조건 없음, 필터 안함
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 
     public static Specification<PostEntity> buildFilterSpec(
             List<Long> categoryIds,
@@ -118,47 +146,46 @@ public class PostSpecification {
             List<AgeGroup> ageGroups,
             boolean isLocalReview,
             String sortBy,
-            Long cursor) {
+            Long cursor,
+            List<Long> blockedUserIds,
+            List<Long> blockerUserIds,
+            List<Long> reportedPostIds) {
 
-        // 로컬리뷰 필터
         Specification<PostEntity> localReviewSpec = withLocalReview(categoryIds);
-
-        // 지역 필터
         Specification<PostEntity> regionSpec = withRegionIds(regionIds);
 
-        // 연령대 필터
         Specification<PostEntity> ageGroupSpec = null;
         if (ageGroups != null && !ageGroups.isEmpty()) {
             ageGroupSpec = PostSpecification.withAgeGroup(ageGroups);
         }
 
-        // 카테고리 필터
-        boolean onlyLocalCategory = categoryIds.size() == 1 && categoryIds.contains(2L);
+        boolean onlyLocalCategory = categoryIds != null && categoryIds.size() == 1 && categoryIds.contains(2L);
         Specification<PostEntity> categorySpec = null;
         if (!onlyLocalCategory) {
             categorySpec = withCategoryIds(categoryIds);
         }
 
-        // 필터 결합
+        Specification<PostEntity> exclusionSpec = excludeBlockedAndReported(blockedUserIds, blockerUserIds, reportedPostIds);
+
         Specification<PostEntity> spec = Specification.where(localReviewSpec)
                 .and(regionSpec)
                 .and(ageGroupSpec != null ? ageGroupSpec : Specification.where(null))
-                .and(categorySpec != null ? categorySpec : Specification.where(null));
+                .and(categorySpec != null ? categorySpec : Specification.where(null))
+                .and(exclusionSpec != null ? exclusionSpec : Specification.where(null));
 
-        // 정렬 처리
         return (root, query, cb) -> {
-            // 기본 필터링된 조건
             Predicate predicate = spec.toPredicate(root, query, cb);
 
-
-            // ✅ 커서 조건 추가
             if (cursor != null) {
                 Path<Long> postIdPath = root.get("postId");
-                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);  // 커서 기준으로 게시물 조회
-                predicate = cb.and(predicate, cursorPredicate);
+                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);
+                if (predicate != null) {
+                    predicate = cb.and(predicate, cursorPredicate);
+                } else {
+                    predicate = cursorPredicate;
+                }
             }
 
-            // 정렬 조건 추가
             if ("zzimCount".equalsIgnoreCase(sortBy)) {
                 Join<PostEntity, ZzimPostEntity> zzimPostJoin = root.join("zzims", JoinType.LEFT);
                 Expression<Long> zzimCount = cb.count(zzimPostJoin.get("post"));
@@ -167,7 +194,6 @@ public class PostSpecification {
                 query.orderBy(cb.desc(zzimCount), cb.desc(root.get("createdAt")));
             } else {
                 query.orderBy(cb.desc(root.get("postId")));
-                //query.orderBy(cb.desc(root.get("createdAt")));  // 최신순으로 정렬
             }
 
             return predicate;
@@ -175,9 +201,80 @@ public class PostSpecification {
     }
 
 
+//    public static Specification<PostEntity> buildFilterSpec(
+//            List<Long> categoryIds,
+//            List<Long> regionIds,
+//            List<AgeGroup> ageGroups,
+//            boolean isLocalReview,
+//            String sortBy,
+//            Long cursor,
+//            List<Long> blockedUserIds,
+//            List<Long> blockerUserIds,
+//            List<Long> reportedPostIds) {
+//
+//        // 로컬리뷰 필터
+//        Specification<PostEntity> localReviewSpec = withLocalReview(categoryIds);
+//
+//        // 지역 필터
+//        Specification<PostEntity> regionSpec = withRegionIds(regionIds);
+//
+//        // 연령대 필터
+//        Specification<PostEntity> ageGroupSpec = null;
+//        if (ageGroups != null && !ageGroups.isEmpty()) {
+//            ageGroupSpec = PostSpecification.withAgeGroup(ageGroups);
+//        }
+//
+//        // 카테고리 필터
+//        boolean onlyLocalCategory = categoryIds.size() == 1 && categoryIds.contains(2L);
+//        Specification<PostEntity> categorySpec = null;
+//        if (!onlyLocalCategory) {
+//            categorySpec = withCategoryIds(categoryIds);
+//        }
+//
+//
+//
+//        // 차단/신고 필터링
+//        Specification<PostEntity> exclusionSpec = excludeBlockedAndReported(blockedUserIds, blockerUserIds, reportedPostIds);
+//
+//
+//        // 필터 결합
+//        Specification<PostEntity> spec = Specification.where(localReviewSpec)
+//                .and(regionSpec)
+//                .and(ageGroupSpec != null ? ageGroupSpec : Specification.where(null))
+//                .and(categorySpec != null ? categorySpec : Specification.where(null))
+//                .and(exclusionSpec);
+//
+//        // 정렬 처리
+//        return (root, query, cb) -> {
+//            // 기본 필터링된 조건
+//            Predicate predicate = spec.toPredicate(root, query, cb);
+//
+//
+//            // ✅ 커서 조건 추가
+//            if (cursor != null) {
+//                Path<Long> postIdPath = root.get("postId");
+//                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);  // 커서 기준으로 게시물 조회
+//                predicate = cb.and(predicate, cursorPredicate);
+//            }
+//
+//            // 정렬 조건 추가
+//            if ("zzimCount".equalsIgnoreCase(sortBy)) {
+//                Join<PostEntity, ZzimPostEntity> zzimPostJoin = root.join("zzims", JoinType.LEFT);
+//                Expression<Long> zzimCount = cb.count(zzimPostJoin.get("post"));
+//
+//                query.groupBy(root.get("postId"));
+//                query.orderBy(cb.desc(zzimCount), cb.desc(root.get("createdAt")));
+//            } else {
+//                query.orderBy(cb.desc(root.get("postId")));
+//                //query.orderBy(cb.desc(root.get("createdAt")));  // 최신순으로 정렬
+//            }
+//
+//            return predicate;
+//        };
+    }
 
 
 
 
 
-}
+
