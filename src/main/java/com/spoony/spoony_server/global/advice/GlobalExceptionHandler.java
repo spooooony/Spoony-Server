@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -67,6 +68,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(BusinessErrorMessage.NULL_ERROR.getHttpStatus())
                 .body(ResponseDTO.fail(BusinessErrorMessage.NULL_ERROR));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<?> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+        return ResponseEntity
+                .status(BusinessErrorMessage.MULTIPART_ERROR.getHttpStatus())
+                .body(ResponseDTO.fail(BusinessErrorMessage.MULTIPART_ERROR));
     }
 
     @ExceptionHandler(value = {Exception.class})

@@ -8,4 +8,5 @@ public interface PlacePort {
     boolean existsByPlaceIdInAndLatitudeAndLongitude(List<Long> placeIds, Double latitude, Double longitude);
     Long savePlace(Place place);
     Place findPlaceById(Long placeId);
+    Place findByPlaceNameAndCoordinates(String placeName, Double latitude, Double longitude);
 }

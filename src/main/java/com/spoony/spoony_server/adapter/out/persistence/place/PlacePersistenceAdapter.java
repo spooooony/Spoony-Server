@@ -9,7 +9,6 @@ import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -45,5 +44,12 @@ public class PlacePersistenceAdapter implements PlacePort {
         return placeRepository.findById(placeId)
                 .map(PlaceMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND));
+    }
+
+    @Override
+    public Place findByPlaceNameAndCoordinates(String placeName, Double latitude, Double longitude) {
+        return placeRepository.findByPlaceNameAndLatitudeAndLongitude(placeName, latitude, longitude)
+                .map(PlaceMapper::toDomain)
+                .orElse(null);
     }
 }
