@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -117,27 +118,19 @@ public class PostService implements
         Long userId = command.getUserId(); //나
         Long tagetUserId = command.getTargetUserId(); //타유저
         Boolean isLocalReview = command.getIsLocalReview();
-        //1. 유저가 작성한 게시물 모두 조회
         List<Post> postList = postPort.findPostsByUserId(tagetUserId);
 
-        //1-1. 타유저 페이지의 경우(userId != targetUserId), 타유저가 작성한 리뷰 중, 내가 신고한 리뷰는 필터링
-        List<Long> reportedPostIds = postPort.getReportedPostIds(userId); //내가 신고한 게시물 ID들 조회
-        System.out.println("🟢🟢🟢🟢reportedPostIds = " + reportedPostIds);
+        // 타유저 페이지의 경우(userId != targetUserId), 타유저가 작성한 리뷰 중, 내가 신고한 리뷰는 필터링
+        List<Long> reportedPostIds = postPort.getReportedPostIds(userId);
 
-//        postList = postList.stream()
-//                .filter(post -> !reportedPostIds.contains(post.getPostId()))
-//                .collect(Collectors.toList());
         postList = postList.stream()
                 .filter(post -> {
                     boolean isReported = reportedPostIds.contains(post.getPostId());
-                    System.out.println("🟢🟢🟢🟢🟢Post ID: " + post.getPostId() +
-                            " | 🟢🟢🟢Reported: " + isReported);
                     return !isReported;
                 })
                 .collect(Collectors.toList());
 
-
-        //2. localReview가 true일 경우, 활동 지역과 식당 지역이 같은 게시물만 필터링
+        // localReview가 true일 경우, 활동 지역과 식당 지역이 같은 게시물만 필터링
         if (Boolean.TRUE.equals(isLocalReview)) {
             postList = postList.stream()
                     .filter(post -> {
@@ -152,6 +145,9 @@ public class PostService implements
                     })
                     .toList();
         }
+
+        // 날짜 기준 최신순 정렬 추가
+        postList.sort(Comparator.comparing(Post::getCreatedAt).reversed());
 
         //3. 각 Post -> Feed
         List<FeedResponseDTO> feedResponseList = postList.stream().map(post -> {
