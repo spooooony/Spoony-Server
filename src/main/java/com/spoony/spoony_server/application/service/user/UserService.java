@@ -111,7 +111,6 @@ public class UserService implements
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
         List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
 
-
         List<Long> reportedUserIds;
         // 내 팔로우 조회면 신고 필터 불필요, 타인 팔로우 조회면 신고한 유저 필터링
         if (userId.equals(targetUserId)) {
@@ -131,6 +130,7 @@ public class UserService implements
                     String regionName = followerUser.getRegion() != null ? followerUser.getRegion().getRegionName() : null;
 
                     return UserSimpleResponseDTO.of(
+                            command.getUserId(), // 현재 유저 ID
                             followerUser.getUserId(),
                             followerUser.getUserName(),
                             regionName,
@@ -148,14 +148,10 @@ public class UserService implements
         Long targetUserId = command.getTargetUserId();
 
         List<Follow> followings = userPort.findFollowingsByUserId(targetUserId);
-
-
-
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
         List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
-
-
         List<Long> reportedUserIds;
+
         // 내 팔로우 조회면 신고 필터 불필요, 타인 팔로우 조회면 신고한 유저 필터링
         if (userId.equals(targetUserId)) {
             reportedUserIds = List.of();
@@ -174,6 +170,7 @@ public class UserService implements
                     String regionName = followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
 
                     return UserSimpleResponseDTO.of(
+                            command.getUserId(),
                             followingUser.getUserId(),
                             followingUser.getUserName(),
                             regionName,
@@ -197,6 +194,7 @@ public class UserService implements
             String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
 
             return UserSimpleResponseDTO.of(
+                    command.getUserId(),
                     blockedUser.getUserId(),
                     blockedUser.getUserName(),
                     regionName,
@@ -216,7 +214,6 @@ public class UserService implements
         if (userPort.existsFollowRelation(userId, targetUserId)) {
             throw new BusinessException(UserErrorMessage.ALEADY_FOLLOW);
         }
-
 
         Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId,targetUserId);
 
