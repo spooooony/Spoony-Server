@@ -11,6 +11,7 @@ import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.application.port.out.post.*;
 import com.spoony.spoony_server.application.port.out.spoon.SpoonPort;
+import com.spoony.spoony_server.application.port.out.user.RegionPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.place.Place;
@@ -23,6 +24,7 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService implements
@@ -54,6 +57,7 @@ public class PostService implements
     private final PhotoPort photoPort;
     private final BlockPort blockPort;
     private final ReportPort reportPort;
+    private final RegionPort regionPort;
 
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
@@ -260,12 +264,15 @@ public class PostService implements
 
         if (place == null) {
             // 없으면 새로 생성
+            Region region = regionPort.findByAddress(command.getPlaceAddress());
+
             place = new Place(
                     command.getPlaceName(),
                     command.getPlaceAddress(),
                     command.getPlaceRoadAddress(),
                     command.getLatitude(),
-                    command.getLongitude()
+                    command.getLongitude(),
+                    region
             );
             Long placeId = placePort.savePlace(place);
             place = placePort.findPlaceById(placeId);

@@ -6,13 +6,13 @@ import com.spoony.spoony_server.domain.user.Region;
 public class RegionMapper {
 
     public static Region toDomain(final RegionEntity regionEntity) {
+        if (regionEntity == null) return null;
         return new Region(
                 regionEntity.getRegionId(),
                 regionEntity.getRegionName());
     }
     public static RegionEntity toEntity(final Region region) {
         if (region == null) return null;
-
         return RegionEntity.builder()
                 .regionId(region.getRegionId())
                 .regionName(region.getRegionName())

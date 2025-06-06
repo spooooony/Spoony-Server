@@ -35,7 +35,8 @@ public class PostMapper {
                         postEntity.getPlace().getPlaceAddress(),
                         postEntity.getPlace().getPlaceRoadAddress(),
                         postEntity.getPlace().getLatitude(),
-                        postEntity.getPlace().getLongitude()
+                        postEntity.getPlace().getLongitude(),
+                        RegionMapper.toDomain(postEntity.getPlace().getRegion())
                 ),
                 postEntity.getDescription(),
                 postEntity.getValue(),

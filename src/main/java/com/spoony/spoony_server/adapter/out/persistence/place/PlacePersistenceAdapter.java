@@ -3,6 +3,7 @@ package com.spoony.spoony_server.adapter.out.persistence.place;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceRepository;
 import com.spoony.spoony_server.adapter.out.persistence.place.mapper.PlaceMapper;
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.global.annotation.Adapter;
@@ -33,6 +34,7 @@ public class PlacePersistenceAdapter implements PlacePort {
                 .placeRoadAddress(place.getPlaceRoadAddress())
                 .latitude(place.getLatitude())
                 .longitude(place.getLongitude())
+                .region(RegionMapper.toEntity(place.getRegion()))
                 .build();
         placeRepository.save(placeEntity);
 
