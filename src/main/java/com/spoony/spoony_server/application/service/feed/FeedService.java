@@ -128,15 +128,14 @@ public class FeedService implements FeedGetUseCase {
             throw new BusinessException(PostErrorMessage.POST_NOT_FOUND);
         }
 
-
-        // 🔹 응답용 DTO 변환
+        // 응답용 DTO 변환
         List<FilteredFeedResponseDTO> feedResponseList = filteredPosts.stream()
                 .map(post -> {
                     User author = post.getUser();
                     boolean isMine = currentUserId != null && currentUserId.equals(author.getUserId());
 
                     List<PostCategory> postCategories = postCategoryPort.findAllByPostId(post.getPostId());
-                    Category mainCategory = postCategories.isEmpty() ? null : postCategories.get(0).getCategory();
+                    Category mainCategory = postCategories.isEmpty() ? null : postCategories.getFirst().getCategory();
 
                     String regionName = author.getRegion() != null ? author.getRegion().getRegionName() : null;
 
@@ -166,9 +165,8 @@ public class FeedService implements FeedGetUseCase {
                 .collect(Collectors.toList());
 
         Long nextCursor = filteredPosts.isEmpty() ? null :
-                filteredPosts.get(filteredPosts.size() - 1).getPostId();
+                filteredPosts.getLast().getPostId();
 
         return FilteredFeedResponseListDTO.of(feedResponseList, nextCursor);
-
     }
 }

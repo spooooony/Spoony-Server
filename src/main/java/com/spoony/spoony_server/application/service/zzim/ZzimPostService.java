@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ZzimPostService implements
         ZzimAddUseCase,
@@ -49,72 +50,66 @@ public class ZzimPostService implements
         Post post = postPort.findPostById(postId);
         User user = userPort.findUserById(userId);
 
-        zzimPostPort.saveZzimPost(user,post);
+        zzimPostPort.saveZzimPost(user, post);
     }
 
+    public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
+        Long zzimCardCount = zzimPostPort.countZzimByUserId(command.getUserId());
 
-@Transactional
-public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
-    Long zzimCardCount = zzimPostPort.countZzimByUserId(command.getUserId());
+        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
+                command.getUserId(),
+                command.getCategoryId()
+        );
 
-    List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
-            command.getUserId(),
-            command.getCategoryId()
-    );
+        // 2. 중복 placeId 제거 + 필터링 (필요하면 여기서 차단 등 필터도 적용 가능)
+        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
 
-    // 2. 중복 placeId 제거 + 필터링 (필요하면 여기서 차단 등 필터도 적용 가능)
-    Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
-
-    for (ZzimPost zzimPost : zzimPostList) {
-        Place place = zzimPost.getPost().getPlace();
-        if (place == null) {
-            throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
+        for (ZzimPost zzimPost : zzimPostList) {
+            Place place = zzimPost.getPost().getPlace();
+            if (place == null) {
+                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
+            }
+            Long placeId = place.getPlaceId();
+            if (!uniquePlacePostMap.containsKey(placeId)) {
+                uniquePlacePostMap.put(placeId, zzimPost);
+            }
         }
-        Long placeId = place.getPlaceId();
-        if (!uniquePlacePostMap.containsKey(placeId)) {
-            uniquePlacePostMap.put(placeId, zzimPost);
-        }
+
+        // 3. size 이상인 경우 결과 자르기
+        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
+                .map(zzimPost -> {
+                    Post post = zzimPost.getPost();
+                    Place place = post.getPlace();
+                    String description = post.getDescription();
+                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
+                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+
+                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
+                            postCategory.getCategory().getCategoryId(),
+                            postCategory.getCategory().getCategoryName(),
+                            postCategory.getCategory().getIconUrlColor(),
+                            postCategory.getCategory().getTextColor(),
+                            postCategory.getCategory().getBackgroundColor()
+                    );
+
+                    return ZzimCardResponseDTO.of(
+                            place.getPlaceId(),
+                            place.getPlaceName(),
+                            description,
+                            place.getPlaceAddress(),
+                            photo.getPhotoUrl(),
+                            place.getLatitude(),
+                            place.getLongitude(),
+                            categoryColorResponse
+                    );
+                })
+                .toList();
+
+
+        return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
-    // 3. size 이상인 경우 결과 자르기
-    List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
-            .map(zzimPost -> {
-                Post post = zzimPost.getPost();
-                Place place = post.getPlace();
-                String description = post.getDescription();
-                Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
-                PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-
-                CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
-                        postCategory.getCategory().getCategoryId(),
-                        postCategory.getCategory().getCategoryName(),
-                        postCategory.getCategory().getIconUrlColor(),
-                        postCategory.getCategory().getTextColor(),
-                        postCategory.getCategory().getBackgroundColor()
-                );
-
-                return ZzimCardResponseDTO.of(
-                        place.getPlaceId(),
-                        place.getPlaceName(),
-                        description,
-                        place.getPlaceAddress(),
-                        photo.getPhotoUrl(),
-                        place.getLatitude(),
-                        place.getLongitude(),
-                        categoryColorResponse
-                );
-            })
-            .toList();
-
-
-    return new ZzimCardListResponseDTO(zzimCardResponses.size(),zzimCardResponses);
-}
-
-
-
-
-public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { //command -> userId, placeId
-
+    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { //command -> userId, placeId
         User user = userPort.findUserById(command.getUserId()); //로그인 userId
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(user.getUserId());
         List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(user.getUserId());
@@ -124,26 +119,25 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
                     Post post = zzimPost.getPost();
                     Place postPlace = post.getPlace();
                     User writer = post.getUser();
-                    return postPlace != null && postPlace.getPlaceId().equals(command.getPlaceId())&&
-                            !blockedUserIds.contains(writer.getUserId());
+                    return postPlace != null && postPlace.getPlaceId().equals(
+                            command.getPlaceId()) && !blockedUserIds.contains(writer.getUserId()
+                    );
                 })
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
                     Place postPlace = post.getPlace();
-
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-
                     CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                             postCategory.getCategory().getCategoryId(),
                             postCategory.getCategory().getCategoryName(),
                             postCategory.getCategory().getIconUrlColor(),
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
-
                     Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId()) - 1L;
 
                     List<Photo> photoList = zzimPostPort.findPhotoListById(post.getPostId());
-                    List<String> photoUrlList = photoList.stream()
+                    List<String> photoUrlList = photoList
+                            .stream()
                             .map(Photo::getPhotoUrl)
                             .toList();
 
@@ -166,7 +160,6 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
         return ZzimFocusListResponseDTO.of(zzimFocusResponseList);
     }
 
-    @Transactional
     public void deleteZzim(ZzimDeleteCommand command) {
         User user = userPort.findUserById(command.getUserId());
         Post post = postPort.findPostById(command.getPostId());
@@ -174,7 +167,6 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
     }
 
     public ZzimCardListResponseDTO getZzimByLocation(ZzimGetLocationCardCommand command) {
-
         Location location = locationPort.findLocationById(command.getLocationId());
 
         if (location.getLocationType().getLocationTypeId() == 1) {
@@ -187,10 +179,8 @@ public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { 
     }
 
     private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationName) {
-
         List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(userId);
         Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
-
 
         for (ZzimPost zzimPost : zzimPostList) {
             Place place = zzimPost.getPost().getPlace();

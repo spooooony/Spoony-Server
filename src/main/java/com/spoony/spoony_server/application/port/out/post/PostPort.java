@@ -29,7 +29,13 @@ public interface PostPort {
     void deleteAllMenusByPostId(Long postId);
     void deleteAllPhotosByPhotoUrl(List<String> deletePhotoUrlList);
 
-    List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds,  List<AgeGroup>ageGroups,String sortBy,  boolean isLocalReview,Long cursor,int size,List<Long> blockedUserIds,
+    List<Post> findFilteredPosts(List<Long> categoryIds,
+                                 List<Long> regionIds,
+                                 List<AgeGroup>ageGroups,String sortBy,
+                                 boolean isLocalReview,
+                                 Long cursor,
+                                 int size,
+                                 List<Long> blockedUserIds,
                                  List<Long> reportedUserIds,
                                  List<Long> reportedPostIds);
 

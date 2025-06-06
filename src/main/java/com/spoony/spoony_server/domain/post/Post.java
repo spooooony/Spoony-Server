@@ -16,15 +16,17 @@ public class Post {
     private String description;
     private Double value;
     private String cons;
+    private Long zzimCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Post(User user, Place place, String description, Double value, String cons, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Post(User user, Place place, String description, Double value, String cons, Long zzimCount, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.user = user;
         this.place = place;
         this.description = description;
         this.value = value;
         this.cons = cons;
+        this.zzimCount = zzimCount;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

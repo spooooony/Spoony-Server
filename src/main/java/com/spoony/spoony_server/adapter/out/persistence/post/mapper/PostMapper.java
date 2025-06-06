@@ -41,6 +41,7 @@ public class PostMapper {
                 postEntity.getDescription(),
                 postEntity.getValue(),
                 postEntity.getCons(),
+                postEntity.getZzimCount(),
                 postEntity.getCreatedAt(),
                 postEntity.getUpdatedAt()
         );
@@ -55,6 +56,7 @@ public class PostMapper {
                 .description(post.getDescription())
                 .value(post.getValue())
                 .cons(post.getCons())
+                .zzimCount(post.getZzimCount())
                 .build();
     }
 }

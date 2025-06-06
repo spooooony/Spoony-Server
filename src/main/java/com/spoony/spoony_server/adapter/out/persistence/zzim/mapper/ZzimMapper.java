@@ -36,6 +36,7 @@ public class ZzimMapper {
                         zzimPostEntity.getPost().getDescription(),
                         zzimPostEntity.getPost().getValue(),
                         zzimPostEntity.getPost().getCons(),
+                        zzimPostEntity.getPost().getZzimCount(),
                         zzimPostEntity.getPost().getCreatedAt(),
                         zzimPostEntity.getPost().getUpdatedAt()
                 )

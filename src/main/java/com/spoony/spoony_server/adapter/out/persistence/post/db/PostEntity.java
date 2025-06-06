@@ -44,6 +44,8 @@ public class PostEntity {
     @Column(columnDefinition = "TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String cons;
 
+    private Long zzimCount;
+
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate
@@ -72,18 +74,26 @@ public class PostEntity {
     private List<ScoopPostEntity> scoopPosts = new ArrayList<>();
 
     @Builder
-    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String description, Double value, String cons) {
+    public PostEntity(Long postId, UserEntity user, PlaceEntity place, String description, Double value, String cons, Long zzimCount) {
         this.postId = postId;
         this.user = user;
         this.place = place;
         this.description = description;
         this.value = value;
         this.cons = cons;
+        this.zzimCount = zzimCount;
     }
 
     public void updatePostContent(String description, Double value, String cons) {
         this.description = description;
         this.value = value;
         this.cons = cons;
+    }
+
+    public void updateZzimCount(long delta) {
+        if (this.zzimCount == null) {
+            this.zzimCount = 0L;
+        }
+        this.zzimCount += delta;
     }
 }

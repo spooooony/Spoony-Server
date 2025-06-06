@@ -18,10 +18,6 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +48,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         return zzimPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }
 
-
     @Override
     public List<ZzimPost> findZzimPostsByUserId(Long userId) {
         return zzimPostRepository.findByUser_UserId(userId)
@@ -69,8 +64,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         return zzimPostEntities.stream()
                 .map(ZzimMapper::toDomain)
                 .toList();
-
-
     }
 
     @Override
@@ -81,6 +74,9 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         PostEntity postEntity = postRepository.findById(post.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+
+        postEntity.updateZzimCount(1);
+        postRepository.save(postEntity);
 
         ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder()
                 .user(userEntity)
@@ -109,8 +105,10 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
 
     @Override
     public void deleteByUserAndPost(User user, Post post) {
+        PostEntity postEntity = postRepository.findById(post.getPostId())
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+        postEntity.updateZzimCount(-1);
+        postRepository.save(postEntity);
         zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
     }
-
-
 }
