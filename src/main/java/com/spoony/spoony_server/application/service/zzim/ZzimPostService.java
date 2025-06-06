@@ -133,7 +133,7 @@ public class ZzimPostService implements
                             postCategory.getCategory().getIconUrlColor(),
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
-                    Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId()) - 1L;
+                    Long zzimCount = post.getZzimCount();
 
                     List<Photo> photoList = zzimPostPort.findPhotoListById(post.getPostId());
                     List<String> photoUrlList = photoList

@@ -73,7 +73,7 @@ public class PostService implements
         Place place = post.getPlace();
         LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt()) ? post.getUpdatedAt() : post.getCreatedAt();
 
-        Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId()) - 1L;
+        Long zzimCount = post.getZzimCount();
         boolean isMine = post.getUser().getUserId().equals(command.getUserId());
         boolean isZzim = zzimPostPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
         boolean isScoop = postPort.existsByUserIdAndPostId(user.getUserId(), post.getPostId());
@@ -175,7 +175,7 @@ public class PostService implements
                                     category.getBackgroundColor()
 
                     ),
-                            zzimPostPort.countZzimByPostId(post.getPostId()),
+                            post.getZzimCount(),
                             photoUrlList,
                             post.getCreatedAt(),
                             isMine
@@ -211,7 +211,7 @@ public class PostService implements
 
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
                     Category category = categoryPort.findCategoryById(postCategory.getCategory().getCategoryId());
-                    Long zzimCount = zzimPostPort.countZzimByPostId(post.getPostId()) - 1L;
+                    Long zzimCount = post.getZzimCount();
                     String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
                     boolean isMine = post.getUser().getUserId().equals(userGetCommand.getUserId());
                     LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())

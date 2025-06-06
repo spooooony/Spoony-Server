@@ -8,7 +8,7 @@ import com.spoony.spoony_server.domain.zzim.ZzimPost;
 import java.util.List;
 
 public interface ZzimPostPort {
-    Long countZzimByPostId(Long postId);
+//    Long countZzimByPostId(Long postId);
     Long countZzimByUserId(Long userId);
     boolean existsByUserIdAndPostId(Long userId, Long postId);
     Photo findFistPhotoById(Long postId);

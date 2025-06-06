@@ -87,7 +87,7 @@ public class FeedService implements FeedGetUseCase {
                                     category.getTextColor(),
                                     category.getBackgroundColor()
                             ),
-                            zzimPostPort.countZzimByPostId(post.getPostId()),
+                            post.getZzimCount(),
                             photoUrlList,
                             post.getCreatedAt(),
                             isMine
@@ -153,7 +153,7 @@ public class FeedService implements FeedGetUseCase {
                                             mainCategory.getTextColor(),
                                             mainCategory.getBackgroundColor()
                                     ) : null,
-                            zzimPostPort.countZzimByPostId(post.getPostId()),
+                            post.getZzimCount(),
                             postPort.findPhotoById(post.getPostId()).stream()
                                     .map(Photo::getPhotoUrl)
                                     .collect(Collectors.toList()),

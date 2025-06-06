@@ -34,10 +34,10 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     private final PostRepository postRepository;
     private final PhotoRepository photoRepository;
 
-    @Override
-    public Long countZzimByPostId(Long postId) {
-        return zzimPostRepository.countByPost_PostId(postId);
-    }
+//    @Override
+//    public Long countZzimByPostId(Long postId) {
+//        return zzimPostRepository.countByPost_PostId(postId);
+//    }
 
     @Override
     public Long countZzimByUserId(Long userId){
