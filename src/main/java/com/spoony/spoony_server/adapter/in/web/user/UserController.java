@@ -143,8 +143,7 @@ public class UserController {
             description = "마이페이지에서 자신이 작성한 리뷰 목록을 조회합니다."
     )
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
-        UserReviewGetCommand command = new UserReviewGetCommand(userId,userId,null); //user 객체
-
+        UserReviewGetCommand command = new UserReviewGetCommand(userId,userId,null);
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
     }

@@ -103,14 +103,19 @@ public class UserPersistenceAdapter implements UserPort {
     public void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDate birth, Long imageLevel) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
-        RegionEntity region = null;
+        RegionEntity regionEntity = null;
+        AgeGroup ageGroup = null;
 
         if (regionId != null) {
-            region = regionRepository.findById(regionId)
-                    .orElseThrow(() -> new BusinessException(RegionErrorMessage.REGION_NOT_FOUND));
+            regionEntity = regionRepository.findById(regionId)
+                    .orElseThrow(() -> new BusinessException(UserErrorMessage.REGION_NOT_FOUND));
         }
 
-        userEntity.updateProfile(userName, region, introduction, birth, imageLevel);
+        if (birth != null) {
+            ageGroup = AgeGroup.from(birth);
+        }
+
+        userEntity.updateProfile(userName, regionEntity, introduction, birth, imageLevel, ageGroup);
     }
 
     @Override

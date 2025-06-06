@@ -130,11 +130,12 @@ public class UserEntity {
     @OneToMany(mappedBy = "reporter", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<UserReportEntity> reporters = new ArrayList<>();
 
-    public void updateProfile(String userName, RegionEntity region, String introduction, LocalDate birth,Long profileImageLevel) {
+    public void updateProfile(String userName, RegionEntity region, String introduction, LocalDate birth,Long profileImageLevel, AgeGroup ageGroup) {
         this.userName = userName;
         this.region = region;
         this.introduction = introduction;
         this.birth = birth;
         this.profileImageLevel = profileImageLevel;
+        this.ageGroup = ageGroup;
     }
 }
