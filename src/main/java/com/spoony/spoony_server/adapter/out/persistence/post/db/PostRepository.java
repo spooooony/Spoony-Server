@@ -19,4 +19,5 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
     @Query("SELECT r.post.postId  FROM ReportEntity r WHERE r.user.userId = :userId")
     List<Long> findReportedPostIdsByUserId(@Param("userId") Long userId);
 
+
 }

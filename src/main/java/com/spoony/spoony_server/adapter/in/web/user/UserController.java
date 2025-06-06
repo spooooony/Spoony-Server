@@ -57,7 +57,7 @@ public class UserController {
 
         BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
 
-        if (blockCheckUseCase.isBlockedByBlockingOrReporting(blockCheckCommand)) {
+        if (blockCheckUseCase.isBlockedByBlockingOrReporting(blockCheckCommand)) { //"isBlockedByBlockingOrReporting" -> '유저'에 대한 차단&신고 처리
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
         }
@@ -143,7 +143,7 @@ public class UserController {
             description = "마이페이지에서 자신이 작성한 리뷰 목록을 조회합니다."
     )
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllMyPosts(@UserId Long userId) {
-        UserReviewGetCommand command = new UserReviewGetCommand(userId,null); //user 객체
+        UserReviewGetCommand command = new UserReviewGetCommand(userId,userId,null); //user 객체
 
         FeedListResponseDTO postListResponse = postGetUseCase.getPostsByUserId(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postListResponse));
@@ -155,10 +155,10 @@ public class UserController {
             description = "다른 사용자의 마이페이지에서 해당 사용자가 작성한 리뷰 목록을 조회합니다."
     )
     public ResponseEntity<ResponseDTO<FeedListResponseDTO>> getAllPostsByUserId(@UserId Long userId, @PathVariable Long targetUserId,@RequestParam(defaultValue = "false") boolean isLocalReview) {
-        UserReviewGetCommand command = new UserReviewGetCommand(targetUserId,isLocalReview);
+        UserReviewGetCommand command = new UserReviewGetCommand(userId,targetUserId,isLocalReview);
         BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
 
-        if (blockCheckUseCase.isBlockedByBlockingOrReporting(blockCheckCommand)) {
+        if (blockCheckUseCase.isBlockedByBlockingOrReporting(blockCheckCommand)) { //isBlockedByBlockingOrReporting(x) -> '게시물'에 대한 신고 거르기
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
         }

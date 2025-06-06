@@ -80,3 +80,4 @@ public class FeedController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 }
+

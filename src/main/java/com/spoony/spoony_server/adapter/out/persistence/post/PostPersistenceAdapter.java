@@ -65,6 +65,16 @@ public class PostPersistenceAdapter implements
     }
 
     @Override
+    public List<Post> findPostsByTargetUserId(Long userId,Long targetUserId) {
+        return List.of();
+    }
+
+//    @Override
+//    public boolean existsPostReportRelation(Long userId, Long postId) {
+//        return postRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
+//    }
+
+    @Override
     public Post findPostById(Long postId) {
         return postRepository.findById(postId)
                 .map(PostMapper::toDomain)
@@ -320,50 +330,6 @@ public class PostPersistenceAdapter implements
         return result;
     }
 
-
-//    @Transactional
-//    @Override
-//    public List<Post> findFilteredPosts(List<Long> categoryIds, List<Long> regionIds, List<AgeGroup> ageGroups, String sortBy, boolean isLocalReview,Long cursor, int size,List<Long> blockedUserIds,
-//                                        List<Long> blockerUserIds,
-//                                        List<Long> reportedPostIds) {
-//        Logger logger = LoggerFactory.getLogger(getClass());
-//        logger.info("🟢findFilteredPosts 호출됨");
-//        logger.info("🟢categoryIds: {}", categoryIds);
-//        logger.info("🟢regionIds: {}", regionIds);
-//        logger.info("🟢ageGroups: {}", ageGroups);
-//        logger.info("🟢isLocalReview: {}", isLocalReview);
-//        logger.info("🟢cursor: {}", cursor);
-//        logger.info("🟢size: {}", size);
-//        // 카테고리, 지역, 연령대, 로컬리뷰 필터 결합
-//        Specification<PostEntity> spec = PostSpecification.buildFilterSpec(
-//                categoryIds,
-//                regionIds,
-//                ageGroups,
-//                isLocalReview,
-//                sortBy,
-//                cursor,
-//                blockedUserIds,
-//                blockerUserIds,
-//                reportedPostIds
-//        );
-//
-//        // Pageable 생성 (페이지 번호는 0부터 시작)
-//        Pageable pageable = PageRequest.of(0, size); // 기본적으로 최신순으로 정렬
-//
-//        // 쿼리 실행 및 결과 반환 (페이징 처리)
-//        Page<PostEntity> page = postRepository.findAll(spec, pageable);
-//
-//        // 엔티티를 도메인 객체로 변환 후 반환
-//        List<Post> result = page.getContent().stream()
-//                .map(PostMapper::toDomain)
-//                .collect(Collectors.toList());
-//
-//        logger.info("🟢총 게시물 수: {}", page.getTotalElements());
-//        logger.info("🟢현재 페이지 게시물 수: {}", result.size());
-//
-//        return result;
-//
-//    }
 
 
     @Override

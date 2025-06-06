@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserReviewGetCommand {
     private final Long userId;
+    private final Long targetUserId;
     private final Boolean isLocalReview;
 }
 

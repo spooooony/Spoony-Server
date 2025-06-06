@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface PostPort {
     List<Post> findPostsByUserId (Long userId);
+    List<Post> findPostsByTargetUserId(Long userId,Long targetUserId);
+    //boolean existsPostReportRelation(Long userId, Long postId);
     boolean existsByUserIdAndPostId(Long userId, Long postId);
     Post findPostById(Long postId);
     List<Photo> findPhotoById(Long postId);
