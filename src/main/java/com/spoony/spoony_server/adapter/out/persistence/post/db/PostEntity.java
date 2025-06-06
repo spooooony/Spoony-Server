@@ -40,6 +40,8 @@ public class PostEntity {
     private String description;
 
     private Double value;
+
+    @Column(columnDefinition = "TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String cons;
 
     @CreatedDate
