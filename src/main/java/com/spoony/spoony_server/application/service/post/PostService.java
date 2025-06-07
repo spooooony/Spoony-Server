@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -147,6 +148,7 @@ public class PostService implements
         }
 
         // 날짜 기준 최신순 정렬 추가
+        postList = new ArrayList<>(postList);
         postList.sort(Comparator.comparing(Post::getCreatedAt).reversed());
 
         //3. 각 Post -> Feed
