@@ -282,7 +282,7 @@ public class PostService implements
                 command.getDescription(),
                 command.getValue(),
                 command.getCons(),
-                0L,
+                null,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
