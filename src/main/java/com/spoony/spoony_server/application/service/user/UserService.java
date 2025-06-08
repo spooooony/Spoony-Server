@@ -12,8 +12,6 @@ import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
-import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
-import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Block;
 import com.spoony.spoony_server.domain.user.Follow;
@@ -45,7 +43,6 @@ public class UserService implements
     private final PostPort postPort;
     private final BlockPort blockPort;
     private final FeedPort feedPort;
-
 
     @Override
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
@@ -119,11 +116,9 @@ public class UserService implements
             reportedUserIds = blockPort.getRelatedUserIdsByReportStatus(userId);
         }
         List<UserSimpleResponseDTO> userDTOList = followers.stream()
-                .map(follow -> follow.getFollower())
+                .map(Follow::getFollower)
                 .filter(followerUser ->
-                        !blockedUserIds.contains(followerUser.getUserId()) &&
-                                !blockerUserIds.contains(followerUser.getUserId())&&
-                                !reportedUserIds.contains(followerUser.getUserId())
+                        !blockedUserIds.contains(followerUser.getUserId()) && !blockerUserIds.contains(followerUser.getUserId()) && !reportedUserIds.contains(followerUser.getUserId())
                 )
                 .map(followerUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
@@ -159,11 +154,9 @@ public class UserService implements
             reportedUserIds = blockPort.getRelatedUserIdsByReportStatus(userId);
         }
         List<UserSimpleResponseDTO> userDTOList = followings.stream()
-                .map(follow -> follow.getFollowing())
+                .map(Follow::getFollowing)
                 .filter(followingUser ->
-                                !blockedUserIds.contains(followingUser.getUserId()) &&
-                                        !blockerUserIds.contains(followingUser.getUserId())&&
-                                        !reportedUserIds.contains(followingUser.getUserId())
+                                !blockedUserIds.contains(followingUser.getUserId()) && !blockerUserIds.contains(followingUser.getUserId())&& !reportedUserIds.contains(followingUser.getUserId())
                 )
                 .map(followingUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
@@ -184,13 +177,12 @@ public class UserService implements
 
     @Override
     public BlockListResponseDTO getBlockings(UserGetCommand command) {
-        List<Block> blockeds = userPort.findBlockedByUserId(command.getUserId());
-        List<UserSimpleResponseDTO> userDTOList = blockeds.stream()
+        List<Block> blockIds = userPort.findBlockedByUserId(command.getUserId());
+        List<UserSimpleResponseDTO> userDTOList = blockIds.stream()
                 .filter(block -> block.getStatus() == BlockStatus.BLOCKED)
                 .map(block ->{
             User blockedUser = block.getBlocked();
             boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
-
             String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
 
             return UserSimpleResponseDTO.of(
@@ -198,7 +190,7 @@ public class UserService implements
                     blockedUser.getUserId(),
                     blockedUser.getUserName(),
                     regionName,
-                    isBlocked,
+                    false,
                     blockedUser.getImageLevel().intValue()
             );
         }).toList();
@@ -236,7 +228,6 @@ public class UserService implements
         User user = userPort.findUserById(userId); //유저
         List<Post> targetUserPosts = postPort.findPostsByUserId(targetUserId); // targetUser가 작성한 게시물 목록
         feedPort.addFeedsIfNotExists(user, targetUserPosts);
-
     }
 
     @Override
@@ -266,30 +257,26 @@ public class UserService implements
 
     @Override
     public UserSearchResponseListDTO searchUsersByQuery(UserGetCommand command, UserSearchCommand searchCommand) {
-
-        //차단 테이블에 있으면서 + status가 blocked나 reported인 유저
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
         List<Long> blockerUserIds = blockPort.getBlockerUserIds(command.getUserId());
-
         List<User> userList = userPort.findByUserNameContaining(searchCommand.getQuery());
 
-        List<UserSearchResponseDTO> userSearchResultList = userList.stream()
-                .filter(user -> !blockedUserIds.contains(user.getUserId())&& !blockerUserIds.contains(user.getUserId())) // 차단된 사용자 제외
+        List<UserSimpleResponseDTO> userSearchResultList = userList.stream()
+                .filter(user -> !blockedUserIds.contains(user.getUserId())&& !blockerUserIds.contains(user.getUserId()))
                 .map(user -> {
-
                     String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
-
-                    // UserSearchResultDTO를 반환
-                    return UserSearchResponseDTO.of(
+                    boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), user.getUserId());
+                    return UserSimpleResponseDTO.of(
+                            command.getUserId(),
                             user.getUserId(),
                             user.getUserName(),
                             regionName,
-                            user.getImageLevel().intValue() // 추가된 profileImageUrl
+                            isFollowing,
+                            user.getImageLevel().intValue()
                     );
                 })
-                .collect(Collectors.toList()); // 리스트로 수집
+                .collect(Collectors.toList());
 
-        // UserSearchResultListDTO로 반환
         return UserSearchResponseListDTO.of(userSearchResultList);
     }
 
@@ -307,15 +294,9 @@ public class UserService implements
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
         blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.BLOCKED);
-
-
-        // 2. follow 관계 제거 (양방향)
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
-
-        //3. zzimPost 관계 제거(양방향)
         userPort.removeZzimRelationsBetweenUsers(userId,targetUserId);
-
     }
 
     @Override
@@ -325,7 +306,7 @@ public class UserService implements
 
         Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId, targetUserId);
 
-        // BlockStatus가 BLOCKED일 경우 UNFOLLOWED로 상태 변경
+        // BLOCKED일 경우 UNFOLLOWED로 상태 변경
         if (blockStatus.get() == BlockStatus.BLOCKED) {
             blockPort.updateUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED); //순서 1
             blockPort.deleteUserBlockRelation(userId, targetUserId, BlockStatus.BLOCKED); //순서2
@@ -345,7 +326,4 @@ public class UserService implements
     public List<Long> searchUsersByQuery(UserGetCommand command) {
         return blockPort.getBlockedUserIds(command.getUserId());
     }
-
-
 }
-
