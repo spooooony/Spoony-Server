@@ -93,7 +93,8 @@ public class PostEntity {
     public void updateZzimCount(long delta) {
         if (this.zzimCount == null) {
             this.zzimCount = 0L;
+        } else {
+            this.zzimCount += delta;
         }
-        this.zzimCount += delta;
     }
 }
