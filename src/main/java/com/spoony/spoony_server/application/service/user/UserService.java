@@ -178,23 +178,23 @@ public class UserService implements
     @Override
     public BlockListResponseDTO getBlockings(UserGetCommand command) {
         List<Block> blockIds = userPort.findBlockedByUserId(command.getUserId());
-        List<UserSimpleResponseDTO> userDTOList = blockIds.stream()
+        List<UserBlockResponseDTO> userBlockResponseDTOList = blockIds.stream()
                 .filter(block -> block.getStatus() == BlockStatus.BLOCKED)
                 .map(block ->{
             User blockedUser = block.getBlocked();
             boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
             String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
 
-            return UserSimpleResponseDTO.of(
+            return UserBlockResponseDTO.of(
                     command.getUserId(),
                     blockedUser.getUserId(),
                     blockedUser.getUserName(),
                     regionName,
-                    false,
+                    isBlocked,
                     blockedUser.getImageLevel().intValue()
             );
         }).toList();
-            return BlockListResponseDTO.of(userDTOList);
+        return BlockListResponseDTO.of(userBlockResponseDTOList);
     }
 
     @Override
