@@ -17,4 +17,5 @@ public interface ZzimPostPort {
     List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId);
     void saveZzimPost(User user, Post post);
     void deleteByUserAndPost(User user, Post post);
+    List<ZzimPost> findZzimPostsByUserIdAndCategoryIdSortedByCreatedAtDesc(Long userId, Long categoryId);
 }

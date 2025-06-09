@@ -7,10 +7,15 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "zzim_post")
 public class ZzimPostEntity {
     @Id
@@ -28,6 +33,9 @@ public class ZzimPostEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostEntity post;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     @Builder
     public ZzimPostEntity(UserEntity user, UserEntity author, Long zzimId, PostEntity post) {

@@ -46,36 +46,42 @@ public class ZzimPostService implements
     public void addZzimPost(ZzimAddCommand command) {
         Long postId = command.getPostId();
         Long userId = command.getUserId();
-
         Post post = postPort.findPostById(postId);
         User user = userPort.findUserById(userId);
-
         zzimPostPort.saveZzimPost(user, post);
     }
 
+    @Override
     public ZzimCardListResponseDTO getZzimCardList(ZzimGetCardCommand command) {
-        Long zzimCardCount = zzimPostPort.countZzimByUserId(command.getUserId());
 
-        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryId(
+        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdAndCategoryIdSortedByCreatedAtDesc(
                 command.getUserId(),
                 command.getCategoryId()
         );
 
-        // 2. 중복 placeId 제거 + 필터링 (필요하면 여기서 차단 등 필터도 적용 가능)
-        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
+        // 차단 유저 조회
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(command.getUserId());
 
+        // 중복 placeId 제거 + 차단 유저 필터링
+        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
         for (ZzimPost zzimPost : zzimPostList) {
-            Place place = zzimPost.getPost().getPlace();
+            Post post = zzimPost.getPost();
+            Place place = post.getPlace();
+
             if (place == null) {
                 throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
             }
-            Long placeId = place.getPlaceId();
-            if (!uniquePlacePostMap.containsKey(placeId)) {
-                uniquePlacePostMap.put(placeId, zzimPost);
+
+            Long authorId = post.getUser().getUserId();
+            // 차단한 사용자의 게시물은 스킵
+            if (blockedUserIds.contains(authorId)) {
+                continue;
             }
+
+            Long placeId = place.getPlaceId();
+            uniquePlacePostMap.putIfAbsent(placeId, zzimPost);
         }
 
-        // 3. size 이상인 경우 결과 자르기
         List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
@@ -104,7 +110,6 @@ public class ZzimPostService implements
                     );
                 })
                 .toList();
-
 
         return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }

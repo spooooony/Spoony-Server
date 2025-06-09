@@ -18,6 +18,7 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +61,17 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     public List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId) {
         Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdAndCategoryId(userId, categoryId);
         List<ZzimPostEntity> zzimPostEntities = zzimPostRepository.findAll(spec);
+
+        return zzimPostEntities.stream()
+                .map(ZzimMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<ZzimPost> findZzimPostsByUserIdAndCategoryIdSortedByCreatedAtDesc(Long userId, Long categoryId) {
+        Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdAndCategoryId(userId, categoryId);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        List<ZzimPostEntity> zzimPostEntities = zzimPostRepository.findAll(spec, sort);
 
         return zzimPostEntities.stream()
                 .map(ZzimMapper::toDomain)
