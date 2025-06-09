@@ -114,39 +114,48 @@ public class ZzimPostService implements
         return new ZzimCardListResponseDTO(zzimCardResponses.size(), zzimCardResponses);
     }
 
-    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) { //command -> userId, placeId
-        User user = userPort.findUserById(command.getUserId()); //로그인 userId
+    @Override
+    public ZzimFocusListResponseDTO getZzimFocusList(ZzimGetFocusCommand command) {
+        User user = userPort.findUserById(command.getUserId());
+
+        // 차단 유저 조회
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(user.getUserId());
-        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(user.getUserId());
+
+        // 북마크 최신순 정렬
+        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdSortedByCreatedAtDesc(user.getUserId());
 
         List<ZzimFocusResponseDTO> zzimFocusResponseList = zzimPostList.stream()
                 .filter(zzimPost -> {
                     Post post = zzimPost.getPost();
                     Place postPlace = post.getPlace();
                     User writer = post.getUser();
-                    return postPlace != null && postPlace.getPlaceId().equals(
-                            command.getPlaceId()) && !blockedUserIds.contains(writer.getUserId()
-                    );
+                    // 장소 일치 + 차단 유저 제외
+                    return postPlace != null
+                            && postPlace.getPlaceId().equals(command.getPlaceId())
+                            && !blockedUserIds.contains(writer.getUserId());
                 })
                 .map(zzimPost -> {
                     Post post = zzimPost.getPost();
                     Place postPlace = post.getPlace();
                     PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+
                     CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
                             postCategory.getCategory().getCategoryId(),
                             postCategory.getCategory().getCategoryName(),
                             postCategory.getCategory().getIconUrlColor(),
                             postCategory.getCategory().getTextColor(),
                             postCategory.getCategory().getBackgroundColor());
+
                     Long zzimCount = post.getZzimCount();
 
                     List<Photo> photoList = zzimPostPort.findPhotoListById(post.getPostId());
-                    List<String> photoUrlList = photoList
-                            .stream()
+                    List<String> photoUrlList = photoList.stream()
                             .map(Photo::getPhotoUrl)
                             .toList();
 
-                    String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
+                    String regionName = post.getUser().getRegion() != null
+                            ? post.getUser().getRegion().getRegionName()
+                            : null;
 
                     return ZzimFocusResponseDTO.of(
                             postPlace.getPlaceId(),
@@ -178,177 +187,99 @@ public class ZzimPostService implements
             return getZzimByAddress(command.getUserId(), location.getLocationName());
         } else if (location.getLocationType().getLocationTypeId() == 2) {
             return getZzimByAreaDong(command.getUserId(), location.getLongitude(), location.getLatitude());
-        } else{
+        } else {
             return getZzimByAreaStation(command.getUserId(), location.getLongitude(), location.getLatitude());
         }
     }
 
-    private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationName) {
-        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(userId);
-        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
+    private Map<Long, ZzimPost> getFilteredUniqueZzimPosts(Long userId) {
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
 
+        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserIdSortedByCreatedAtDesc(userId);
+
+        Map<Long, ZzimPost> uniqueMap = new LinkedHashMap<>();
         for (ZzimPost zzimPost : zzimPostList) {
-            Place place = zzimPost.getPost().getPlace();
-            if (place == null) {
-                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
-            }
+            Post post = zzimPost.getPost();
+            Place place = post.getPlace();
+            if (place == null) continue;
+
+            Long authorId = post.getUser().getUserId();
+            if (blockedUserIds.contains(authorId)) continue;
 
             Long placeId = place.getPlaceId();
-            if (!uniquePlacePostMap.containsKey(placeId)) {
-                uniquePlacePostMap.put(placeId, zzimPost);
-            }
+            uniqueMap.putIfAbsent(placeId, zzimPost); // 최신순이므로 첫 번째만 남김
         }
 
-        // placeAddress에 locationName 문자열이 포함된 데이터만 필터링
-        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
-                .filter(zzimPost-> {
-                    Place place= zzimPost.getPost().getPlace();
+        return uniqueMap;
+    }
+
+    private ZzimCardListResponseDTO getZzimByAddress(Long userId, String locationName) {
+        Map<Long, ZzimPost> uniqueZzimPosts = getFilteredUniqueZzimPosts(userId);
+
+        List<ZzimCardResponseDTO> responseList = uniqueZzimPosts.values().stream()
+                .filter(zzimPost -> {
+                    Place place = zzimPost.getPost().getPlace();
                     return place.getPlaceAddress() != null && place.getPlaceAddress().contains(locationName);
                 })
-                .map(zzimPost -> {
-                    Post post = zzimPost.getPost();
-                    String description = post.getDescription();
-                    Place place = post.getPlace();
-                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
+                .map(this::toZzimCardResponse)
+                .toList();
 
-                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-
-                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
-                            postCategory.getCategory().getCategoryId(),
-                            postCategory.getCategory().getCategoryName(),
-                            postCategory.getCategory().getIconUrlColor(),
-                            postCategory.getCategory().getTextColor(),
-                            postCategory.getCategory().getBackgroundColor());
-
-                    return ZzimCardResponseDTO.of(
-                            place.getPlaceId(),  // placeId 추가
-                            place.getPlaceName(),
-                            description,
-                            place.getPlaceAddress(),
-                            photo.getPhotoUrl(),
-                            place.getLatitude(),
-                            place.getLongitude(),
-                            categoryColorResponse
-                    );
-                })
-                .collect(Collectors.toList());
-
-        return ZzimCardListResponseDTO.of(zzimCardResponses.size(), zzimCardResponses);
+        return ZzimCardListResponseDTO.of(responseList.size(), responseList);
     }
 
     private ZzimCardListResponseDTO getZzimByAreaDong(Long userId, Double longitude, Double latitude) {
-        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(userId);
+        Map<Long, ZzimPost> uniqueZzimPosts = getFilteredUniqueZzimPosts(userId);
 
-        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
-
-        for (ZzimPost zzimPost : zzimPostList) {
-            Place place = zzimPost.getPost().getPlace();
-            if (place == null) {
-                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
-            }
-
-            Long placeId = place.getPlaceId();
-            if (!uniquePlacePostMap.containsKey(placeId)) {
-                uniquePlacePostMap.put(placeId, zzimPost);
-            }
-        }
-
-        // 주어진 위도(latitude)와 경도(longitude) 기준으로 2km 이내 장소만 필터링
-        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
+        List<ZzimCardResponseDTO> responseList = uniqueZzimPosts.values().stream()
                 .filter(zzimPost -> {
                     Place place = zzimPost.getPost().getPlace();
-                    if (place.getLatitude() == null || place.getLongitude() == null) {
-                        return false;
-                    }
-                    return calculateDistance(latitude, longitude, place.getLatitude(), place.getLongitude()) <= 2.0;
+                    return place.getLatitude() != null && place.getLongitude() != null &&
+                            calculateDistance(latitude, longitude, place.getLatitude(), place.getLongitude()) <= 2.0;
                 })
-                .map(zzimPost -> {
-                    Post post = zzimPost.getPost();
-                    String description = post.getDescription();
-                    Place place = post.getPlace();
-                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
+                .map(this::toZzimCardResponse)
+                .toList();
 
-                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
-
-                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
-                            postCategory.getCategory().getCategoryId(),
-                            postCategory.getCategory().getCategoryName(),
-                            postCategory.getCategory().getIconUrlColor(),
-                            postCategory.getCategory().getTextColor(),
-                            postCategory.getCategory().getBackgroundColor());
-
-                    return ZzimCardResponseDTO.of(
-                            place.getPlaceId(),  // placeId 추가
-                            place.getPlaceName(),
-                            description,
-                            place.getPlaceAddress(),
-                            photo.getPhotoUrl(),
-                            place.getLatitude(),
-                            place.getLongitude(),
-                            categoryColorResponse
-                    );
-                })
-                .collect(Collectors.toList());
-
-        return ZzimCardListResponseDTO.of(zzimCardResponses.size(), zzimCardResponses);
+        return ZzimCardListResponseDTO.of(responseList.size(), responseList);
     }
 
     private ZzimCardListResponseDTO getZzimByAreaStation(Long userId, Double longitude, Double latitude) {
-        List<ZzimPost> zzimPostList = zzimPostPort.findZzimPostsByUserId(userId);
+        Map<Long, ZzimPost> uniqueZzimPosts = getFilteredUniqueZzimPosts(userId);
 
-        Map<Long, ZzimPost> uniquePlacePostMap = new LinkedHashMap<>();
-
-        for (ZzimPost zzimPost : zzimPostList) {
-            Place place = zzimPost.getPost().getPlace();
-            if (place == null) {
-                throw new BusinessException(PlaceErrorMessage.PLACE_NOT_FOUND);
-            }
-
-            Long placeId = place.getPlaceId();
-            if (!uniquePlacePostMap.containsKey(placeId)) {
-                uniquePlacePostMap.put(placeId, zzimPost);
-            }
-        }
-
-        // 주어진 위도(latitude)와 경도(longitude) 기준으로 2km 이내 장소만 필터링
-        List<ZzimCardResponseDTO> zzimCardResponses = uniquePlacePostMap.values().stream()
+        List<ZzimCardResponseDTO> responseList = uniqueZzimPosts.values().stream()
                 .filter(zzimPost -> {
                     Place place = zzimPost.getPost().getPlace();
-                    if (place.getLatitude() == null || place.getLongitude() == null) {
-                        return false;
-                    }
-                    return calculateDistance(latitude, longitude, place.getLatitude(), place.getLongitude()) <= 1.0;
+                    return place.getLatitude() != null && place.getLongitude() != null &&
+                            calculateDistance(latitude, longitude, place.getLatitude(), place.getLongitude()) <= 1.0;
                 })
-                .map(zzimPost -> {
-                    Post post = zzimPost.getPost();
-                    String description = post.getDescription();
-                    Place place = post.getPlace();
+                .map(this::toZzimCardResponse)
+                .toList();
 
-                    Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
+        return ZzimCardListResponseDTO.of(responseList.size(), responseList);
+    }
 
-                    PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
+    private ZzimCardResponseDTO toZzimCardResponse(ZzimPost zzimPost) {
+        Post post = zzimPost.getPost();
+        Place place = post.getPlace();
+        Photo photo = zzimPostPort.findFistPhotoById(post.getPostId());
+        PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
 
-                    CategoryColorResponseDTO categoryColorResponse = CategoryColorResponseDTO.of(
-                            postCategory.getCategory().getCategoryId(),
-                            postCategory.getCategory().getCategoryName(),
-                            postCategory.getCategory().getIconUrlColor(),
-                            postCategory.getCategory().getTextColor(),
-                            postCategory.getCategory().getBackgroundColor());
+        CategoryColorResponseDTO categoryColor = CategoryColorResponseDTO.of(
+                postCategory.getCategory().getCategoryId(),
+                postCategory.getCategory().getCategoryName(),
+                postCategory.getCategory().getIconUrlColor(),
+                postCategory.getCategory().getTextColor(),
+                postCategory.getCategory().getBackgroundColor());
 
-                    return ZzimCardResponseDTO.of(
-                            place.getPlaceId(),  // placeId 추가
-                            place.getPlaceName(),
-                            description,
-                            place.getPlaceAddress(),
-                            photo.getPhotoUrl(),
-                            place.getLatitude(),
-                            place.getLongitude(),
-                            categoryColorResponse
-                    );
-                })
-                .collect(Collectors.toList());
-
-        return ZzimCardListResponseDTO.of(zzimCardResponses.size(), zzimCardResponses);
+        return ZzimCardResponseDTO.of(
+                place.getPlaceId(),
+                place.getPlaceName(),
+                post.getDescription(),
+                place.getPlaceAddress(),
+                photo.getPhotoUrl(),
+                place.getLatitude(),
+                place.getLongitude(),
+                categoryColor
+        );
     }
 
     // 두 좌표 간의 거리를 계산하는 메서드 (단위: km)

@@ -35,16 +35,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     private final PostRepository postRepository;
     private final PhotoRepository photoRepository;
 
-//    @Override
-//    public Long countZzimByPostId(Long postId) {
-//        return zzimPostRepository.countByPost_PostId(postId);
-//    }
-
-    @Override
-    public Long countZzimByUserId(Long userId){
-        return zzimPostRepository.countByUser_UserId(userId);
-    }
-
     public boolean existsByUserIdAndPostId(Long userId, Long postId) {
         return zzimPostRepository.existsByUser_UserIdAndPost_PostId(userId, postId);
     }
@@ -58,9 +48,10 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     }
 
     @Override
-    public List<ZzimPost> findZzimPostsByUserIdAndCategoryId(Long userId, Long categoryId) {
+    public List<ZzimPost> findZzimPostsByUserIdAndCategoryIdSortedByCreatedAtDesc(Long userId, Long categoryId) {
         Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdAndCategoryId(userId, categoryId);
-        List<ZzimPostEntity> zzimPostEntities = zzimPostRepository.findAll(spec);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        List<ZzimPostEntity> zzimPostEntities = zzimPostRepository.findAll(spec, sort);
 
         return zzimPostEntities.stream()
                 .map(ZzimMapper::toDomain)
@@ -68,8 +59,8 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     }
 
     @Override
-    public List<ZzimPost> findZzimPostsByUserIdAndCategoryIdSortedByCreatedAtDesc(Long userId, Long categoryId) {
-        Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdAndCategoryId(userId, categoryId);
+    public List<ZzimPost> findZzimPostsByUserIdSortedByCreatedAtDesc(Long userId) {
+        Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserId(userId);
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         List<ZzimPostEntity> zzimPostEntities = zzimPostRepository.findAll(spec, sort);
 

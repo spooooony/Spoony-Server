@@ -27,4 +27,7 @@ public class ZzimPostSpecification {
         };
     }
 
+    public static Specification<ZzimPostEntity> withUserId(Long userId) {
+        return (root, query, cb) -> cb.equal(root.get("user").get("userId"), userId);
+    }
 }
