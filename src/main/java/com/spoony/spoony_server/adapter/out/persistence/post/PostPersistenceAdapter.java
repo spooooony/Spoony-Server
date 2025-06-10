@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.post;
 
+import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.adapter.out.persistence.feed.PostSpecification;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionRepository;
 import com.spoony.spoony_server.application.port.out.post.PhotoPort;
@@ -23,11 +24,7 @@ import com.spoony.spoony_server.global.message.business.CategoryErrorMessage;
 import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -274,7 +271,7 @@ public class PostPersistenceAdapter implements
                                         List<AgeGroup> ageGroups,
                                         String sortBy,
                                         boolean isLocalReview,
-                                        Long cursor,
+                                        Cursor cursor,
                                         int size,
                                         List<Long> blockedUserIds,
                                         List<Long> blockerUserIds,
@@ -293,15 +290,19 @@ public class PostPersistenceAdapter implements
 
         Sort sort;
         if ("zzimCount".equalsIgnoreCase(sortBy)) {
-            sort = Sort.by(Sort.Direction.DESC, "zzimCount");
+            sort = Sort.by(
+                    Sort.Order.desc("zzimCount"),
+                    Sort.Order.desc("createdAt")
+            );
         } else {
             sort = Sort.by(Sort.Direction.DESC, "createdAt");
         }
+        List<PostEntity> result = postRepository.findAll(spec, sort)
+                .stream()
+                .limit(size) // 커서 방식에서는 직접 limit
+                .toList();
 
-        Pageable pageable = PageRequest.of(0, size, sort);
-        Page<PostEntity> page = postRepository.findAll(spec, pageable);
-
-        return page.getContent().stream()
+        return result.stream()
                 .map(PostMapper::toDomain)
                 .collect(Collectors.toList());
     }

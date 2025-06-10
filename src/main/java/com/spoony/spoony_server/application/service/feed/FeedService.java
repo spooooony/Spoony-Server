@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.application.service.feed;
 
+import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.adapter.dto.post.response.*;
 import com.spoony.spoony_server.application.port.command.feed.FeedFilterCommand;
 import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
@@ -103,7 +104,7 @@ public class FeedService implements FeedGetUseCase {
         List<Long> categoryIds = command.getCategoryIds();
         boolean isLocalReviewFlag = command.isLocalReview();
         List<AgeGroup> ageGroups = command.getAgeGroups();
-        Long cursor = command.getCursor();
+        Cursor cursor = command.getCursor();
         int size = command.getSize();
         Long currentUserId = command.getCurrentUserId();
 
@@ -164,9 +165,14 @@ public class FeedService implements FeedGetUseCase {
                 })
                 .collect(Collectors.toList());
 
-        Long nextCursor = filteredPosts.isEmpty() ? null :
-                filteredPosts.getLast().getPostId();
-
+        Cursor nextCursor = null;
+        if (!filteredPosts.isEmpty()) {
+            Post lastPost = filteredPosts.get(filteredPosts.size() - 1);
+            nextCursor = new Cursor(
+                    lastPost.getZzimCount(),
+                    lastPost.getCreatedAt()
+            );
+        }
         return FilteredFeedResponseListDTO.of(feedResponseList, nextCursor);
     }
 }

@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.application.port.out.post;
 
+import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.domain.post.Menu;
 import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
@@ -33,7 +34,7 @@ public interface PostPort {
                                  List<Long> regionIds,
                                  List<AgeGroup>ageGroups,String sortBy,
                                  boolean isLocalReview,
-                                 Long cursor,
+                                 Cursor cursor,
                                  int size,
                                  List<Long> blockedUserIds,
                                  List<Long> reportedUserIds,

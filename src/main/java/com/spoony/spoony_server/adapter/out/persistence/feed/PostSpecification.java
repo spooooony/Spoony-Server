@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.feed;
 
 
+import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
@@ -11,6 +12,7 @@ import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,14 +141,37 @@ public class PostSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+    public static Specification<PostEntity> withCursor(Cursor cursor, String sortBy) {
+        if (cursor == null) {
+            return null;
+        }
 
+        if ("zzimCount".equalsIgnoreCase(sortBy)) {
+            // 복합 정렬: zzimCount DESC, createdAt DESC
+            // 커서 이후 데이터 조건:
+            // zzimCount < cursor.zzimCount OR (zzimCount = cursor.zzimCount AND createdAt < cursor.createdAt)
+            return (root, query, cb) -> {
+                Predicate zzimLess = cb.lessThan(root.get("zzimCount"), cursor.zzimCount());
+                Predicate zzimEqualCreatedAtLess = cb.and(
+                        cb.equal(root.get("zzimCount"), cursor.zzimCount()),
+                        cb.lessThan(root.get("createdAt"), cursor.createdAt())
+                );
+                return cb.or(zzimLess, zzimEqualCreatedAtLess);
+            };
+        } else {
+            // 단일 정렬: createdAt DESC
+            // 커서 이후 데이터 조건: createdAt < cursor.createdAt
+            return (root, query, cb) ->
+                    cb.lessThan(root.get("createdAt"), cursor.createdAt());
+        }
+    }
     public static Specification<PostEntity> buildFilterSpec(
             List<Long> categoryIds,
             List<Long> regionIds,
             List<AgeGroup> ageGroups,
             boolean isLocalReview,
             String sortBy,
-            Long cursor,
+            Cursor cursor,
             List<Long> blockedUserIds,
             List<Long> blockerUserIds,
             List<Long> reportedPostIds) {
@@ -154,52 +179,129 @@ public class PostSpecification {
         Specification<PostEntity> localReviewSpec = withLocalReview(categoryIds);
         Specification<PostEntity> regionSpec = withRegionIds(regionIds);
 
-        Specification<PostEntity> ageGroupSpec = null;
-        if (ageGroups != null && !ageGroups.isEmpty()) {
-            ageGroupSpec = PostSpecification.withAgeGroup(ageGroups);
-        }
+        Specification<PostEntity> ageGroupSpec = (ageGroups != null && !ageGroups.isEmpty())
+                ? PostSpecification.withAgeGroup(ageGroups)
+                : null;
 
         boolean onlyLocalCategory = categoryIds != null && categoryIds.size() == 1 && categoryIds.contains(2L);
-        Specification<PostEntity> categorySpec = null;
-        if (!onlyLocalCategory) {
-            categorySpec = withCategoryIds(categoryIds);
-        }
+        Specification<PostEntity> categorySpec = !onlyLocalCategory
+                ? withCategoryIds(categoryIds)
+                : null;
 
         Specification<PostEntity> exclusionSpec = excludeBlockedAndReported(blockedUserIds, blockerUserIds, reportedPostIds);
-
-        Specification<PostEntity> spec = Specification.where(localReviewSpec)
+        Specification<PostEntity> cursorSpec = PostSpecification.withCursor(cursor, sortBy);
+        Specification<PostEntity> baseSpec = Specification.where(localReviewSpec)
                 .and(regionSpec)
                 .and(ageGroupSpec != null ? ageGroupSpec : Specification.where(null))
                 .and(categorySpec != null ? categorySpec : Specification.where(null))
-                .and(exclusionSpec != null ? exclusionSpec : Specification.where(null));
+                .and(exclusionSpec != null ? exclusionSpec : Specification.where(null))
+                .and(cursorSpec != null ? cursorSpec : Specification.where(null));
 
         return (root, query, cb) -> {
-            Predicate predicate = spec.toPredicate(root, query, cb);
+            Predicate basePredicate = baseSpec.toPredicate(root, query, cb);
 
-            if (cursor != null) {
-                Path<Long> postIdPath = root.get("postId");
-                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);
-                if (predicate != null) {
-                    predicate = cb.and(predicate, cursorPredicate);
-                } else {
-                    predicate = cursorPredicate;
-                }
+            if ("zzimCount".equalsIgnoreCase(sortBy) && cursor != null) {
+                // cursorZzimCount, cursorCreatedAt 둘 다 있어야 함
+                Long cursorZzimCount = cursor.zzimCount();
+                LocalDateTime cursorCreatedAt = cursor.createdAt();
+
+                // 저장순 기준 + 저장수가 같은 경우 최신순으로 페이징 처리
+                Predicate cursorPredicate = cb.or(
+                        cb.lessThan(root.get("zzimCount"), cursorZzimCount),
+                        cb.and(
+                                cb.equal(root.get("zzimCount"), cursorZzimCount),
+                                cb.lessThan(root.get("createdAt"), cursorCreatedAt)
+                        )
+                );
+
+                return cb.and(basePredicate, cursorPredicate);
             }
 
-            if ("zzimCount".equalsIgnoreCase(sortBy)) {
-                Join<PostEntity, ZzimPostEntity> zzimPostJoin = root.join("zzims", JoinType.LEFT);
-                Expression<Long> zzimCount = cb.count(zzimPostJoin.get("post"));
-
-                query.groupBy(root.get("postId"));
-                query.orderBy(cb.desc(zzimCount), cb.desc(root.get("createdAt")));
-            } else {
-                query.orderBy(cb.desc(root.get("postId")));
+            if (cursor != null && cursor.createdAt() != null) {
+                // 최신순 정렬일 경우 createdAt 기준 페이징
+                Predicate cursorPredicate = cb.lessThan(root.get("createdAt"), cursor.createdAt());
+                return cb.and(basePredicate, cursorPredicate);
             }
 
-            return predicate;
+            return basePredicate;
         };
     }
 
+//    public static Specification<PostEntity> buildFilterSpec(
+//            List<Long> categoryIds,
+//            List<Long> regionIds,
+//            List<AgeGroup> ageGroups,
+//            boolean isLocalReview,
+//            String sortBy,
+//            Cursor cursor,
+//            List<Long> blockedUserIds,
+//            List<Long> blockerUserIds,
+//            List<Long> reportedPostIds) {
+//
+//        Specification<PostEntity> localReviewSpec = withLocalReview(categoryIds);
+//        Specification<PostEntity> regionSpec = withRegionIds(regionIds);
+//
+//        Specification<PostEntity> ageGroupSpec = null;
+//        if (ageGroups != null && !ageGroups.isEmpty()) {
+//            ageGroupSpec = PostSpecification.withAgeGroup(ageGroups);
+//        }
+//
+//        boolean onlyLocalCategory = categoryIds != null && categoryIds.size() == 1 && categoryIds.contains(2L);
+//        Specification<PostEntity> categorySpec = null;
+//        if (!onlyLocalCategory) {
+//            categorySpec = withCategoryIds(categoryIds);
+//        }
+//
+//        Specification<PostEntity> exclusionSpec = excludeBlockedAndReported(blockedUserIds, blockerUserIds, reportedPostIds);
+//
+//        Specification<PostEntity> spec = Specification.where(localReviewSpec)
+//                .and(regionSpec)
+//                .and(ageGroupSpec != null ? ageGroupSpec : Specification.where(null))
+//                .and(categorySpec != null ? categorySpec : Specification.where(null))
+//                .and(exclusionSpec != null ? exclusionSpec : Specification.where(null));
+//
+//        return (root, query, cb) -> {
+//            Predicate predicate = spec.toPredicate(root, query, cb);
+//
+//            // 정렬 조건: 저장순 or 최신순
+//            if ("zzimCount".equalsIgnoreCase(sortBy)) {
+//                // LEFT JOIN으로 zzimCount 계산
+//                Join<PostEntity, ZzimPostEntity> zzimPostJoin = root.join("zzims", JoinType.LEFT);
+//                query.groupBy(root.get("postId"));
+//
+//                Expression<Long> zzimCountExpr = cb.count(zzimPostJoin.get("post"));
+//
+//                // 커서 조건 (zzimCount ↓, createdAt ↓)
+//                if (cursorZzimCount != null && cursorCreatedAt != null) {
+//                    Predicate zzimCountPredicate = cb.lessThan(zzimCountExpr, cursorZzimCount);
+//                    Predicate zzimCountEqual = cb.equal(zzimCountExpr, cursorZzimCount);
+//                    Predicate createdAtPredicate = cb.lessThan(root.get("createdAt"), cursorCreatedAt);
+//
+//                    Predicate combinedCursor = cb.or(
+//                            zzimCountPredicate,
+//                            cb.and(zzimCountEqual, createdAtPredicate)
+//                    );
+//
+//                    predicate = predicate != null ? cb.and(predicate, combinedCursor) : combinedCursor;
+//                }
+//
+//                // 정렬: 저장수 DESC, 최신순 DESC
+//                query.orderBy(cb.desc(zzimCountExpr), cb.desc(root.get("createdAt")));
+//
+//            } else {
+//                // 최신순 커서 조건
+//                if (cursorCreatedAt != null) {
+//                    Predicate createdAtPredicate = cb.lessThan(root.get("createdAt"), cursorCreatedAt);
+//                    predicate = predicate != null ? cb.and(predicate, createdAtPredicate) : createdAtPredicate;
+//                }
+//
+//                // 정렬: 최신순
+//                query.orderBy(cb.desc(root.get("createdAt")));
+//            }
+//
+//            return predicate;
+//        };
+//    }
 
 //    public static Specification<PostEntity> buildFilterSpec(
 //            List<Long> categoryIds,
@@ -212,52 +314,41 @@ public class PostSpecification {
 //            List<Long> blockerUserIds,
 //            List<Long> reportedPostIds) {
 //
-//        // 로컬리뷰 필터
 //        Specification<PostEntity> localReviewSpec = withLocalReview(categoryIds);
-//
-//        // 지역 필터
 //        Specification<PostEntity> regionSpec = withRegionIds(regionIds);
 //
-//        // 연령대 필터
 //        Specification<PostEntity> ageGroupSpec = null;
 //        if (ageGroups != null && !ageGroups.isEmpty()) {
 //            ageGroupSpec = PostSpecification.withAgeGroup(ageGroups);
 //        }
 //
-//        // 카테고리 필터
-//        boolean onlyLocalCategory = categoryIds.size() == 1 && categoryIds.contains(2L);
+//        boolean onlyLocalCategory = categoryIds != null && categoryIds.size() == 1 && categoryIds.contains(2L);
 //        Specification<PostEntity> categorySpec = null;
 //        if (!onlyLocalCategory) {
 //            categorySpec = withCategoryIds(categoryIds);
 //        }
 //
-//
-//
-//        // 차단/신고 필터링
 //        Specification<PostEntity> exclusionSpec = excludeBlockedAndReported(blockedUserIds, blockerUserIds, reportedPostIds);
 //
-//
-//        // 필터 결합
 //        Specification<PostEntity> spec = Specification.where(localReviewSpec)
 //                .and(regionSpec)
 //                .and(ageGroupSpec != null ? ageGroupSpec : Specification.where(null))
 //                .and(categorySpec != null ? categorySpec : Specification.where(null))
-//                .and(exclusionSpec);
+//                .and(exclusionSpec != null ? exclusionSpec : Specification.where(null));
 //
-//        // 정렬 처리
 //        return (root, query, cb) -> {
-//            // 기본 필터링된 조건
 //            Predicate predicate = spec.toPredicate(root, query, cb);
 //
-//
-//            // ✅ 커서 조건 추가
 //            if (cursor != null) {
 //                Path<Long> postIdPath = root.get("postId");
-//                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);  // 커서 기준으로 게시물 조회
-//                predicate = cb.and(predicate, cursorPredicate);
+//                Predicate cursorPredicate = cb.lessThan(postIdPath, cursor);
+//                if (predicate != null) {
+//                    predicate = cb.and(predicate, cursorPredicate);
+//                } else {
+//                    predicate = cursorPredicate;
+//                }
 //            }
 //
-//            // 정렬 조건 추가
 //            if ("zzimCount".equalsIgnoreCase(sortBy)) {
 //                Join<PostEntity, ZzimPostEntity> zzimPostJoin = root.join("zzims", JoinType.LEFT);
 //                Expression<Long> zzimCount = cb.count(zzimPostJoin.get("post"));
@@ -266,12 +357,13 @@ public class PostSpecification {
 //                query.orderBy(cb.desc(zzimCount), cb.desc(root.get("createdAt")));
 //            } else {
 //                query.orderBy(cb.desc(root.get("postId")));
-//                //query.orderBy(cb.desc(root.get("createdAt")));  // 최신순으로 정렬
 //            }
 //
 //            return predicate;
 //        };
-    }
+//    }
+//
+ }
 
 
 

@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.application.port.command.feed;
 
+import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,7 @@ public class FeedFilterCommand {
     private final List<AgeGroup> ageGroups;
     private final String sortBy;
     private final boolean isLocalReview;
-
-    private final Long cursor;
+    private final Cursor cursor;
     private final int size;
     private final Long currentUserId;
 }

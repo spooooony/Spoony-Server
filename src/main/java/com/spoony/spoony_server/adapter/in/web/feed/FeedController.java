@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.in.web.feed;
 
+import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.adapter.dto.post.response.FilteredFeedResponseListDTO;
 import com.spoony.spoony_server.application.port.command.feed.FeedFilterCommand;
 import com.spoony.spoony_server.application.port.command.feed.FollowingUserFeedGetCommand;
@@ -10,12 +11,15 @@ import com.spoony.spoony_server.global.dto.ResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.FeedListResponseDTO;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
+import com.spoony.spoony_server.global.util.CursorParser;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -41,11 +45,11 @@ public class FeedController {
             @RequestParam(required = false) List<Long> regionIds,
             @RequestParam(required = false) List<AgeGroup> ageGroups,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(required = false) Long cursor,
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size
     ) {
 
-        FilteredFeedResponseListDTO feedListResponse;
+
 
         // 전체 카테고리
         if (categoryIds == null || categoryIds.isEmpty()) {
@@ -68,9 +72,12 @@ public class FeedController {
         if (ageGroups != null && ageGroups.isEmpty()) {
             ageGroups = null;
         }
-
-        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview, cursor, size,currentUserId);
-
+        Cursor parsedCursor = null;
+        if (cursor != null && !cursor.isBlank()) {
+            parsedCursor = Cursor.fromCursorString(cursor);
+        }
+        FeedFilterCommand command = new FeedFilterCommand(categoryIds, regionIds, ageGroups, sortBy, isLocalReview, parsedCursor, size,currentUserId);
+        FilteredFeedResponseListDTO feedListResponse;
         try {
             feedListResponse = feedGetUseCase.getFilteredFeed(command);
         } catch (Exception e) {
