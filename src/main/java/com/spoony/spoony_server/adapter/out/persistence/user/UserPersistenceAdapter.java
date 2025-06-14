@@ -279,8 +279,6 @@ public class UserPersistenceAdapter implements UserPort {
         for (PostEntity post : postsByUser) {
             zzimPostRepository.deleteByUserAndAuthorAndPost(targetUser, user, post);
         }
-
-
     }
 }
 

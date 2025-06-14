@@ -70,9 +70,7 @@ public class PostService implements
         PostCategory postCategory = postCategoryPort.findPostCategoryByPostId(post.getPostId());
         Long categoryId = postCategory.getCategory().getCategoryId();
         Category category = categoryPort.findCategoryById(categoryId);
-
         Place place = post.getPlace();
-        LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt()) ? post.getUpdatedAt() : post.getCreatedAt();
 
         Long zzimCount = post.getZzimCount();
         boolean isMine = post.getUser().getUserId().equals(command.getUserId());
@@ -92,7 +90,7 @@ public class PostService implements
         return PostResponseDTO.of(command.getPostId(),
                 post.getUser().getUserId(),
                 photoUrlList,
-                latestDate,
+                post.getCreatedAt(),
                 menuNameList,
                 post.getDescription(),
                 post.getValue(),
@@ -216,8 +214,6 @@ public class PostService implements
                     Long zzimCount = post.getZzimCount();
                     String regionName = post.getUser().getRegion() != null ? post.getUser().getRegion().getRegionName() : null;
                     boolean isMine = post.getUser().getUserId().equals(userGetCommand.getUserId());
-                    LocalDateTime latestDate = post.getUpdatedAt().isAfter(post.getCreatedAt())
-                            ? post.getUpdatedAt() : post.getCreatedAt();
 
                     return FeedResponseDTO.of(
                             post.getUser().getUserId(),
@@ -234,7 +230,7 @@ public class PostService implements
                             ),
                             zzimCount,
                             photoUrlList,
-                            latestDate,
+                            post.getCreatedAt(),
                             isMine
                     );
                 })
