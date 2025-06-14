@@ -18,8 +18,8 @@ public interface UserPort {
     void updateUser(Long userId, String userName, Long regionId, String introduction, LocalDate birth, Long imageLevel);
     List<User> findByUserNameContaining(String query);
     List<Region> findAllRegions();
-    Long countFollowerByUserId(Long userId);
-    Long countFollowingByUserId(Long userId);
+    Long countFollowerExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds);
+    Long countFollowingExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds);
     void saveNewFollow(Long fromUserId, Long toUserId);
     void removeFeedPostsRelatedToBlock(Long fromUserId, Long toUserId);
 

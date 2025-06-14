@@ -125,13 +125,13 @@ public class UserPersistenceAdapter implements UserPort {
     }
 
     @Override
-    public Long countFollowerByUserId(Long userId) {
-        return followRepository.countByFollowing_UserId(userId);
+    public Long countFollowerExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds) {
+        return followRepository.countByFollowingUserIdExcludingBlocked(targetUserId, blockedUserIds, blockerUserIds);
     }
 
     @Override
-    public Long countFollowingByUserId(Long userId) {
-        return followRepository.countByFollower_UserId(userId);
+    public Long countFollowingExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds) {
+        return followRepository.countByFollowerUserIdExcludingBlocked(targetUserId, blockedUserIds, blockerUserIds);
     }
 
     @Override

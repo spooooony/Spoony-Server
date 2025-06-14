@@ -46,9 +46,18 @@ public class UserService implements
 
     @Override
     public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
-        User user = userPort.findUserById(userGetCommand.getUserId());
-        Long followerCount = userPort.countFollowerByUserId(user.getUserId());
-        Long followingCount = userPort.countFollowingByUserId(user.getUserId());
+        Long userId = userGetCommand.getUserId();
+        User user = userPort.findUserById(userId);
+
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
+
+
+        Long followerCount = userPort.countFollowerExcludingBlocked(user.getUserId(), blockedUserIds, blockerUserIds);
+        Long followingCount = userPort.countFollowingExcludingBlocked(user.getUserId(), blockedUserIds, blockerUserIds);
+
+
+
         Long reviewCount = postPort.countPostsByUserId(userGetCommand.getUserId());
 
         // 🔥 로그인한 사용자가 이 유저를 팔로우 중인지 확인
