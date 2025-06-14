@@ -41,8 +41,8 @@ public class UserController {
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
     public ResponseEntity<ResponseDTO<UserResponseDTO>> getUserInfo(
             @UserId Long userId) {
-        UserGetCommand command = new UserGetCommand(userId);
-        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(command,null);
+        RelatedUserGetCommand relatedUserGetCommand = new RelatedUserGetCommand(userId,userId);
+        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(relatedUserGetCommand,null);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
 
@@ -53,6 +53,7 @@ public class UserController {
             @PathVariable Long targetUserId) {
 
         UserGetCommand userGetCommand = new UserGetCommand(targetUserId);
+        RelatedUserGetCommand relatedUserGetCommand = new RelatedUserGetCommand(userId,targetUserId);
         UserFollowCommand userFollowCommand = new UserFollowCommand(userId,targetUserId);
 
         BlockCheckCommand blockCheckCommand = new BlockCheckCommand(userId, targetUserId);
@@ -62,7 +63,7 @@ public class UserController {
                     .body(ResponseDTO.fail(BlockErrorMessage.USER_BLOCKED));
         }
 
-        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(userGetCommand,userFollowCommand);
+        UserResponseDTO userResponseDTO = userGetUseCase.getUserInfo(relatedUserGetCommand,userFollowCommand);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(userResponseDTO));
     }
 
