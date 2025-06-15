@@ -40,7 +40,7 @@ public interface PostPort {
                                  List<Long> reportedUserIds,
                                  List<Long> reportedPostIds);
 
-    Long countPostsByUserId(Long userId);
+    Long countPostsByUserIdExcludingReported(Long targetUserId,List <Long> reportedPostIds);
     List<Post> findByPostDescriptionContaining(String query);
     List<Post> findAll();
 

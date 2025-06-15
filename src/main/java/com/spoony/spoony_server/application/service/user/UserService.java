@@ -45,11 +45,23 @@ public class UserService implements
     private final FeedPort feedPort;
 
     @Override
-    public UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand) {
-        User user = userPort.findUserById(userGetCommand.getUserId());
-        Long followerCount = userPort.countFollowerByUserId(user.getUserId());
-        Long followingCount = userPort.countFollowingByUserId(user.getUserId());
-        Long reviewCount = postPort.countPostsByUserId(userGetCommand.getUserId());
+    public UserResponseDTO getUserInfo(RelatedUserGetCommand relatedUserGetCommand, UserFollowCommand userFollowCommand) {
+        Long userId = relatedUserGetCommand.getUserId();
+        Long targetUserId = relatedUserGetCommand.getTargetUserId();
+        User user = userPort.findUserById(userId);
+
+        List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
+        List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
+
+        // 타유저 페이지의 경우(userId != targetUserId), 타유저가 작성한 리뷰 중, 내가 신고한 리뷰는 필터링
+        List <Long> reportedPostIds = postPort.getReportedPostIds(userId);
+
+        Long followerCount = userPort.countFollowerExcludingBlocked(userId, blockedUserIds, blockerUserIds);
+        Long followingCount = userPort.countFollowingExcludingBlocked(userId, blockedUserIds, blockerUserIds);
+
+
+
+        Long reviewCount = postPort.countPostsByUserIdExcludingReported(targetUserId,reportedPostIds);
 
         // 🔥 로그인한 사용자가 이 유저를 팔로우 중인지 확인
         boolean isFollowing = false;

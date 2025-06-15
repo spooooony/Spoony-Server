@@ -10,6 +10,6 @@ import com.spoony.spoony_server.application.port.command.user.UserReviewGetComma
 public interface PostGetUseCase {
     PostResponseDTO getPostById(PostGetCommand command);
     FeedListResponseDTO getPostsByUserId(UserReviewGetCommand command);
-    ReviewAmountResponseDTO getPostAmountByUserId(UserGetCommand command);
+   // ReviewAmountResponseDTO getPostAmountByUserId(UserGetCommand command);
 }
 

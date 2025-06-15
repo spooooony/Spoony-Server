@@ -6,7 +6,7 @@ import com.spoony.spoony_server.application.port.command.user.*;
 import java.util.List;
 
 public interface UserGetUseCase {
-    UserResponseDTO getUserInfo(UserGetCommand userGetCommand, UserFollowCommand userFollowCommand );
+    UserResponseDTO getUserInfo(RelatedUserGetCommand relatedUserGetCommand, UserFollowCommand userFollowCommand );
     UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand userGetCommand);
     Boolean isUsernameDuplicate(UserNameCheckCommand command);
     FollowListResponseDTO getFollowers(FollowGetCommand command);

@@ -308,8 +308,8 @@ public class PostPersistenceAdapter implements
     }
 
     @Override
-    public Long countPostsByUserId(Long userId) {
-        return postRepository.countByUser_UserId(userId);
+    public Long countPostsByUserIdExcludingReported(Long userId,List <Long> reportedPostIds) {
+        return postRepository.countByUser_UserId(userId,reportedPostIds);
     }
 
     @Override
