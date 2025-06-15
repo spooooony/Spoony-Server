@@ -49,8 +49,6 @@ public class FeedController {
             @RequestParam(defaultValue = "10") int size
     ) {
 
-
-
         // 전체 카테고리
         if (categoryIds == null || categoryIds.isEmpty()) {
             categoryIds = List.of(1L);
@@ -87,4 +85,3 @@ public class FeedController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(feedListResponse));
     }
 }
-

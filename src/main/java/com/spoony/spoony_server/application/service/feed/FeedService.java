@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -166,13 +168,18 @@ public class FeedService implements FeedGetUseCase {
                 .collect(Collectors.toList());
 
         Cursor nextCursor = null;
+        String encodedCursor = null;
+
         if (!filteredPosts.isEmpty()) {
             Post lastPost = filteredPosts.get(filteredPosts.size() - 1);
             nextCursor = new Cursor(
                     lastPost.getZzimCount(),
                     lastPost.getCreatedAt()
             );
+
+            String rawCursor = nextCursor.toCursorString();
+            encodedCursor = URLEncoder.encode(rawCursor, StandardCharsets.UTF_8);
         }
-        return FilteredFeedResponseListDTO.of(feedResponseList, nextCursor);
+        return FilteredFeedResponseListDTO.of(feedResponseList, encodedCursor);
     }
 }
