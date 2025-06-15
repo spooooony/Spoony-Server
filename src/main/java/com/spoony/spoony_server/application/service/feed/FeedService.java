@@ -171,7 +171,7 @@ public class FeedService implements FeedGetUseCase {
         String encodedCursor = null;
 
         if (!filteredPosts.isEmpty()) {
-            Post lastPost = filteredPosts.get(filteredPosts.size() - 1);
+            Post lastPost = filteredPosts.getLast();
             nextCursor = new Cursor(
                     lastPost.getZzimCount(),
                     lastPost.getCreatedAt()
