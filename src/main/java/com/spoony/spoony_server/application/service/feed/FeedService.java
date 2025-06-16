@@ -168,7 +168,7 @@ public class FeedService implements FeedGetUseCase {
                 .collect(Collectors.toList());
 
         Cursor nextCursor = null;
-        String encodedCursor = null;
+        String rawCursor = null;
 
         if (!filteredPosts.isEmpty()) {
             Post lastPost = filteredPosts.getLast();
@@ -177,9 +177,9 @@ public class FeedService implements FeedGetUseCase {
                     lastPost.getCreatedAt()
             );
 
-            String rawCursor = nextCursor.toCursorString();
-            encodedCursor = URLEncoder.encode(rawCursor, StandardCharsets.UTF_8);
+            rawCursor = nextCursor.toCursorString();
         }
-        return FilteredFeedResponseListDTO.of(feedResponseList, encodedCursor);
+
+        return FilteredFeedResponseListDTO.of(feedResponseList, rawCursor);
     }
 }
