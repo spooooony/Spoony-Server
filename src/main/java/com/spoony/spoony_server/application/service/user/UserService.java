@@ -46,48 +46,40 @@ public class UserService implements
 
     @Override
     public UserResponseDTO getUserInfo(RelatedUserGetCommand relatedUserGetCommand, UserFollowCommand userFollowCommand) {
-        Long userId = relatedUserGetCommand.getUserId();
-        Long targetUserId = relatedUserGetCommand.getTargetUserId();
-        User user = userPort.findUserById(userId);
+        Long userId = relatedUserGetCommand.getUserId(); // 로그인 유저
+        Long targetUserId = relatedUserGetCommand.getTargetUserId(); // 프로필 조회 대상
+
+        User targetUser = userPort.findUserById(targetUserId);
 
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userId);
         List<Long> blockerUserIds = blockPort.getBlockerUserIds(userId);
+        List<Long> reportedPostIds = postPort.getReportedPostIds(userId);
 
-        // 타유저 페이지의 경우(userId != targetUserId), 타유저가 작성한 리뷰 중, 내가 신고한 리뷰는 필터링
-        List <Long> reportedPostIds = postPort.getReportedPostIds(userId);
+        Long followerCount = userPort.countFollowerExcludingBlocked(targetUserId, blockedUserIds, blockerUserIds);
+        Long followingCount = userPort.countFollowingExcludingBlocked(targetUserId, blockedUserIds, blockerUserIds);
+        Long reviewCount = postPort.countPostsByUserIdExcludingReported(targetUserId, reportedPostIds);
 
-        Long followerCount = userPort.countFollowerExcludingBlocked(userId, blockedUserIds, blockerUserIds);
-        Long followingCount = userPort.countFollowingExcludingBlocked(userId, blockedUserIds, blockerUserIds);
-
-
-
-        Long reviewCount = postPort.countPostsByUserIdExcludingReported(targetUserId,reportedPostIds);
-
-        // 🔥 로그인한 사용자가 이 유저를 팔로우 중인지 확인
         boolean isFollowing = false;
         if (userFollowCommand != null) {
-            isFollowing = userPort.existsFollowRelation(
-                    userFollowCommand.getUserId(),
-                    userFollowCommand.getTargetUserId()
-            );
+            isFollowing = userPort.existsFollowRelation(userId, targetUserId);
         }
 
-        String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
+        String regionName = targetUser.getRegion() != null ? targetUser.getRegion().getRegionName() : null;
 
         return UserResponseDTO.of(
-                user.getUserId(),
-                user.getPlatform(),
-                user.getPlatformId(),
-                user.getUserName(),
+                targetUser.getUserId(),
+                targetUser.getPlatform(),
+                targetUser.getPlatformId(),
+                targetUser.getUserName(),
                 regionName,
-                user.getIntroduction(),
-                user.getCreatedAt(),
-                user.getUpdatedAt(),
+                targetUser.getIntroduction(),
+                targetUser.getCreatedAt(),
+                targetUser.getUpdatedAt(),
                 followerCount,
                 followingCount,
                 isFollowing,
                 reviewCount,
-                user.getImageLevel().intValue()
+                targetUser.getImageLevel().intValue()
         );
     }
 
@@ -168,7 +160,7 @@ public class UserService implements
         List<UserSimpleResponseDTO> userDTOList = followings.stream()
                 .map(Follow::getFollowing)
                 .filter(followingUser ->
-                                !blockedUserIds.contains(followingUser.getUserId()) && !blockerUserIds.contains(followingUser.getUserId())&& !reportedUserIds.contains(followingUser.getUserId())
+                        !blockedUserIds.contains(followingUser.getUserId()) && !blockerUserIds.contains(followingUser.getUserId())&& !reportedUserIds.contains(followingUser.getUserId())
                 )
                 .map(followingUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
@@ -193,19 +185,19 @@ public class UserService implements
         List<UserBlockResponseDTO> userBlockResponseDTOList = blockIds.stream()
                 .filter(block -> block.getStatus() == BlockStatus.BLOCKED)
                 .map(block ->{
-            User blockedUser = block.getBlocked();
-            boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
-            String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
+                    User blockedUser = block.getBlocked();
+                    boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
+                    String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
 
-            return UserBlockResponseDTO.of(
-                    command.getUserId(),
-                    blockedUser.getUserId(),
-                    blockedUser.getUserName(),
-                    regionName,
-                    isBlocked,
-                    blockedUser.getImageLevel().intValue()
-            );
-        }).toList();
+                    return UserBlockResponseDTO.of(
+                            command.getUserId(),
+                            blockedUser.getUserId(),
+                            blockedUser.getUserName(),
+                            regionName,
+                            isBlocked,
+                            blockedUser.getImageLevel().intValue()
+                    );
+                }).toList();
         return BlockListResponseDTO.of(userBlockResponseDTOList);
     }
 
