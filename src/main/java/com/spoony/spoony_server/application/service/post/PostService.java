@@ -114,12 +114,11 @@ public class PostService implements
 
     //유저페이지 -> 유저가 작성한 리뷰 조회 시 사용
     public FeedListResponseDTO getPostsByUserId(UserReviewGetCommand command){
-        Long userId = command.getUserId(); //나
-        Long tagetUserId = command.getTargetUserId(); //타유저
+        Long userId = command.getUserId();
+        Long targetUserId = command.getTargetUserId();
         Boolean isLocalReview = command.getIsLocalReview();
-        List<Post> postList = postPort.findPostsByUserId(tagetUserId);
 
-        // 타유저 페이지의 경우(userId != targetUserId), 타유저가 작성한 리뷰 중, 내가 신고한 리뷰는 필터링
+        List<Post> postList = postPort.findPostsByUserId(targetUserId);
         List<Long> reportedPostIds = postPort.getReportedPostIds(userId);
 
         postList = postList.stream()
@@ -129,7 +128,7 @@ public class PostService implements
                 })
                 .collect(Collectors.toList());
 
-        // localReview가 true일 경우, 활동 지역과 식당 지역이 같은 게시물만 필터링
+        // localReview = true: 활동 지역과 식당 지역이 같은 게시물만 필터링
         if (Boolean.TRUE.equals(isLocalReview)) {
             postList = postList.stream()
                     .filter(post -> {
@@ -184,13 +183,6 @@ public class PostService implements
                 .collect(Collectors.toList());
         return FeedListResponseDTO.of(feedResponseList);
     }
-
-//    @Override
-//    public ReviewAmountResponseDTO getPostAmountByUserId(UserGetCommand command) {
-//        Long userId = command.getUserId();
-//        Long reviewCount = postPort.countPostsByUserId(userId);
-//        return ReviewAmountResponseDTO.of(reviewCount);
-//    }
 
     @Override
     public PostSearchResultListDTO searchReviewsByQuery(UserGetCommand userGetCommand,PostSearchCommand postSearchCommand){
