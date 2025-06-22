@@ -37,6 +37,8 @@ out/
 .vscode/
 
 application.yml
+application-prod.yml
 application-aws.yml
+application-prod-aws.yml
 application-naver.yml
 application-oath.yml
