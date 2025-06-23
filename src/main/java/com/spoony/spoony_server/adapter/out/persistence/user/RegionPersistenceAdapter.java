@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.adapter.out.persistence.user;
 
-import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.RegionMapper;
 import com.spoony.spoony_server.application.port.out.user.RegionPort;

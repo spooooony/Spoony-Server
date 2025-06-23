@@ -2,7 +2,6 @@ package com.spoony.spoony_server.adapter.out.persistence.post;
 
 import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.adapter.out.persistence.feed.PostSpecification;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.RegionRepository;
 import com.spoony.spoony_server.application.port.out.post.PhotoPort;
 import com.spoony.spoony_server.domain.post.CategoryType;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
@@ -32,9 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Adapter
 @Transactional
 @RequiredArgsConstructor
@@ -62,11 +58,6 @@ public class PostPersistenceAdapter implements
     }
 
     @Override
-    public List<Post> findPostsByTargetUserId(Long userId,Long targetUserId) {
-        return List.of();
-    }
-
-    @Override
     public Post findPostById(Long postId) {
         return postRepository.findById(postId)
                 .map(PostMapper::toDomain)
@@ -78,14 +69,6 @@ public class PostPersistenceAdapter implements
         return postCategoryRepository.findByPost_PostId(postId)
                 .map(PostCategoryMapper::toDomain)
                 .orElseThrow(() -> new BusinessException(CategoryErrorMessage.CATEGORY_NOT_FOUND));
-    }
-
-    @Override
-    public List<PostCategory> findPostCategoriesByPostId(Long postId) {
-        return postCategoryRepository.findAllByPost_PostId(postId)
-                .stream()
-                .map(PostCategoryMapper::toDomain)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -251,12 +234,6 @@ public class PostPersistenceAdapter implements
     @Override
     public List<Post> findByPostDescriptionContaining(String query) {
         List<PostEntity> postEntityList = postRepository.findByDescriptionContaining(query);
-        return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Post> findAll() {
-        List<PostEntity> postEntityList = postRepository.findAll();
         return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
     }
 

@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
 @Transactional
 @RequiredArgsConstructor
@@ -27,7 +26,6 @@ public class BlockPersistenceAdapter implements BlockPort {
     @Override
     public void saveUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
         UserEntity fromUserEntity = userRepository.findById(fromUserId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-
         UserEntity toUserEntity = userRepository.findById(toUserId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         BlockEntity blockEntity = BlockEntity.builder()
@@ -37,9 +35,7 @@ public class BlockPersistenceAdapter implements BlockPort {
                 .build();
 
         blockRepository.save(blockEntity);
-
     }
-
 
     @Override
     public boolean existsBlockUserRelation(Long fromUserId, Long toUserId) {
@@ -57,11 +53,9 @@ public class BlockPersistenceAdapter implements BlockPort {
     }
 
     @Override
-
     public List<Long> getUnfollowedUserIds(Long userId) {
         return blockRepository.findUnfollowedUserIds(userId);
     }
-
 
     @Override
     public Optional<BlockStatus> getBlockRelationStatus(Long fromUserId, Long toUserId) {
@@ -78,7 +72,6 @@ public class BlockPersistenceAdapter implements BlockPort {
         blockRepository.save(updatedBlockEntity);  // 상태 저장
     }
 
-
     @Override
     public void saveOrUpdateUserBlockRelation(Long fromUserId, Long toUserId, BlockStatus status) {
         Optional<BlockEntity> optionalBlock = blockRepository.findByBlocker_UserIdAndBlocked_UserId(fromUserId, toUserId);
@@ -88,9 +81,7 @@ public class BlockPersistenceAdapter implements BlockPort {
             if (blockEntity.getStatus() != status) {
                 blockEntity.updateStatus(status);
             }
-            // 이미 있고 상태도 같으면 아무것도 하지 않음
         } else {
-            // 기존 관계가 아예 없을 때만 새로 저장
             UserEntity fromUser = userRepository.findById(fromUserId)
                     .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
             UserEntity toUser = userRepository.findById(toUserId)

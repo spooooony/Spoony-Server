@@ -18,7 +18,6 @@ import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostReposito
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.*;
 import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.business.RegionErrorMessage;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +79,6 @@ public class UserPersistenceAdapter implements UserPort {
 
     @Override
     public void saveFollowRelation(Long fromUserId, Long toUserId) {
-        // 1. 사용자 존재 여부 검증 (예외 던짐)
         UserEntity fromUserEntity = userRepository.findById(fromUserId)
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
@@ -132,21 +130,6 @@ public class UserPersistenceAdapter implements UserPort {
     @Override
     public Long countFollowingExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds) {
         return followRepository.countByFollowerUserIdExcludingBlocked(targetUserId, blockedUserIds, blockerUserIds);
-    }
-
-    @Override
-    public void saveNewFollow(Long fromUserId, Long toUserId) {
-        UserEntity fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-        UserEntity toUser = userRepository.findById(toUserId)
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-
-        NewFollowEntity newFollowEntity = NewFollowEntity.builder()
-                .newFollower(fromUser)
-                .newFollowing(toUser)
-                .build();
-
-        newFollowRepository.save(newFollowEntity);
-
     }
 
     @Override
@@ -245,16 +228,6 @@ public class UserPersistenceAdapter implements UserPort {
     }
 
     @Override
-    public void removeFeedPostsRelatedToBlock(Long fromUserId, Long toUserId) {
-        // fromUserId가 toUserId를 차단한 경우
-        // fromUserId는 userId로서 피드에 toUserId(내가 차단한 유저)가 작성한 글이 있으면 삭제
-
-        feedRepository.deleteByUser_UserIdAndAuthor_UserId(fromUserId, toUserId);
-        feedRepository.deleteByUser_UserIdAndAuthor_UserId(toUserId, fromUserId);
-
-    }
-
-    @Override
     public List<Block> findBlockedByUserId(Long userId) {
         List<BlockEntity> blockingList = blockRepository.findByBlocker_UserId(userId);
         return blockingList.stream().map(BlockMapper::toDomain).toList();
@@ -270,15 +243,12 @@ public class UserPersistenceAdapter implements UserPort {
         List<PostEntity> postsByTargetUser = postRepository.findByUser_UserId(targetUserId);
         List<PostEntity> postsByUser = postRepository.findByUser_UserId(userId);
 
-        // 내가 찜한 상대방의 게시물 제거
         for (PostEntity post : postsByTargetUser) {
             zzimPostRepository.deleteByUserAndAuthorAndPost(user, targetUser, post);
         }
 
-        // 상대방이 찜한 나의 게시물 제거
         for (PostEntity post : postsByUser) {
             zzimPostRepository.deleteByUserAndAuthorAndPost(targetUser, user, post);
         }
     }
 }
-

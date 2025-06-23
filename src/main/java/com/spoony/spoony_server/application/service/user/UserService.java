@@ -6,7 +6,6 @@ import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
 import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
-import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
@@ -36,8 +35,7 @@ public class UserService implements
         UserSearchUseCase,
         RegionGetUseCase,
         BlockUserCreateUseCase,
-        BlockCheckUseCase,
-        BlockedUserGetUseCase {
+        BlockCheckUseCase {
 
     private final UserPort userPort;
     private final PostPort postPort;
@@ -324,10 +322,5 @@ public class UserService implements
     @Override
     public boolean isBlockedByBlockingOrReporting(BlockCheckCommand command) {
         return blockPort.existsBlockUserRelation(command.getUserId(), command.getTargetUserId());
-    }
-
-    @Override
-    public List<Long> searchUsersByQuery(UserGetCommand command) {
-        return blockPort.getBlockedUserIds(command.getUserId());
     }
 }

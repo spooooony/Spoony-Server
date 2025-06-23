@@ -22,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -39,6 +37,7 @@ public class ReportService implements ReportCreateUseCase {
         if (command.getReportDetail().trim().isEmpty()) {
             throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_MISSING);
         }
+
         if (command.getReportDetail().length() > 300) {
             throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_TOO_LONG);
         }
@@ -55,10 +54,7 @@ public class ReportService implements ReportCreateUseCase {
         Post post = postPort.findPostById(postId);
         User user = userPort.findUserById(userId);
 
-        //Feed테이블 -> 신고자(user_id) , 게시물(post_id) 삭제 (팔로잉 기반 피드조회시)
         feedPort.deleteFeedByUserIdAndPostId(userId,postId);
-
-        //zzim포스트에서 삭제
         zzimPostPort.deleteByUserAndPost(user,post);
 
         Report report = new Report(reportType,command.getReportDetail(),post,user);
@@ -83,13 +79,11 @@ public class ReportService implements ReportCreateUseCase {
         User user = userPort.findUserById(userId);
         User targetUser = userPort.findUserById(targetUserId);
 
-
         blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.REPORT);
 
         // 2. follow 관계 제거 (양방향)
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
-
 
         // 3. zzimPost 양방향 관계 제거
         userPort.removeZzimRelationsBetweenUsers(userId, targetUserId);

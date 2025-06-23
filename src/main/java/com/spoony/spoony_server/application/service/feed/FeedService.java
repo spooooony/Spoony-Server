@@ -8,9 +8,7 @@ import com.spoony.spoony_server.application.port.in.feed.FeedGetUseCase;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
-import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
-import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Category;
 import com.spoony.spoony_server.domain.post.Photo;
@@ -24,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,9 +33,7 @@ public class FeedService implements FeedGetUseCase {
     private final FeedPort feedPort;
     private  final PostPort postPort;
     private final PostCategoryPort postCategoryPort;
-    private final ZzimPostPort zzimPostPort;
     private final BlockPort blockPort;
-    private final ReportPort reportPort;
 
     @Transactional
     public FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command) {

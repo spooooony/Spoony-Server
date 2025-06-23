@@ -63,13 +63,6 @@ public class GlobalExceptionHandler {
                 .body(ResponseDTO.fail(BusinessErrorMessage.BDOY_ERROR));
     }
 
-//    @ExceptionHandler(NullPointerException.class)
-//    public ResponseEntity<?> handleNullPointerException(NullPointerException e) {
-//        return ResponseEntity
-//                .status(BusinessErrorMessage.NULL_ERROR.getHttpStatus())
-//                .body(ResponseDTO.fail(BusinessErrorMessage.NULL_ERROR));
-//    }
-
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<?> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
         return ResponseEntity

@@ -20,8 +20,6 @@ public interface UserPort {
     List<Region> findAllRegions();
     Long countFollowerExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds);
     Long countFollowingExcludingBlocked(Long targetUserId, List<Long> blockedUserIds, List<Long> blockerUserIds);
-    void saveNewFollow(Long fromUserId, Long toUserId);
-    void removeFeedPostsRelatedToBlock(Long fromUserId, Long toUserId);
 
     // AUTH
     User create(PlatformUserDTO platformUserDTO, UserSignupDTO userSignupDTO);

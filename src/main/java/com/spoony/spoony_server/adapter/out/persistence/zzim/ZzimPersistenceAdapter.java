@@ -40,14 +40,6 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     }
 
     @Override
-    public List<ZzimPost> findZzimPostsByUserId(Long userId) {
-        return zzimPostRepository.findByUser_UserId(userId)
-                .stream()
-                .map(ZzimMapper::toDomain)
-                .toList();
-    }
-
-    @Override
     public List<ZzimPost> findZzimPostsByUserIdAndCategoryIdSortedByCreatedAtDesc(Long userId, Long categoryId) {
         Specification<ZzimPostEntity> spec = ZzimPostSpecification.withUserIdAndCategoryId(userId, categoryId);
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");

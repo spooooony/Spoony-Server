@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.adapter.in.web.zzim;
 
-import com.spoony.spoony_server.adapter.dto.zzim.response.ZzimCardListWithCursorResponseDTO;
 import com.spoony.spoony_server.application.port.command.zzim.*;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimAddUseCase;
 import com.spoony.spoony_server.application.port.in.zzim.ZzimGetUseCase;

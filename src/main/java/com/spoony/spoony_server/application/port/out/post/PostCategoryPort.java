@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface PostCategoryPort {
     PostCategory findPostCategoryByPostId(Long postId);
-    List<PostCategory> findPostCategoriesByPostId(Long postId);
     List<PostCategory> findAllByPostId(Long postId);
 }

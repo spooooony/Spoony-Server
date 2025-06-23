@@ -13,7 +13,6 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenProvider;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenValidator;
 import com.spoony.spoony_server.global.exception.AuthException;
-import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

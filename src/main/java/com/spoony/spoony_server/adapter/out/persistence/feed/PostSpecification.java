@@ -1,16 +1,13 @@
 package com.spoony.spoony_server.adapter.out.persistence.feed;
 
-
 import com.spoony.spoony_server.adapter.dto.Cursor;
 import com.spoony.spoony_server.adapter.out.persistence.place.db.PlaceEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostCategoryEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
-import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostEntity;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
-
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -10,7 +10,6 @@ import com.spoony.spoony_server.application.port.command.user.BlockUserCommand;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
 import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
-import com.spoony.spoony_server.application.port.in.user.BlockedUserGetUseCase;
 import com.spoony.spoony_server.application.port.in.post.PostGetUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
