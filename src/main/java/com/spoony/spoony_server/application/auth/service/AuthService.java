@@ -13,6 +13,7 @@ import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenProvider;
 import com.spoony.spoony_server.global.auth.jwt.JwtTokenValidator;
 import com.spoony.spoony_server.global.exception.AuthException;
+import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -65,7 +66,17 @@ public class AuthService implements
     }
 
     @Override
-    public void withdraw(Long userId) {
+    public void withdraw(Long userId, String authCode) {
+        User user = userPort.findUserById(userId);
+        if(user.getPlatform() == Platform.KAKAO) {
+            kakaoService.unlink(user.getPlatformId());
+        } else if(user.getPlatform() == Platform.APPLE) {
+            // Apple revoke 스킵 (자체 토큰 발급 이슈)
+            // appleService.revoke(authCode);
+        } else {
+            throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);
+        }
+
         tokenPort.deleteRefreshToken(userId);
         userPort.deleteUser(userId);
     }

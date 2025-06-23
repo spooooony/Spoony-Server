@@ -10,6 +10,7 @@ import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
+import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -60,8 +61,11 @@ public class AuthController {
 
     @PostMapping("/withdraw")
     @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴합니다.")
-    public ResponseEntity<ResponseDTO<Void>> withdraw(@UserId Long userId) {
-        withdrawUseCase.withdraw(userId);
+    public ResponseEntity<ResponseDTO<Void>> withdraw(
+            @UserId Long userId,
+            @Nullable @RequestHeader(value = AuthConstant.APPLE_WITHDRAW_HEADER, required = false) final String authCode
+    ) {
+        withdrawUseCase.withdraw(userId, authCode);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
