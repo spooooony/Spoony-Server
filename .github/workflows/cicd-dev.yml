@@ -45,10 +45,10 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t yh0872/spoony-dev:latest .
+        run: docker build -t dltnals317/spoony-dev:latest .
 
       - name: Publish Image to Docker Hub
-        run: docker push yh0872/spoony-dev:latest
+        run: docker push dltnals317/spoony-dev:latest
 
   deploy:
     needs: build
@@ -93,7 +93,7 @@ jobs:
           fi
 
           echo "📥 최신 이미지 가져오기"
-          sudo docker pull yh0872/spoony-dev:latest
+          sudo docker pull dltnals317/spoony-dev:latest
 
           echo "🗑️ 이전 컨테이너 제거"
           sudo docker rm -f spoony-dev-container || true
@@ -102,7 +102,7 @@ jobs:
           sudo docker run -d -p 8080:8080 \
             --name spoony-dev-container \
             --network spoony-network \
-            yh0872/spoony-dev
+            dltnals317/spoony-dev
 
           echo "🛠 Nginx 설정 포트 고정"
           sudo sed -i "s/127.0.0.1:808[12]/127.0.0.1:8080/" /etc/nginx/sites-available/default
