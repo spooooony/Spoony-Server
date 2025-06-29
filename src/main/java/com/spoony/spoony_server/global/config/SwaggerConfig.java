@@ -14,7 +14,6 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("https://www.spoony.o-r.kr").description("Production Server")) // HTTPS 서버 추가
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth", securityScheme()))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
