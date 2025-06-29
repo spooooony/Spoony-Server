@@ -9,11 +9,17 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Configuration
 public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
+                .servers(List.of(
+                        new Server().url("https://www.spoony-prod.o-r.kr"),
+                        new Server().url("https://www.spoony-dev.o-r.kr")
+                ))
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth", securityScheme()))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
