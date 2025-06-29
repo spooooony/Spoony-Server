@@ -77,17 +77,23 @@ jobs:
             sudo docker network create spoony-network
           fi
 
+          echo "🧰 Redis 실행 확인"
+          
           REDIS_EXISTS=$(sudo docker ps -a -q -f name=^redis$)
           REDIS_RUNNING=$(sudo docker ps -q -f name=^redis$)
 
           if [ -n "$REDIS_EXISTS" ]; then
+            echo "🧰 Redis 인스턴스 존재"
             if [ -n "$REDIS_RUNNING" ]; then
+              echo "🧰 Redis 실행 중"
               sudo docker network connect spoony-network redis || true
             else
+              echo "🧰 Redis 실행 필요, 실행 시작"
               sudo docker start redis
               sudo docker network connect spoony-network redis || true
             fi
           else
+            echo "🧰 Redis 인스턴스 없음"
             sudo docker rm -f redis || true
             sudo docker run -d --name redis --network spoony-network redis
           fi
