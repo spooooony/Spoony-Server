@@ -34,7 +34,7 @@ jobs:
 
       - name: Generate environment-specific yml files
         run: |
-          echo "${{ secrets.CD_APPLICATION_PROD_AWS }}" > ./src/main/resources/application-aws.yml
+          echo "${{ secrets.CD_APPLICATION_AWS }}" > ./src/main/resources/application-aws.yml
           echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
           echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
 

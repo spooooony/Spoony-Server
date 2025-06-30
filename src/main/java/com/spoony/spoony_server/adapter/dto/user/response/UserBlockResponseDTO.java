@@ -12,7 +12,7 @@ public record UserBlockResponseDTO (
 ) {
     public static UserBlockResponseDTO of(Long currentUserId, Long userId, String username, String regionName, boolean isBlocked, int imageLevel) {
         ProfileImage profileImage = ProfileImage.fromLevel(imageLevel);
-        String profileImageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
+        String profileImageUrl = "https://www.spoony-prod.o-r.kr/profile-images/" + profileImage.getImage();
         boolean isMine = currentUserId.equals(userId); // 현재 유저와 같은지 비교
 
         return new UserBlockResponseDTO(

@@ -10,7 +10,7 @@ public record ProfileImageResponseDTO(
         boolean isUnlocked
 ) {
     public static ProfileImageResponseDTO of(ProfileImage profileImage, boolean isUnlocked) {
-        String imageUrl = "https://www.spoony.o-r.kr/profile-images/" + profileImage.getImage();
+        String imageUrl = "https://www.spoony-prod.o-r.kr/profile-images/" + profileImage.getImage();
         return new ProfileImageResponseDTO(
                 profileImage.getImageLevel(),
                 profileImage.getSpoonName(),
