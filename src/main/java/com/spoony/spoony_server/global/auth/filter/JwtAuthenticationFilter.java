@@ -60,6 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || requestURI.startsWith("/api/v1/auth/refresh")
                 || requestURI.startsWith("/api/v1/user/exists")
                 || requestURI.startsWith("/api/v1/user/region")
+                // TODO: main 브랜치 병합 전 제거 필수 (dev swagger test 인증 토큰 이슈..)
+                || requestURI.startsWith("/api/v1/admin")
                 || requestURI.startsWith("/profile-images")
                 || requestURI.startsWith("/swagger-ui")
                 || requestURI.startsWith("/v3/api-docs");
