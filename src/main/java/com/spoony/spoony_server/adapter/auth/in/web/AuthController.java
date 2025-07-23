@@ -47,6 +47,8 @@ public class AuthController {
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @RequestBody final PlatformRequestDTO platformRequestDTO
     ) {
+        System.out.println("AuthController.login");
+        System.out.println("platformToken = " + platformToken + ", platformRequestDTO = " + platformRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platformRequestDTO.platform(), platformToken)));
     }
 
@@ -65,6 +67,8 @@ public class AuthController {
             @UserId Long userId,
             @Nullable @RequestHeader(value = AuthConstant.APPLE_WITHDRAW_HEADER, required = false) final String authCode
     ) {
+        System.out.println("AuthController.withdraw");
+        System.out.println("userId = " + userId + ", authCode = " + authCode);
         withdrawUseCase.withdraw(userId, authCode);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
