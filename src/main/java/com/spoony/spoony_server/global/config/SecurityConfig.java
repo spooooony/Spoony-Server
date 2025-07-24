@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.global.config;
 
+import com.spoony.spoony_server.global.auth.filter.AdminJwtAuthenticationFilter;
 import com.spoony.spoony_server.global.auth.filter.JwtAuthenticationFilter;
 import com.spoony.spoony_server.global.auth.filter.JwtExceptionFilter;
 import com.spoony.spoony_server.global.auth.handler.CustomJwtAuthenticationEntryPoint;
@@ -22,6 +23,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final AdminJwtAuthenticationFilter adminJwtAuthenticationFilter;
     private final CustomJwtAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final List<String> AUTH_WHITE_LIST = List.of(
@@ -30,8 +32,9 @@ public class SecurityConfig {
             "/api/v1/auth/refresh",
             "/api/v1/user/exists",
             "/api/v1/user/region",
+            "/api/v1/admin/auth/login",
+            "/api/v1/admin/auth/signup",
             // TODO: main 브랜치 병합 전 제거 필수 (dev swagger test 인증 토큰 이슈..)
-            "/api/v1/admin/**",
             "/profile-images/**",
             "/swagger-ui/**",
             "/v3/api-docs/**"
@@ -52,6 +55,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http
+                .addFilterBefore(adminJwtAuthenticationFilter, JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling ->

@@ -1,82 +1,65 @@
 package com.spoony.spoony_server.global.auth.jwt;
 
-import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.auth.dto.ClaimDTO;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
 @Component
-public class JwtTokenProvider implements InitializingBean {
+public class AdminJwtTokenProvider implements InitializingBean {
 
     private static final String ANONYMOUS_USER = "anonymous";
 
-    @Value("${jwt.user.access_token_expiration_time}")
+    @Value("${jwt.admin.access_token_expiration_time}")
     private Long accessTokenExpirationTime;
-    @Value("${jwt.user.refresh_token_expiration_time}")
-    private Long refreshTokenExpirationTime;
-    @Value("${jwt.user.secret}")
+
+    @Value("${jwt.admin.secret}")
     private String secretKey;
 
-    private Key singingKey;
+    private Key signingKey;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         String encodedKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        this.singingKey = Keys.hmacShaKeyFor(encodedKey.getBytes());
+        this.signingKey = Keys.hmacShaKeyFor(encodedKey.getBytes());
     }
 
-    public JwtTokenDTO generateTokenPair(Long userId) {
-        return JwtTokenDTO.of(
-                generateToken(userId, true),
-                generateToken(userId, false)
-        );
-    }
+    public String generateToken(Long adminId) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + accessTokenExpirationTime);
 
-    public String generateToken(Long userId, boolean isAccessToken) {
-        final Date now = new Date();
-        final Date expirationDate = generateExpirationDate(now, isAccessToken);
-        final Claims claims = Jwts.claims()
+        Claims claims = Jwts.claims()
                 .setIssuedAt(now)
-                .setExpiration(expirationDate);
+                .setExpiration(expiry);
 
-        claims.put(AuthConstant.USER_ID, userId);
-        claims.put(AuthConstant.TOKEN_TYPE, isAccessToken);
+        claims.put(AuthConstant.USER_ID, adminId);
+        claims.put(AuthConstant.TOKEN_TYPE, true);
+        claims.put("role", "ADMIN");
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setClaims(claims)
-                .signWith(singingKey)
+                .signWith(signingKey)
                 .compact();
-    }
-
-    private Date generateExpirationDate(Date now, boolean isAccessToken) {
-        if (isAccessToken) {
-            return new Date(now.getTime() + accessTokenExpirationTime);
-        }
-        return new Date(now.getTime() + refreshTokenExpirationTime);
     }
 
     public Claims getClaims(final String token) {
         try {
             return Jwts.parserBuilder()
-                    .setSigningKey(singingKey)
+                    .setSigningKey(signingKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (SignatureException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             throw new AuthException(AuthErrorMessage.INVALID_TOKEN);
         }
     }
