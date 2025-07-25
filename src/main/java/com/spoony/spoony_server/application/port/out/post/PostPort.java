@@ -39,4 +39,6 @@ public interface PostPort {
                                  List<Long> blockedUserIds,
                                  List<Long> reportedUserIds,
                                  List<Long> reportedPostIds);
+    List<Post> findAllPosts(int page, int size);
+    int countAllPosts();
 }

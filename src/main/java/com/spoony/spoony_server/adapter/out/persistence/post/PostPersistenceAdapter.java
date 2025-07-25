@@ -295,4 +295,18 @@ public class PostPersistenceAdapter implements
                 .map(PhotoEntity::getPhotoUrl)
                 .toList();
     }
+
+    @Override
+    public List<Post> findAllPosts(int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return postRepository.findAll(pageable)
+                .stream()
+                .map(PostMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countAllPosts() {
+        return (int) postRepository.count();
+    }
 }

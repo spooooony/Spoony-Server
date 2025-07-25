@@ -5,6 +5,7 @@ import com.spoony.spoony_server.adapter.out.persistence.report.db.ReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.ReportRepository;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.UserReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.UserReportRepository;
+import com.spoony.spoony_server.adapter.out.persistence.report.mapper.ReportMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Adapter
 @Transactional
@@ -59,5 +62,13 @@ public class ReportPersistenceAdapter implements ReportPort {
     @Override
     public List<Long> findReportedPostIdsByUserId(Long userId) {
         return reportRepository.findReportedPostIdsByUserId(userId);
+    }
+
+    @Override
+    public Map<Long, List<Report>> findReportsByPostIds(List<Long> postIds) {
+        List<ReportEntity> entities = reportRepository.findAllByPost_PostIdIn(postIds);
+        return entities.stream()
+                .map(ReportMapper::toDomain)
+                .collect(Collectors.groupingBy(r -> r.getPost().getPostId()));
     }
 }
