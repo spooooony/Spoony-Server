@@ -8,5 +8,4 @@ import lombok.RequiredArgsConstructor;
 public class AdminGetAllPostsCommand {
     private final int page;
     private final int size;
-    private final String status;
 }
