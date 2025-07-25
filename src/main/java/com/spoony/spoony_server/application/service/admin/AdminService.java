@@ -12,4 +12,33 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
+    @Override
+    public AdminPostListResponseDTO getAllPosts(AdminGetAllPostsCommand command) {
+        return null;
+    }
+
+    @Override
+    public ReportedPostListResponseDTO getReportedPosts(AdminGetReportedPostsCommand command) {
+        return null;
+    }
+
+    @Override
+    public ReportedUserListResponseDTO getReportedUsers(AdminGetReportedUsersCommand command) {
+        return null;
+    }
+
+    @Override
+    public UserPostListResponseDTO getPostsByUser(AdminGetUserPostsCommand command) {
+        return null;
+    }
+
+    @Override
+    public void deletePost(AdminDeletePostCommand adminDeletePostCommand) {
+
+    }
+
+    @Override
+    public void deleteUser(AdminDeleteUserCommand adminDeleteUserCommand) {
+
+    }
 }

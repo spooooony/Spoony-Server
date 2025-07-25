@@ -19,6 +19,17 @@ public class AdminController {
     private final AdminPostUseCase adminPostUseCase;
     private final AdminUserUseCase adminUserUseCase;
 
+    @GetMapping("/posts")
+    @Operation(summary = "전체 게시글 목록 조회", description = "전체 게시글을 페이징으로 조회합니다. status 값으로 신고된 게시글만 조회할 수 있습니다.")
+    public ResponseEntity<ResponseDTO<AdminPostListResponseDTO>> getAllPosts(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(defaultValue = "ALL") String status) {
+        AdminGetAllPostsCommand command = new AdminGetAllPostsCommand(page, size, status);
+        AdminPostListResponseDTO result = adminPostUseCase.getAllPosts(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(result));
+    }
+
     @GetMapping("/posts/reported")
     @Operation(summary = "신고된 게시글 목록 조회", description = "신고된 게시글 목록을 페이징으로 조회합니다.")
     public ResponseEntity<ResponseDTO<ReportedPostListResponseDTO>> getReportedPosts(
