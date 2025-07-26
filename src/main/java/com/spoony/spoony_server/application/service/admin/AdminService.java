@@ -106,7 +106,77 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     @Override
     public ReportedPostListResponseDTO getReportedPosts(AdminGetReportedPostsCommand command) {
-        return null;
+        int page = command.getPage();
+        int size = command.getSize();
+
+        // 1. 신고된 게시글 페이징 조회
+        List<Post> reportedPosts = postPort.findReportedPosts(page, size);
+        int total = postPort.countReportedPosts();
+        int totalPages = (int) Math.ceil((double) total / size);
+
+        // 2. 게시글 ID 추출
+        List<Long> postIds = reportedPosts.stream()
+                .map(Post::getPostId)
+                .toList();
+
+        // 3. 게시글별 신고 정보 조회
+        Map<Long, List<Report>> reportsByPostId = reportPort.findReportsByPostIds(postIds);
+
+        // 4. 게시글 DTO 변환
+        List<AdminPostResponseDTO> postDTOs = reportedPosts.stream()
+                .map(post -> {
+                    User author = post.getUser();
+                    Place place = post.getPlace();
+
+                    List<Photo> photos = postPort.findPhotoById(post.getPostId());
+                    List<Menu> menus = postPort.findMenuById(post.getPostId());
+
+                    List<String> imageUrls = photos.stream()
+                            .map(Photo::getPhotoUrl)
+                            .toList();
+
+                    List<AdminPostResponseDTO.MenuDTO> menuDTOs = menus.stream()
+                            .map(menu -> AdminPostResponseDTO.MenuDTO.of(
+                                    String.valueOf(menu.getMenuId()),
+                                    menu.getMenuName()
+                            ))
+                            .toList();
+
+                    List<Report> reports = reportsByPostId.getOrDefault(post.getPostId(), List.of());
+
+                    int reportCount = reports.size();
+
+                    List<AdminPostResponseDTO.ReportDTO> reportDTOs = reports.stream()
+                            .map(report -> AdminPostResponseDTO.ReportDTO.of(
+                                    String.valueOf(report.getReportId()),
+                                    report.getReportType().name(),
+                                    report.getReportDetail(),
+                                    report.getUser().getUserName(),
+                                    null
+                            ))
+                            .toList();
+
+                    return AdminPostResponseDTO.of(
+                            String.valueOf(post.getPostId()),
+                            String.valueOf(author.getUserId()),
+                            author.getUserName(),
+                            post.getDescription(),
+                            place.getPlaceName(),
+                            post.getCons(),
+                            imageUrls,
+                            place.getPlaceAddress(),
+                            menuDTOs,
+                            post.getCreatedAt(),
+                            post.getUpdatedAt(),
+                            true,
+                            reportCount,
+                            reportDTOs
+                    );
+                })
+                .toList();
+
+        Pagination pagination = Pagination.of(page, size, total, totalPages);
+        return ReportedPostListResponseDTO.of(postDTOs, pagination);
     }
 
     @Override

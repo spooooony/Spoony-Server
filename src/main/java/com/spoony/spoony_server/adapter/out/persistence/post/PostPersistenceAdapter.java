@@ -309,4 +309,18 @@ public class PostPersistenceAdapter implements
     public int countAllPosts() {
         return (int) postRepository.count();
     }
+
+    @Override
+    public List<Post> findReportedPosts(int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<PostEntity> entities = postRepository.findReportedPosts(pageable);
+        return entities.stream()
+                .map(PostMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countReportedPosts() {
+        return postRepository.countReportedPosts();
+    }
 }

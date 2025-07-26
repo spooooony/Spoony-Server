@@ -41,4 +41,6 @@ public interface PostPort {
                                  List<Long> reportedPostIds);
     List<Post> findAllPosts(int page, int size);
     int countAllPosts();
+    List<Post> findReportedPosts(int page, int size);
+    int countReportedPosts();
 }
