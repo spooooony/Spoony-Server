@@ -11,6 +11,7 @@ import com.spoony.spoony_server.domain.post.Menu;
 import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.report.Report;
+import com.spoony.spoony_server.domain.report.UserReport;
 import com.spoony.spoony_server.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -181,7 +183,48 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     @Override
     public ReportedUserListResponseDTO getReportedUsers(AdminGetReportedUsersCommand command) {
-        return null;
+        int page = command.getPage();
+        int size = command.getSize();
+
+        // 1. 페이징 처리된 신고 대상 유저 목록 및 신고 내역 조회
+        List<UserReport> userReports = reportPort.findUserReportsWithPagination(page, size);
+        int total = reportPort.countReportedUsers();
+        int totalPages = (int) Math.ceil((double) total / size);
+
+        // 2. 사용자별 그룹핑
+        Map<Long, List<UserReport>> reportsByTargetUserId = userReports.stream()
+                .collect(Collectors.groupingBy(r -> r.getTargetUser().getUserId()));
+
+        // 3. DTO 변환
+        List<ReportedUserResponseDTO> users = reportsByTargetUserId.entrySet().stream()
+                .map(entry -> {
+                    Long userId = entry.getKey();
+                    List<UserReport> reports = entry.getValue();
+
+                    User targetUser = reports.get(0).getTargetUser(); // 동일 대상
+                    int reportCount = reports.size();
+
+                    List<ReportedUserResponseDTO.ReportDTO> reportDTOs = reports.stream()
+                            .map(report -> ReportedUserResponseDTO.ReportDTO.of(
+                                    String.valueOf(report.getUserReportId()),
+                                    report.getUserReportType().name(),
+                                    report.getUserReportDetail(),
+                                    report.getReporter().getUserName(),
+                                    null
+                            ))
+                            .toList();
+
+                    return ReportedUserResponseDTO.of(
+                            String.valueOf(userId),
+                            targetUser.getUserName(),
+                            reportCount,
+                            reportDTOs
+                    );
+                })
+                .toList();
+
+        Pagination pagination = Pagination.of(page, size, total, totalPages);
+        return ReportedUserListResponseDTO.of(users, pagination);
     }
 
     @Override

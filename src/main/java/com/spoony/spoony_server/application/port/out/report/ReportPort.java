@@ -11,6 +11,8 @@ public interface ReportPort {
     void saveUserReport(UserReport userReport);
     List<Long> findReportedPostIdsByUserId(Long userId);
     Map<Long, List<Report>> findReportsByPostIds(List<Long> postIds);
+    List<UserReport> findUserReportsWithPagination(int page, int size);
+    int countReportedUsers();
 }
 
 
