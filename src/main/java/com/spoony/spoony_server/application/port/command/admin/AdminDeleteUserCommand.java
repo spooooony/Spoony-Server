@@ -6,5 +6,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class AdminDeleteUserCommand {
-    private final String userId;
+    private final Long userId;
 }

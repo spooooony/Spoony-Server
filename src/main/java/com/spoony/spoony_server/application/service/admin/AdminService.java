@@ -29,6 +29,7 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     private final PostPort postPort;
     private final ReportPort reportPort;
+    private final UserPort userPort;
 
     @Override
     public AdminPostListResponseDTO getAllPosts(AdminGetAllPostsCommand command) {
@@ -314,13 +315,16 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
         Pagination pagination = Pagination.of(page, size, total, totalPages);
         return UserPostListResponseDTO.of(userInfo, postDTOs, pagination);
     }
-    @Override
-    public void deletePost(AdminDeletePostCommand adminDeletePostCommand) {
 
+    @Override
+    public void deletePost(AdminDeletePostCommand command) {
+        Long postId = command.getPostId();
+        postPort.deleteById(postId);
     }
 
     @Override
-    public void deleteUser(AdminDeleteUserCommand adminDeleteUserCommand) {
-
+    public void deleteUser(AdminDeleteUserCommand command) {
+        Long userId = command.getUserId();
+        userPort.deleteUser(userId);
     }
 }

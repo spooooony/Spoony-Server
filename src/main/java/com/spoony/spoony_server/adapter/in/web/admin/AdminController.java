@@ -63,14 +63,14 @@ public class AdminController {
 
     @DeleteMapping("/posts/{postId}")
     @Operation(summary = "게시글 삭제", description = "지정된 게시글을 삭제합니다.")
-    public ResponseEntity<ResponseDTO<Void>> deletePost(@PathVariable String postId) {
+    public ResponseEntity<ResponseDTO<Void>> deletePost(@PathVariable Long postId) {
         adminPostUseCase.deletePost(new AdminDeletePostCommand(postId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
     @DeleteMapping("/users/{userId}")
     @Operation(summary = "유저 삭제", description = "지정된 유저를 삭제합니다.")
-    public ResponseEntity<ResponseDTO<Void>> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<ResponseDTO<Void>> deleteUser(@PathVariable Long userId) {
         adminUserUseCase.deleteUser(new AdminDeleteUserCommand(userId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
