@@ -53,7 +53,7 @@ public class AdminController {
     @GetMapping("/users/{userId}/posts")
     @Operation(summary = "유저별 게시글 조회", description = "특정 유저가 작성한 게시글을 조회합니다.")
     public ResponseEntity<ResponseDTO<UserPostListResponseDTO>> getUserPosts(
-            @PathVariable String userId,
+            @PathVariable Long userId,
             @RequestParam int page,
             @RequestParam int size) {
         AdminGetUserPostsCommand command = new AdminGetUserPostsCommand(userId, page, size);

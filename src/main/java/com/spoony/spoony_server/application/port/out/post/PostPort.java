@@ -11,6 +11,8 @@ import com.spoony.spoony_server.domain.user.User;
 import java.util.List;
 
 public interface PostPort {
+    List<Post> findPostsByUserId(Long userId, int page, int size);
+    int countPostsByUserId(Long userId); // 페이지네이션 위한 총 개수
     List<Post> findPostsByUserId (Long userId);
     boolean existsByUserIdAndPostId(Long userId, Long postId);
     Post findPostById(Long postId);

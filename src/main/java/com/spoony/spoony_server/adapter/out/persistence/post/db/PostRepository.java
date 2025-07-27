@@ -30,4 +30,10 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
 
     @Query("SELECT COUNT(DISTINCT p) FROM PostEntity p JOIN ReportEntity r ON p.postId = r.post.postId")
     int countReportedPosts();
+
+    @Query("SELECT p FROM PostEntity p WHERE p.user.userId = :userId ORDER BY p.createdAt DESC")
+    List<PostEntity> findByUserIdWithPaging(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId")
+    int countByUserId(@Param("userId") Long userId);
 }

@@ -24,6 +24,8 @@ import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -322,5 +324,19 @@ public class PostPersistenceAdapter implements
     @Override
     public int countReportedPosts() {
         return postRepository.countReportedPosts();
+    }
+
+    @Override
+    public List<Post> findPostsByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return postRepository.findByUserIdWithPaging(userId, pageable)
+                .stream()
+                .map(PostMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countPostsByUserId(Long userId) {
+        return postRepository.countByUserId(userId);
     }
 }
