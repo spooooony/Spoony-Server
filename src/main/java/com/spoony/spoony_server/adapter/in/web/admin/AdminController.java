@@ -4,6 +4,7 @@ import com.spoony.spoony_server.adapter.dto.admin.response.*;
 import com.spoony.spoony_server.application.port.command.admin.*;
 import com.spoony.spoony_server.application.port.in.admin.AdminPostUseCase;
 import com.spoony.spoony_server.application.port.in.admin.AdminUserUseCase;
+import com.spoony.spoony_server.global.auth.annotation.annotation.AdminId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,9 @@ public class AdminController {
     private final AdminUserUseCase adminUserUseCase;
 
     @GetMapping("/posts")
-    @Operation(summary = "전체 게시글 목록 조회", description = "전체 게시글을 페이징으로 조회합니다. status 값으로 신고된 게시글만 조회할 수 있습니다.")
+    @Operation(summary = "전체 게시글 목록 조회", description = "전체 게시글을 페이징으로 조회합니다.")
     public ResponseEntity<ResponseDTO<AdminPostListResponseDTO>> getAllPosts(
+            @AdminId Long adminId,
             @RequestParam int page,
             @RequestParam int size) {
         AdminGetAllPostsCommand command = new AdminGetAllPostsCommand(page, size);
@@ -32,6 +34,7 @@ public class AdminController {
     @GetMapping("/posts/reported")
     @Operation(summary = "신고된 게시글 목록 조회", description = "신고된 게시글 목록을 페이징으로 조회합니다.")
     public ResponseEntity<ResponseDTO<ReportedPostListResponseDTO>> getReportedPosts(
+            @AdminId Long adminId,
             @RequestParam int page,
             @RequestParam int size) {
         AdminGetReportedPostsCommand command = new AdminGetReportedPostsCommand(page, size);
@@ -42,6 +45,7 @@ public class AdminController {
     @GetMapping("/users/reported")
     @Operation(summary = "신고된 유저 목록 조회", description = "신고된 유저 목록을 조회합니다.")
     public ResponseEntity<ResponseDTO<ReportedUserListResponseDTO>> getReportedUsers(
+            @AdminId Long adminId,
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(defaultValue = "1") int reportCount) {
@@ -53,6 +57,7 @@ public class AdminController {
     @GetMapping("/users/{userId}/posts")
     @Operation(summary = "유저별 게시글 조회", description = "특정 유저가 작성한 게시글을 조회합니다.")
     public ResponseEntity<ResponseDTO<UserPostListResponseDTO>> getUserPosts(
+            @AdminId Long adminId,
             @PathVariable Long userId,
             @RequestParam int page,
             @RequestParam int size) {
@@ -63,14 +68,18 @@ public class AdminController {
 
     @DeleteMapping("/posts/{postId}")
     @Operation(summary = "게시글 삭제", description = "지정된 게시글을 삭제합니다.")
-    public ResponseEntity<ResponseDTO<Void>> deletePost(@PathVariable Long postId) {
+    public ResponseEntity<ResponseDTO<Void>> deletePost(
+            @AdminId Long adminId,
+            @PathVariable Long postId) {
         adminPostUseCase.deletePost(new AdminDeletePostCommand(postId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
     @DeleteMapping("/users/{userId}")
     @Operation(summary = "유저 삭제", description = "지정된 유저를 삭제합니다.")
-    public ResponseEntity<ResponseDTO<Void>> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<ResponseDTO<Void>> deleteUser(
+            @AdminId Long adminId,
+            @PathVariable Long userId) {
         adminUserUseCase.deleteUser(new AdminDeleteUserCommand(userId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
