@@ -1,6 +1,5 @@
 package com.spoony.spoony_server.global.config;
 
-import com.spoony.spoony_server.global.auth.filter.AdminJwtAuthenticationFilter;
 import com.spoony.spoony_server.global.auth.filter.JwtAuthenticationFilter;
 import com.spoony.spoony_server.global.auth.filter.JwtExceptionFilter;
 import com.spoony.spoony_server.global.auth.handler.CustomJwtAuthenticationEntryPoint;
@@ -23,7 +22,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
-    private final AdminJwtAuthenticationFilter adminJwtAuthenticationFilter;
     private final CustomJwtAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final List<String> AUTH_WHITE_LIST = List.of(
@@ -55,7 +53,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http
-                .addFilterBefore(adminJwtAuthenticationFilter, JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling ->
