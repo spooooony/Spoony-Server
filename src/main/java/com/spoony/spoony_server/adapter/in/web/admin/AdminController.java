@@ -4,7 +4,7 @@ import com.spoony.spoony_server.adapter.dto.admin.response.*;
 import com.spoony.spoony_server.application.port.command.admin.*;
 import com.spoony.spoony_server.application.port.in.admin.AdminPostUseCase;
 import com.spoony.spoony_server.application.port.in.admin.AdminUserUseCase;
-import com.spoony.spoony_server.global.auth.annotation.annotation.AdminId;
+import com.spoony.spoony_server.global.auth.annotation.AdminId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
