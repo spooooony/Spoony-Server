@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.post.db;
 
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -24,5 +25,15 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
     @Query("SELECT r.post.postId  FROM ReportEntity r WHERE r.user.userId = :userId")
     List<Long> findReportedPostIdsByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT DISTINCT p FROM PostEntity p JOIN ReportEntity r ON p.postId = r.post.postId")
+    List<PostEntity> findReportedPosts(Pageable pageable);
 
+    @Query("SELECT COUNT(DISTINCT p) FROM PostEntity p JOIN ReportEntity r ON p.postId = r.post.postId")
+    int countReportedPosts();
+
+    @Query("SELECT p FROM PostEntity p WHERE p.user.userId = :userId ORDER BY p.createdAt DESC")
+    List<PostEntity> findByUserIdWithPaging(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId")
+    int countByUserId(@Param("userId") Long userId);
 }

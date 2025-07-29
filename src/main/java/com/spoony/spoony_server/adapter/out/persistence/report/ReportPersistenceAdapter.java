@@ -5,8 +5,10 @@ import com.spoony.spoony_server.adapter.out.persistence.report.db.ReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.ReportRepository;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.UserReportEntity;
 import com.spoony.spoony_server.adapter.out.persistence.report.db.UserReportRepository;
+import com.spoony.spoony_server.adapter.out.persistence.report.mapper.ReportMapper;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.adapter.out.persistence.report.mapper.UserReportMapper;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.domain.report.Report;
 import com.spoony.spoony_server.domain.report.UserReport;
@@ -15,9 +17,13 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Adapter
 @Transactional
@@ -59,5 +65,28 @@ public class ReportPersistenceAdapter implements ReportPort {
     @Override
     public List<Long> findReportedPostIdsByUserId(Long userId) {
         return reportRepository.findReportedPostIdsByUserId(userId);
+    }
+
+    @Override
+    public Map<Long, List<Report>> findReportsByPostIds(List<Long> postIds) {
+        List<ReportEntity> entities = reportRepository.findAllByPost_PostIdIn(postIds);
+        return entities.stream()
+                .map(ReportMapper::toDomain)
+                .collect(Collectors.groupingBy(r -> r.getPost().getPostId()));
+    }
+
+    @Override
+    public List<UserReport> findUserReportsWithPagination(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<UserReportEntity> entities = userReportRepository.findAll(pageable).getContent();
+
+        return entities.stream()
+                .map(UserReportMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countReportedUsers() {
+        return userReportRepository.countDistinctTargetUsers();
     }
 }

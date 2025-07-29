@@ -12,4 +12,5 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
     @Query("SELECT DISTINCT r.post.postId FROM ReportEntity r WHERE r.user.userId = :userId")
     List<Long> findReportedPostIdsByUserId(@Param("userId") Long userId);
 
+    List<ReportEntity> findAllByPost_PostIdIn(List<Long> postIds);
 }
