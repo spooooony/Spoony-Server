@@ -76,7 +76,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.addAllowedOriginPattern("http://localhost:3000");
-        config.addAllowedOriginPattern("https://spoony-admin.vercel.app");
+        config.addAllowedOriginPattern("https://spoony-admin-web.vercel.app");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);
