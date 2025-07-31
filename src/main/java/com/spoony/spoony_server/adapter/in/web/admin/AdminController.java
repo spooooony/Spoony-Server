@@ -26,7 +26,7 @@ public class AdminController {
             @AdminId Long adminId,
             @RequestParam int page,
             @RequestParam int size) {
-        AdminGetAllPostsCommand command = new AdminGetAllPostsCommand(page, size);
+        AdminGetAllPostsCommand command = new AdminGetAllPostsCommand(adminId, page, size);
         AdminPostListResponseDTO result = adminPostUseCase.getAllPosts(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(result));
     }
@@ -37,7 +37,7 @@ public class AdminController {
             @AdminId Long adminId,
             @RequestParam int page,
             @RequestParam int size) {
-        AdminGetReportedPostsCommand command = new AdminGetReportedPostsCommand(page, size);
+        AdminGetReportedPostsCommand command = new AdminGetReportedPostsCommand(adminId, page, size);
         ReportedPostListResponseDTO result = adminPostUseCase.getReportedPosts(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(result));
     }
@@ -49,7 +49,7 @@ public class AdminController {
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(defaultValue = "1") int reportCount) {
-        AdminGetReportedUsersCommand command = new AdminGetReportedUsersCommand(page, size, reportCount);
+        AdminGetReportedUsersCommand command = new AdminGetReportedUsersCommand(adminId, page, size, reportCount);
         ReportedUserListResponseDTO result = adminUserUseCase.getReportedUsers(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(result));
     }
@@ -61,7 +61,7 @@ public class AdminController {
             @PathVariable Long userId,
             @RequestParam int page,
             @RequestParam int size) {
-        AdminGetUserPostsCommand command = new AdminGetUserPostsCommand(userId, page, size);
+        AdminGetUserPostsCommand command = new AdminGetUserPostsCommand(adminId, userId, page, size);
         UserPostListResponseDTO result = adminPostUseCase.getPostsByUser(command);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(result));
     }
@@ -71,7 +71,7 @@ public class AdminController {
     public ResponseEntity<ResponseDTO<Void>> deletePost(
             @AdminId Long adminId,
             @PathVariable Long postId) {
-        adminPostUseCase.deletePost(new AdminDeletePostCommand(postId));
+        adminPostUseCase.deletePost(new AdminDeletePostCommand(adminId, postId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
@@ -80,7 +80,7 @@ public class AdminController {
     public ResponseEntity<ResponseDTO<Void>> deleteUser(
             @AdminId Long adminId,
             @PathVariable Long userId) {
-        adminUserUseCase.deleteUser(new AdminDeleteUserCommand(userId));
+        adminUserUseCase.deleteUser(new AdminDeleteUserCommand(adminId, userId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 }
