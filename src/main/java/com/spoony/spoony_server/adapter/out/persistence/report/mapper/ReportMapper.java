@@ -15,7 +15,8 @@ public class ReportMapper {
                 entity.getReportType(),
                 entity.getReportDetail(),
                 PostMapper.toDomain(entity.getPost()),
-                UserMapper.toDomain(entity.getUser())
+                UserMapper.toDomain(entity.getUser()),
+                entity.getCreatedAt()
         );
     }
 }

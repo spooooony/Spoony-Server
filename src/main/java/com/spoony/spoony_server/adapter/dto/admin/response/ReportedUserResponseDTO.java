@@ -1,6 +1,6 @@
 package com.spoony.spoony_server.adapter.dto.admin.response;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record ReportedUserResponseDTO(String userId, String userName, int reportCount, List<ReportDTO> reports) {
@@ -12,12 +12,12 @@ public record ReportedUserResponseDTO(String userId, String userName, int report
                             String reportType,
                             String reportDetail,
                             String reporterName,
-                            ZonedDateTime createdAt) {
+                            LocalDateTime createdAt) {
         public static ReportDTO of(String id,
                                    String reportType,
                                    String reportDetail,
                                    String reporterName,
-                                   ZonedDateTime createdAt) {
+                                   LocalDateTime createdAt) {
             return new ReportDTO(id, reportType, reportDetail, reporterName, createdAt);
         }
     }

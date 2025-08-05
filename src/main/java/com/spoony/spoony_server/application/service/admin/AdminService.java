@@ -81,7 +81,7 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
                             report.getReportType().name(),
                             report.getReportDetail(),
                             report.getUser().getUserName(), // 신고자
-                            null // createdAt이 Report 도메인에 없으므로 null 처리
+                            report.getCreatedAt()
                     )).toList()
                             : null;
 
@@ -156,7 +156,7 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
                                     report.getReportType().name(),
                                     report.getReportDetail(),
                                     report.getUser().getUserName(),
-                                    null
+                                    report.getCreatedAt()
                             ))
                             .toList();
 
@@ -212,7 +212,7 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
                                     report.getUserReportType().name(),
                                     report.getUserReportDetail(),
                                     report.getReporter().getUserName(),
-                                    null
+                                    report.getCreatedAt()
                             ))
                             .toList();
 
