@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class AdminGetReportedUsersCommand {
+    private final Long adminId;
     private final int page;
     private final int size;
     private final int reportCount;

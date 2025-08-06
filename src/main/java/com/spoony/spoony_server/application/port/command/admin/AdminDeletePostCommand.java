@@ -6,5 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class AdminDeletePostCommand {
+    private final Long adminId;
     private final Long postId;
 }

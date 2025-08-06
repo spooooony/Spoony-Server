@@ -2,11 +2,13 @@ package com.spoony.spoony_server.application.service.admin;
 
 import com.spoony.spoony_server.adapter.dto.Pagination;
 import com.spoony.spoony_server.adapter.dto.admin.response.*;
+import com.spoony.spoony_server.application.auth.port.out.AdminPort;
 import com.spoony.spoony_server.application.port.command.admin.*;
 import com.spoony.spoony_server.application.port.in.admin.*;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
+import com.spoony.spoony_server.domain.admin.Admin;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.Menu;
 import com.spoony.spoony_server.domain.post.Photo;
@@ -30,9 +32,12 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
     private final PostPort postPort;
     private final ReportPort reportPort;
     private final UserPort userPort;
+    private final AdminPort adminPort;
 
     @Override
     public AdminPostListResponseDTO getAllPosts(AdminGetAllPostsCommand command) {
+        // admin 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
 
         int page = command.getPage();
         int size = command.getSize();
@@ -110,6 +115,9 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     @Override
     public ReportedPostListResponseDTO getReportedPosts(AdminGetReportedPostsCommand command) {
+        // admin 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+
         int page = command.getPage();
         int size = command.getSize();
 
@@ -185,6 +193,9 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     @Override
     public ReportedUserListResponseDTO getReportedUsers(AdminGetReportedUsersCommand command) {
+        // admin 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+
         int page = command.getPage();
         int size = command.getSize();
 
@@ -231,6 +242,9 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     @Override
     public UserPostListResponseDTO getPostsByUser(AdminGetUserPostsCommand command) {
+        // admin 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+
         Long userId = command.getUserId();
         int page = command.getPage();
         int size = command.getSize();
@@ -318,12 +332,18 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
 
     @Override
     public void deletePost(AdminDeletePostCommand command) {
+        // admin 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+
         Long postId = command.getPostId();
         postPort.deleteById(postId);
     }
 
     @Override
     public void deleteUser(AdminDeleteUserCommand command) {
+        // admin 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+
         Long userId = command.getUserId();
         userPort.deleteUser(userId);
     }

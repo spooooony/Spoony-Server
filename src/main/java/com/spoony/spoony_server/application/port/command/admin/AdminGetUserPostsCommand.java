@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class AdminGetUserPostsCommand {
+    private final Long adminId;
     private final Long userId;
     private final int page;
     private final int size;
