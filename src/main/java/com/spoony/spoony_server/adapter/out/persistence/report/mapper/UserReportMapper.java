@@ -13,7 +13,8 @@ public class UserReportMapper {
                 entity.getUserReportType(),
                 entity.getUserReportDetail(),
                 UserMapper.toDomain(entity.getReporter()),
-                UserMapper.toDomain(entity.getTargetUser())
+                UserMapper.toDomain(entity.getTargetUser()),
+                entity.getCreatedAt()
         );
     }
 
