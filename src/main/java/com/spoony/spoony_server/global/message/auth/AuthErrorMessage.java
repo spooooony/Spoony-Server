@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 public enum AuthErrorMessage implements DefaultErrorMessage {
     PLATFORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "유효하지 않은 소셜 플랫폼입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
+    PASSWORD_NOT_MATCHED(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
+    ADMIN_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 관리자입니다."),
 
     // APPLE
     INVALID_APPLE_PUBLIC_KEY(HttpStatus.BAD_REQUEST, "유효하지 않은 Apple Public Key입니다."),
@@ -25,6 +27,7 @@ public enum AuthErrorMessage implements DefaultErrorMessage {
     UNSUPPORTED_TOKEN(HttpStatus.BAD_REQUEST, "지원하지 않는 토큰 형식입니다."),
     EMPTY_TOKEN(HttpStatus.BAD_REQUEST, "토큰이 비어 있거나 잘못된 요청입니다."),
     UNKNOWN_TOKEN(HttpStatus.UNAUTHORIZED, "알 수 없는 출처의 토큰입니다."),
+    INVALID_ROLE(HttpStatus.FORBIDDEN, "유효하지 않은 관리자 권한입니다."),
 
     // JWT (REFRESH)
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh 토큰입니다."),

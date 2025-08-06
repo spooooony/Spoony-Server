@@ -24,6 +24,8 @@ import com.spoony.spoony_server.global.message.business.PlaceErrorMessage;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -294,5 +296,47 @@ public class PostPersistenceAdapter implements
         return photoRepository.findAllByPost_PostId(postId).stream()
                 .map(PhotoEntity::getPhotoUrl)
                 .toList();
+    }
+
+    @Override
+    public List<Post> findAllPosts(int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return postRepository.findAll(pageable)
+                .stream()
+                .map(PostMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countAllPosts() {
+        return (int) postRepository.count();
+    }
+
+    @Override
+    public List<Post> findReportedPosts(int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<PostEntity> entities = postRepository.findReportedPosts(pageable);
+        return entities.stream()
+                .map(PostMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countReportedPosts() {
+        return postRepository.countReportedPosts();
+    }
+
+    @Override
+    public List<Post> findPostsByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return postRepository.findByUserIdWithPaging(userId, pageable)
+                .stream()
+                .map(PostMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int countPostsByUserId(Long userId) {
+        return postRepository.countByUserId(userId);
     }
 }
