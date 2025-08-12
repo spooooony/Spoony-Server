@@ -51,6 +51,11 @@ public class PostEntity {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+    private LocalDateTime deletedAt;
+
     // Cascade 설정
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuEntity> menus = new ArrayList<>();
