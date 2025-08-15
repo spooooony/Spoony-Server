@@ -235,7 +235,7 @@ public class PostPersistenceAdapter implements
 
     @Override
     public List<Post> findByPostDescriptionContaining(String query) {
-        List<PostEntity> postEntityList = postRepository.findByDescriptionContaining(query);
+        List<PostEntity> postEntityList = postRepository.findByDescriptionContainingAndDeletedFalse(query);
         return postEntityList.stream().map(PostMapper::toDomain).collect(Collectors.toList());
     }
 

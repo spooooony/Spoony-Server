@@ -21,7 +21,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
 
 
     //Long countByUser_UserId(Long userId);
-    List<PostEntity> findByDescriptionContaining(String query);
+    List<PostEntity> findByDescriptionContainingAndDeletedFalse(String query);
 
     @Query("SELECT r.post.postId  FROM ReportEntity r WHERE r.user.userId = :userId")
     List<Long> findReportedPostIdsByUserId(@Param("userId") Long userId);
