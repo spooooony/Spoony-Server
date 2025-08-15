@@ -288,7 +288,8 @@ public class PostPersistenceAdapter implements
 
     @Override
     public Long countPostsByUserIdExcludingReported(Long userId,List <Long> reportedPostIds) {
-        return postRepository.countByUser_UserId(userId,reportedPostIds);
+        List<Long> ids = (reportedPostIds == null || reportedPostIds.isEmpty()) ? null : reportedPostIds;
+        return postRepository.countByUser_UserId(userId, ids);
     }
 
     @Override

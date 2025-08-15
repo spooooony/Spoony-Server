@@ -15,7 +15,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
 
     List<PostEntity> findByUser_UserIdAndDeletedFalse(Long userId);
     List<PostEntity> findByUser_UserId(Long userId);
-    @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId AND (:reportedPostIds IS NULL OR p.postId NOT IN :reportedPostIds)")
+    @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId AND p.isDeleted = false AND (:reportedPostIds IS NULL OR p.postId NOT IN :reportedPostIds)")
     Long countByUser_UserId(@Param("userId") Long userId,
                             @Param("reportedPostIds") List<Long> reportedPostIds);
 
