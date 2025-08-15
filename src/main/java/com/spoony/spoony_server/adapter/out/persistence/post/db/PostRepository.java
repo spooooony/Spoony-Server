@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpecificationExecutor<PostEntity> {
 
+    List<PostEntity> findByUser_UserIdAndDeletedFalse(Long userId);
     List<PostEntity> findByUser_UserId(Long userId);
     @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId AND (:reportedPostIds IS NULL OR p.postId NOT IN :reportedPostIds)")
     Long countByUser_UserId(@Param("userId") Long userId,

@@ -53,7 +53,7 @@ public class PostPersistenceAdapter implements
 
     @Override
     public List<Post> findPostsByUserId(Long userId) {
-        return postRepository.findByUser_UserId(userId)
+        return postRepository.findByUser_UserIdAndDeletedFalse(userId)
                 .stream()
                 .map(PostMapper::toDomain)
                 .collect(Collectors.toList());
