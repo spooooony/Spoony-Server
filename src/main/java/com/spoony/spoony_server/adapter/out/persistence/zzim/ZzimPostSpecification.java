@@ -11,21 +11,32 @@ public class ZzimPostSpecification {
 
     public static Specification<ZzimPostEntity> withUserIdAndCategoryId(Long userId, Long categoryId){
         return (root, query, cb) -> {
+            Join<ZzimPostEntity, PostEntity> postJoin = root.join("post");
+
+            Predicate notDeleted = cb.isFalse(postJoin.get("isDeleted"));
+
             if (categoryId != null && categoryId == 1L) {
-                return cb.equal(root.get("user").get("userId"), userId);
+                Predicate userPredicate = cb.equal(root.get("user").get("userId"), userId);
+                return cb.and(userPredicate, notDeleted);
             } else {
-                Join<ZzimPostEntity, PostEntity> postJoin = root.join("post");
                 Join<PostEntity, PostCategoryEntity> pcJoin = postJoin.join("postCategories");
 
                 Predicate userPredicate = cb.equal(root.get("user").get("userId"), userId);
                 Predicate categoryPredicate = cb.equal(pcJoin.get("category").get("categoryId"), categoryId);
 
-                return cb.and(userPredicate, categoryPredicate);
+                return cb.and(userPredicate, categoryPredicate, notDeleted);
             }
         };
     }
 
     public static Specification<ZzimPostEntity> withUserId(Long userId) {
-        return (root, query, cb) -> cb.equal(root.get("user").get("userId"), userId);
+        return (root, query, cb) -> {
+            Join<ZzimPostEntity, PostEntity> postJoin = root.join("post");
+
+            Predicate userPredicate = cb.equal(root.get("user").get("userId"), userId);
+            Predicate notDeleted = cb.isFalse(postJoin.get("isDeleted"));
+
+            return cb.and(userPredicate, notDeleted);
+        };
     }
 }
