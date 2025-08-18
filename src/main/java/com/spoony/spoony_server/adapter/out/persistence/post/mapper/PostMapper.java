@@ -43,7 +43,9 @@ public class PostMapper {
                 postEntity.getCons(),
                 postEntity.getZzimCount(),
                 postEntity.getCreatedAt(),
-                postEntity.getUpdatedAt()
+                postEntity.getUpdatedAt(),
+                postEntity.isDeleted(),
+                postEntity.getDeletedAt()
         );
     }
     public static PostEntity toEntity(Post post) {

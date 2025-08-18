@@ -17,7 +17,8 @@ public record AdminPostResponseDTO(String postId,
                                    LocalDateTime updatedAt,
                                    boolean isReported,
                                    int reportCount,
-                                   List<ReportDTO> reports) {
+                                   List<ReportDTO> reports,
+                                   LocalDateTime deletedAt) {
 
     public static AdminPostResponseDTO of(String postId,
                                           String authorId,
@@ -32,8 +33,9 @@ public record AdminPostResponseDTO(String postId,
                                           LocalDateTime updatedAt,
                                           boolean isReported,
                                           int reportCount,
-                                          List<ReportDTO> reports) {
-        return new AdminPostResponseDTO(postId, authorId, authorName, content, restaurantName, disappointment, imageUrls, location, menus, createdAt, updatedAt, isReported, reportCount, reports);
+                                          List<ReportDTO> reports,
+                                          LocalDateTime deletedAt) {
+        return new AdminPostResponseDTO(postId, authorId, authorName, content, restaurantName, disappointment, imageUrls, location, menus, createdAt, updatedAt, isReported, reportCount, reports, deletedAt);
     }
 
     public record MenuDTO(String id, String name) {

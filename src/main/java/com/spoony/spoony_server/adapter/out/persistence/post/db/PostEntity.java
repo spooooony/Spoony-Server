@@ -102,4 +102,16 @@ public class PostEntity {
             this.zzimCount += delta;
         }
     }
+
+    // 논리적 삭제
+    public void markDeleted() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // 논리적 삭제 복구
+    public void restore() {
+        this.isDeleted = false;
+        this.deletedAt = null;
+    }
 }
