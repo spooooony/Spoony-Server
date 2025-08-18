@@ -347,4 +347,19 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
         Long userId = command.getUserId();
         userPort.deleteUser(userId);
     }
+
+    @Override
+    public void softDeletePost(AdminSoftDeletePostCommand command) {
+
+    }
+
+    @Override
+    public DeletedPostListResponseDTO getDeletedPosts(AdminGetDeletedPostsCommand command) {
+        return null;
+    }
+
+    @Override
+    public void restorePost(AdminRestorePostCommand command) {
+
+    }
 }
