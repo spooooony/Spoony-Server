@@ -5,6 +5,7 @@ import com.spoony.spoony_server.adapter.dto.admin.response.*;
 import com.spoony.spoony_server.application.auth.port.out.AdminPort;
 import com.spoony.spoony_server.application.port.command.admin.*;
 import com.spoony.spoony_server.application.port.in.admin.*;
+import com.spoony.spoony_server.application.port.out.admin.AdminPostPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
@@ -19,6 +20,7 @@ import com.spoony.spoony_server.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
     private final ReportPort reportPort;
     private final UserPort userPort;
     private final AdminPort adminPort;
+    private final AdminPostPort adminPostPort;
 
     @Override
     public AdminPostListResponseDTO getAllPosts(AdminGetAllPostsCommand command) {
@@ -104,7 +107,8 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
                             post.getUpdatedAt(),
                             isReported,
                             reportCount,
-                            reportDTOs
+                            reportDTOs,
+                            null
                     );
                 })
                 .toList();
@@ -182,7 +186,8 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
                             post.getUpdatedAt(),
                             true,
                             reportCount,
-                            reportDTOs
+                            reportDTOs,
+                            null
                     );
                 })
                 .toList();
@@ -311,7 +316,8 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
                             post.getUpdatedAt(),
                             isReported,
                             reportCount,
-                            reportDTOs
+                            reportDTOs,
+                            null
                     );
                 })
                 .toList();
@@ -331,20 +337,114 @@ public class AdminService implements AdminPostUseCase, AdminUserUseCase {
     }
 
     @Override
+    @Transactional
     public void deletePost(AdminDeletePostCommand command) {
         // admin 존재 여부 확인
         Admin admin = adminPort.findByAdminId(command.getAdminId());
-
-        Long postId = command.getPostId();
-        postPort.deleteById(postId);
+        postPort.deleteById(command.getPostId());
     }
 
     @Override
+    @Transactional
     public void deleteUser(AdminDeleteUserCommand command) {
         // admin 존재 여부 확인
         Admin admin = adminPort.findByAdminId(command.getAdminId());
+        userPort.deleteUser(command.getUserId());
+    }
 
-        Long userId = command.getUserId();
-        userPort.deleteUser(userId);
+    @Override
+    @Transactional
+    public void softDeletePost(AdminSoftDeletePostCommand command) {
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+        adminPostPort.softDelete(command.getPostId());
+    }
+
+    @Override
+    public DeletedPostListResponseDTO getDeletedPosts(AdminGetDeletedPostsCommand command) {
+        // 1. 관리자 존재 여부 확인
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+
+        int page = command.getPage();
+        int size = command.getSize();
+
+        // 1. 삭제된 게시글 페이징 조회
+        List<Post> deletedPosts = adminPostPort.findDeleted(page, size);
+        int total = adminPostPort.countDeletedPosts();
+        int totalPages = (int) Math.ceil((double) total / size);
+
+        // 2. 게시글 ID 추출
+        List<Long> postIds = deletedPosts.stream()
+                .map(Post::getPostId)
+                .toList();
+
+        // 3. 신고 정보 조회
+        Map<Long, List<Report>> reportsByPostId = reportPort.findReportsByPostIds(postIds);
+
+        // 4. DTO 매핑
+        List<AdminPostResponseDTO> postDTOs = deletedPosts.stream()
+                .map(post -> {
+                    User author = post.getUser();
+                    Place place = post.getPlace();
+
+                    List<Photo> photos = postPort.findPhotoById(post.getPostId());
+                    List<Menu> menus = postPort.findMenuById(post.getPostId());
+
+                    List<String> imageUrls = photos.stream()
+                            .map(Photo::getPhotoUrl)
+                            .toList();
+
+                    List<AdminPostResponseDTO.MenuDTO> menuDTOs = menus.stream()
+                            .map(menu -> AdminPostResponseDTO.MenuDTO.of(
+                                    String.valueOf(menu.getMenuId()),
+                                    menu.getMenuName()
+                            ))
+                            .toList();
+
+                    List<Report> reports = reportsByPostId.getOrDefault(post.getPostId(), List.of());
+
+                    int reportCount = reports.size();
+                    boolean isReported = reportCount > 0;
+
+                    List<AdminPostResponseDTO.ReportDTO> reportDTOs = reports.stream()
+                            .map(report -> AdminPostResponseDTO.ReportDTO.of(
+                                    String.valueOf(report.getReportId()),
+                                    report.getReportType().name(),
+                                    report.getReportDetail(),
+                                    report.getUser().getUserName(),
+                                    report.getCreatedAt()
+                            ))
+                            .toList();
+
+                    return AdminPostResponseDTO.of(
+                            String.valueOf(post.getPostId()),
+                            String.valueOf(author.getUserId()),
+                            author.getUserName(),
+                            post.getDescription(),
+                            place.getPlaceName(),
+                            post.getCons(),
+                            imageUrls,
+                            place.getPlaceAddress(),
+                            menuDTOs,
+                            post.getCreatedAt(),
+                            post.getUpdatedAt(),
+                            isReported,
+                            reportCount,
+                            reportDTOs,
+                            post.getDeletedAt()
+                    );
+                })
+                .toList();
+
+        // 5. 페이징 정보
+        Pagination pagination = Pagination.of(page, size, total, totalPages);
+
+        return DeletedPostListResponseDTO.of(postDTOs, pagination);
+    }
+
+    @Override
+    @Transactional
+    public void restorePost(AdminRestorePostCommand command) {
+        Admin admin = adminPort.findByAdminId(command.getAdminId());
+        adminPostPort.restore(command.getPostId());
     }
 }
