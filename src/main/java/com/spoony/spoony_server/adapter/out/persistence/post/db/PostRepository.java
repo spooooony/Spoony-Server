@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpecificationExecutor<PostEntity> {
@@ -36,10 +37,10 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
     @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId")
     int countByUserId(@Param("userId") Long userId);
 
-    @Query(
-            value = "SELECT * FROM post WHERE is_deleted = true ORDER BY created_at DESC",
-            nativeQuery = true
-    )
+    @Query(value = "SELECT * FROM post WHERE post_id = :postId", nativeQuery = true)
+    Optional<PostEntity> findByIdIncludingDeleted(@Param("postId") Long postId);
+
+    @Query(value = "SELECT * FROM post WHERE is_deleted = true ORDER BY created_at DESC", nativeQuery = true)
     List<PostEntity> findDeletedPosts(Pageable pageable);
 
     @Query(value = "SELECT COUNT(*) FROM post WHERE is_deleted = true", nativeQuery = true)
