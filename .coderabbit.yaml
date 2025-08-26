@@ -1,85 +1,85 @@
-language: ko-KR                      # 리뷰 언어: 한국어
-early_access: true                   # 베타 기능 사용
-enable_free_tier: true                # 무료 요금제 기능 활성화
+language: ko-KR                      # 리뷰 언어
+early_access: true                   # 베타 기능
+enable_free_tier: true               # 무료 티어
 
 reviews:
-  profile: chill                      # 리뷰 강도 완화(부드러운 피드백 중심)
-  request_changes_workflow: true      # 리뷰 후 필요한 경우 변경 요청
-  high_level_summary: true            # 변경 사항 요약 제공
+  profile: chill                      # 부드러운 피드백
+  request_changes_workflow: true      # 변경 요청 워크플로
+  high_level_summary: true            # 변경 사항 요약
   high_level_summary_placeholder: '@coderabbitai 요약'  # 요약 기본 문구
   auto_title_placeholder: '@coderabbitai'               # 자동 제목 생성 시 기본 문구
-  poem: false                          # 리뷰 시 유머/시 포함 x
+  poem: false                         # 유머/시 비활성
   review_status: true                 # 리뷰 상태 표시
-  collapse_walkthrough: false         # 코드 변경 개요를 기본적으로 펼침
+  collapse_walkthrough: false         # 변경 개요 펼침
 
-  path_filters:                       # 리뷰에서 제외할 파일 패턴
-    - "!**/swagger.json"              # swagger.json 파일 제외
-    - "!**/README.md"                  # README.md 파일 제외
+  path_filters:                       # 리뷰 제외 파일
+    - "!**/swagger.json"
+    - "!**/README.md"
+    - "!**/*.md"                      # 문서 전반 제외(백엔드 코드 집중)
 
   path_instructions:
     - path: "**/*.java"
       instructions: >
-        다음은 hackday-conventions-java 기반 Java 코딩 컨벤션 기준입니다:
+        다음 규칙은 '일회성 체크'로 위반 패턴만 지적(지속적 강제 X).
+        hackday-conventions-java 기준:
         - 탭 들여쓰기(indent_style=tab), indent_size=4
-        - 한 줄은 최대 120자 이하로 작성 (max_line_length=120)
-        - 파일 끝에는 반드시 개행이 있어야 함 (newline-eof)
-          https://naver.github.io/hackday-conventions-java/
-        - 모든 주석은 전후로 공백이 있어야 함 (space-around-comment)
-        - 중괄호는 K&R 스타일을 따라야 함
-          https://github.com/naver/hackday-conventions-java
+        - 한 줄 최대 120자 (max_line_length=120)
+        - 파일 끝 개행 (newline-eof)
+        - 주석 전후 공백 (space-around-comment)
+        - 중괄호 K&R 스타일
+        참고: https://naver.github.io/hackday-conventions-java/
 
     - path: "**/*Controller*.java"
       instructions: >
-        REST API 컨트롤러 리뷰 기준입니다:
-        - @RestController 어노테이션이 명확히 선언되어야 함
-        - URI는 리소스 중심 RESTful 설계(`/api/v1/users`, `/api/v1/orders`)를 따름
-        - 복잡한 동작은 동사를 URI에 포함 (`/orders/{orderId}/cancel`)
-        - 하나의 URI에는 하나의 식별자만 포함
-        - HTTP 메서드는 의미에 맞게 사용 (GET, POST, PUT, DELETE)
+        REST 컨트롤러 체크:
+        - @RestController 명시
+        - 리소스 중심 URI(/api/v1/users 등)
+        - 동작은 서브리소스/액션으로 표현(/orders/{id}/cancel)
+        - 하나의 URI에 하나의 식별자
+        - HTTP 메서드 의미에 맞게 사용(GET/POST/PUT/DELETE)
 
-  abort_on_close: true                 # PR이 닫히면 리뷰 중단
+  abort_on_close: false               # PR 닫혀도 이후 수동 트리거 허용
 
   auto_review:
-    enabled: true                      # 자동 리뷰 활성화
-    auto_incremental_review: true      # 변경분만 점진적으로 리뷰
-    ignore_title_keywords: []          # PR 제목에 포함 시 리뷰 제외할 키워드 없음
-    labels: []                         # 리뷰 시 자동 부여할 라벨 없음
-    drafts: false                      # Draft PR에는 리뷰 수행 안 함
-    base_branches: []                  # 특정 브랜치 지정 없음(모든 브랜치 대상)
+    enabled: false                    # 🔴 자동 리뷰 비활성(수동 트리거 사용: @coderabbitai review)
+    auto_incremental_review: true     # 재활성 시 변경분만 리뷰
+    ignore_title_keywords: []         # PR 제목에 포함 시 리뷰 제외할 키워드 없음
+    labels: []                        # 리뷰 시 자동 부여할 라벨 없음
+    drafts: false                     # Draft PR에는 리뷰 수행 안 함
+    base_branches: []                 # 특정 브랜치 지정 없음(모든 브랜치 대상)
 
-  # 여기부터 조금 딮한 설정
-
-  tools:                               # 활성화할 정적 분석/품질 도구
+  # 도구 설정: 백엔드 로직 집중을 위해 필수 보안만 기본 활성화
+  tools:
     shellcheck:
-      enabled: true                    # 셸 스크립트 검사
+      enabled: false                  # 스크립트 증가 시 활성화
     markdownlint:
-      enabled: true                    # Markdown 문법 검사
+      enabled: false                  # 문서 리뷰 필요 시 활성화
     github-checks:
-      enabled: true                    # GitHub Checks API 활용
-      timeout_ms: 90000                 # 타임아웃 90초
+      enabled: false                  # 운영 복잡도 축소
+      timeout_ms: 90000
     languagetool:
-      enabled: true                    # 문법/언어 검사
-      disabled_rules:                  # 비활성화할 규칙
+      enabled: false                  # 문체/맞춤법 소음 방지
+      disabled_rules:
         - EN_UNPAIRED_BRACKETS
         - EN_UNPAIRED_QUOTES
-      disabled_categories:             # 비활성화할 카테고리
+      disabled_categories:
         - TYPOS
         - TYPOGRAPHY
         - CASING
       enabled_only: false
       level: default
-      enabled_rules: []                 # 활성화할 특정 규칙 없음
-      enabled_categories: []            # 활성화할 특정 카테고리 없음
+      enabled_rules: []
+      enabled_categories: []
     hadolint:
-      enabled: true                    # Dockerfile 검사
+      enabled: true                   # Dockerfile 검사
     yamllint:
-      enabled: true                    # YAML 문법 검사
+      enabled: false                  # YAML 품질 필요 시 활성화
     gitleaks:
-      enabled: true                    # 비밀 정보 유출 검사
+      enabled: true                   # 시크릿 누출 차단
     checkov:
-      enabled: true                    # 인프라 보안 검사(IaC)
+      enabled: false                  # IaC 사용 시 활성화
     ast-grep:
-      packages: []                      # AST 기반 패턴 검사
+      packages: []                    # AST 기반 패턴 검사
       rule_dirs: []
       util_dirs: []
       essential_rules: true
@@ -93,15 +93,12 @@ reviews:
       enabled: false
     biome:
       enabled: false
+
 chat:
-  auto_reply: true                     # 질문에 자동 응답
+  auto_reply: true                    # 질문 자동 응답
 
 knowledge_base:
   learnings:
     scope: auto                        # 학습 범위 자동
   issues:
     scope: auto                        # 이슈 관련 학습 범위 자동
-  jira:
-    project_keys: []                   # JIRA 프로젝트 키 없음
-  linear:
-    team_keys: []                      # Linear 팀 키 없음
