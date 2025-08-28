@@ -20,6 +20,7 @@ public enum AuthErrorMessage implements DefaultErrorMessage {
     CREATE_PUBLIC_KEY_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Apple Public Key 생성에 실패하였습니다."),
     APPLE_REVOKE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 회원 탈퇴에 실패하였습니다."),
     APPLE_TOKEN_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 토큰 요청에 실패하였습니다."),
+    EMPTY_AUTH_CODE(HttpStatus.BAD_REQUEST, "Auth Code가 비어 있거나 잘못된 요청입니다."),
 
     // JWT (ACCESS)
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),

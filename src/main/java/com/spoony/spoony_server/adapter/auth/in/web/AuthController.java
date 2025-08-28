@@ -6,7 +6,6 @@ import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.LoginResponseDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
 import com.spoony.spoony_server.application.auth.port.in.*;
-import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
@@ -47,7 +46,7 @@ public class AuthController {
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
             @RequestBody final PlatformRequestDTO platformRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platformRequestDTO.platform(), platformToken)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platformRequestDTO, platformToken)));
     }
 
     @PostMapping("/logout")
@@ -65,7 +64,7 @@ public class AuthController {
             @UserId Long userId,
             @Nullable @RequestHeader(value = AuthConstant.APPLE_WITHDRAW_HEADER, required = false) final String authCode
     ) {
-        withdrawUseCase.withdraw(userId, authCode);
+        withdrawUseCase.withdraw(userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
