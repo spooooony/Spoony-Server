@@ -36,7 +36,6 @@ public class SecurityConfig {
             "/api/v1/user/exists",
             "/api/v1/user/region",
             "/api/v1/admin/login",
-            // TODO: main 브랜치 병합 전 제거 필수 (dev swagger test 인증 토큰 이슈..)
             "/profile-images/**",
             "/swagger-ui/**",
             "/v3/api-docs/**"
