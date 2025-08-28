@@ -19,6 +19,8 @@ public class Post {
     private Long zzimCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean isDeleted;
+    private LocalDateTime deletedAt;
 
     public Post(User user, Place place, String description, Double value, String cons, Long zzimCount, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.user = user;

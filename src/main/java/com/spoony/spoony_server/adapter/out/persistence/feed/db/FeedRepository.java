@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface FeedRepository extends JpaRepository<FeedEntity, Long>, JpaSpecificationExecutor<FeedEntity> {
-    List<FeedEntity> findByUser_UserId(Long userId);
+    List<FeedEntity> findByUser_UserIdAndPost_IsDeletedFalse(Long userId);
     void deleteByUser_UserIdAndPost_PostId(Long userId, Long postId);
     void deleteByUser_UserIdAndAuthor_UserId(Long userId, Long authorId);
     @Query("SELECT f.post.postId FROM FeedEntity f WHERE f.user.userId = :userId AND f.post.postId IN :postIds")

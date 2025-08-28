@@ -83,4 +83,33 @@ public class AdminController {
         adminUserUseCase.deleteUser(new AdminDeleteUserCommand(adminId, userId));
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
+
+    @PostMapping("/posts/delete/{postId}")
+    @Operation(summary = "게시글 소프트 삭제", description = "지정된 게시글을 소프트 삭제합니다. (isDeleted = true, deletedAt 기록)")
+    public ResponseEntity<ResponseDTO<Void>> softDeletePost(
+            @AdminId Long adminId,
+            @PathVariable Long postId) {
+        adminPostUseCase.softDeletePost(new AdminSoftDeletePostCommand(adminId, postId));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
+    }
+
+    @GetMapping("/posts/deleted")
+    @Operation(summary = "삭제된 게시글 목록 조회", description = "소프트 삭제된 게시글들을 페이징으로 조회합니다.")
+    public ResponseEntity<ResponseDTO<DeletedPostListResponseDTO>> getDeletedPosts(
+            @AdminId Long adminId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        AdminGetDeletedPostsCommand command = new AdminGetDeletedPostsCommand(adminId, page, size);
+        DeletedPostListResponseDTO result = adminPostUseCase.getDeletedPosts(command);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(result));
+    }
+
+    @PostMapping("/posts/restore/{postId}")
+    @Operation(summary = "삭제된 게시글 복구", description = "소프트 삭제된 게시글을 복구합니다. (isDeleted = false, deletedAt = null)")
+    public ResponseEntity<ResponseDTO<Void>> restorePost(
+            @AdminId Long adminId,
+            @PathVariable Long postId) {
+        adminPostUseCase.restorePost(new AdminRestorePostCommand(adminId, postId));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
+    }
 }

@@ -24,7 +24,7 @@ public class FeedPersistenceAdapter implements FeedPort {
 
     @Override
     public List<Feed> findFeedListByFollowing(Long userId) {
-        return feedRepository.findByUser_UserId(userId)
+        return feedRepository.findByUser_UserIdAndPost_IsDeletedFalse(userId)
                 .stream()
                 .map(FeedMapper::toDomain)
                 .toList();

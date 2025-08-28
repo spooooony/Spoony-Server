@@ -1,0 +1,104 @@
+language: ko-KR                      # 리뷰 언어
+early_access: true                   # 베타 기능
+enable_free_tier: true               # 무료 티어
+
+reviews:
+  profile: chill                      # 부드러운 피드백
+  request_changes_workflow: true      # 변경 요청 워크플로
+  high_level_summary: true            # 변경 사항 요약
+  high_level_summary_placeholder: '@coderabbitai 요약'  # 요약 기본 문구
+  auto_title_placeholder: '@coderabbitai'               # 자동 제목 생성 시 기본 문구
+  poem: false                         # 유머/시 비활성
+  review_status: true                 # 리뷰 상태 표시
+  collapse_walkthrough: false         # 변경 개요 펼침
+
+  path_filters:                       # 리뷰 제외 파일
+    - "!**/swagger.json"
+    - "!**/README.md"
+    - "!**/*.md"                      # 문서 전반 제외(백엔드 코드 집중)
+
+  path_instructions:
+    - path: "**/*.java"
+      instructions: >
+        다음 규칙은 '일회성 체크'로 위반 패턴만 지적(지속적 강제 X).
+        hackday-conventions-java 기준:
+        - 탭 들여쓰기(indent_style=tab), indent_size=4
+        - 한 줄 최대 120자 (max_line_length=120)
+        - 파일 끝 개행 (newline-eof)
+        - 주석 전후 공백 (space-around-comment)
+        - 중괄호 K&R 스타일
+        참고: https://naver.github.io/hackday-conventions-java/
+
+    - path: "**/*Controller*.java"
+      instructions: >
+        REST 컨트롤러 체크:
+        - @RestController 명시
+        - 리소스 중심 URI(/api/v1/users 등)
+        - 동작은 서브리소스/액션으로 표현(/orders/{id}/cancel)
+        - 하나의 URI에 하나의 식별자
+        - HTTP 메서드 의미에 맞게 사용(GET/POST/PUT/DELETE)
+
+  abort_on_close: false               # PR 닫혀도 이후 수동 트리거 허용
+
+  auto_review:
+    enabled: false                    # 🔴 자동 리뷰 비활성(수동 트리거 사용: @coderabbitai review)
+    auto_incremental_review: true     # 재활성 시 변경분만 리뷰
+    ignore_title_keywords: []         # PR 제목에 포함 시 리뷰 제외할 키워드 없음
+    labels: []                        # 리뷰 시 자동 부여할 라벨 없음
+    drafts: false                     # Draft PR에는 리뷰 수행 안 함
+    base_branches: []                 # 특정 브랜치 지정 없음(모든 브랜치 대상)
+
+  # 도구 설정: 백엔드 로직 집중을 위해 필수 보안만 기본 활성화
+  tools:
+    shellcheck:
+      enabled: false                  # 스크립트 증가 시 활성화
+    markdownlint:
+      enabled: false                  # 문서 리뷰 필요 시 활성화
+    github-checks:
+      enabled: false                  # 운영 복잡도 축소
+      timeout_ms: 90000
+    languagetool:
+      enabled: false                  # 문체/맞춤법 소음 방지
+      disabled_rules:
+        - EN_UNPAIRED_BRACKETS
+        - EN_UNPAIRED_QUOTES
+      disabled_categories:
+        - TYPOS
+        - TYPOGRAPHY
+        - CASING
+      enabled_only: false
+      level: default
+      enabled_rules: []
+      enabled_categories: []
+    hadolint:
+      enabled: true                   # Dockerfile 검사
+    yamllint:
+      enabled: false                  # YAML 품질 필요 시 활성화
+    gitleaks:
+      enabled: true                   # 시크릿 누출 차단
+    checkov:
+      enabled: false                  # IaC 사용 시 활성화
+    ast-grep:
+      packages: []                    # AST 기반 패턴 검사
+      rule_dirs: []
+      util_dirs: []
+      essential_rules: true
+    ruff:
+      enabled: false
+    swiftlint:
+      enabled: false
+    phpstan:
+      enabled: false
+    golangci-lint:
+      enabled: false
+    biome:
+      enabled: false
+
+chat:
+  auto_reply: true                    # 질문 자동 응답
+
+knowledge_base:
+  learnings:
+    scope: auto                        # 학습 범위 자동
+  issues:
+    scope: auto                        # 이슈 관련 학습 범위 자동
