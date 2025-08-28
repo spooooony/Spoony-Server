@@ -21,15 +21,12 @@ public class KakaoService {
 
     public PlatformUserDTO getPlatformUserInfo(String platformToken) {
         KakaoUserDTO kakaoUserDTO = kakaoFeignClient.getUserInformation(platformToken);
-        System.out.println("KakaoService.getPlatformUserInfo");
         log.info("kakao user info = {}", kakaoUserDTO);
         return PlatformUserDTO.of(
                 kakaoUserDTO.id().toString());
     }
 
     public void unlink(final String platformId) {
-        System.out.println("KakaoService.unlink");
-        System.out.println("platformId = " + platformId);
         System.out.println(AuthConstant.GRANT_TYPE + adminKey + " " + AuthConstant.TARGET_ID_TYPE + " " + Long.valueOf(platformId));
         kakaoFeignClient.unlinkUser(
                 AuthConstant.GRANT_TYPE + adminKey,

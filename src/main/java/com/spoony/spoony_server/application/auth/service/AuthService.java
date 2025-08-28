@@ -49,9 +49,6 @@ public class AuthService implements
         PlatformUserDTO platformUserDTO = getPlatformInfo(platform, platformToken);
         User user = userPort.load(platform, platformUserDTO);
 
-        System.out.println("AuthService.login");
-        System.out.println("platform = " + platform + ", platformToken = " + platformToken);
-
         if (user == null) {
             System.out.println("User is null");
             return LoginResponseDTO.of(false, null, null);
@@ -71,8 +68,6 @@ public class AuthService implements
     @Override
     public void withdraw(Long userId, String authCode) {
         User user = userPort.findUserById(userId);
-        System.out.println("AuthService.withdraw");
-        System.out.println("userId = " + userId + ", authCode = " + authCode);
         if(user.getPlatform() == Platform.KAKAO) {
             kakaoService.unlink(user.getPlatformId());
         } else if(user.getPlatform() == Platform.APPLE) {
@@ -116,8 +111,6 @@ public class AuthService implements
     // 로그인
     private PlatformUserDTO getPlatformInfo(Platform platform, String platformToken) {
         if (platform.toString().equals("KAKAO")){
-            System.out.println("AuthService.getPlatformInfo");
-            System.out.println("platform = " + platform + ", platformToken = " + platformToken);
             return kakaoService.getPlatformUserInfo(platformToken);
         } else if (platform.toString().equals("APPLE")){
             return appleService.getPlatformUserInfo(platformToken);
