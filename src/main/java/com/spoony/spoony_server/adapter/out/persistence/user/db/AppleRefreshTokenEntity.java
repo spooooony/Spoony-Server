@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
+import com.spoony.spoony_server.global.auth.encryptor.AppleRefreshTokenEncryptor;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,6 +22,7 @@ public class AppleRefreshTokenEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Convert(converter = AppleRefreshTokenEncryptor.class)
     @Column(name = "refresh_token", nullable = false, length = 2048)
     private String refreshToken;
 

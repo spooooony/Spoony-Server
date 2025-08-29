@@ -39,7 +39,13 @@ public enum AuthErrorMessage implements DefaultErrorMessage {
 
     // JWT (ACCESS + REFRESH)
     INVALID_TOKEN_TYPE(HttpStatus.BAD_REQUEST, "올바르지 않은 토큰 타입입니다."),
-    LOGIN_REQUIRED(HttpStatus.LOCKED, "재로그인이 필요합니다.");
+    LOGIN_REQUIRED(HttpStatus.LOCKED, "재로그인이 필요합니다."),
+
+    // Encrypt
+    INVALID_SECRET_KEY(HttpStatus.BAD_REQUEST, "KEY가 비어 있거나 유효하지 않습니다."),
+    ENCRYPT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "암호화에 실패했습니다."),
+    INVALID_CIPHERTEXT(HttpStatus.BAD_REQUEST, "올바르지 않은 토큰 암호문입니다."),
+    DECRYPT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "복호화에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
