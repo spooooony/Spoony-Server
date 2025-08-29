@@ -6,6 +6,7 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.exception.alert.ErrorAlertService;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
 import com.spoony.spoony_server.global.message.business.BusinessErrorMessage;
+import com.spoony.spoony_server.global.message.business.DefaultErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -27,14 +28,18 @@ public class GlobalExceptionHandler {
 
     private final ErrorAlertService alert;
 
+    /** 공통: 5xx인 경우만 Discord 알림 전송 */
+    private void notifyIfServerError(DefaultErrorMessage errorMessage, Throwable e, HttpServletRequest req) {
+        if (errorMessage != null && errorMessage.getHttpStatus().is5xxServerError()) {
+            alert.notifyIfNecessary(errorMessage, e, req);
+        }
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleBusinessException(
             BusinessException e, HttpServletRequest req) {
 
-        // 5xx 디스코드 알림
-        if (e.getErrorMessage().getHttpStatus().is5xxServerError()) {
-            alert.notifyIfNecessary(e.getErrorMessage(), e, req);
-        }
+        notifyIfServerError(e.getErrorMessage(), e, req);
 
         return ResponseEntity
                 .status(e.getErrorMessage().getHttpStatus())
@@ -45,9 +50,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDTO<AuthErrorMessage>> handleAuthException(
             AuthException e, HttpServletRequest req) {
 
-        if (e.getErrorMessage().getHttpStatus().is5xxServerError()) {
-            alert.notifyIfNecessary(e.getErrorMessage(), e, req);
-        }
+        notifyIfServerError(e.getErrorMessage(), e, req);
 
         return ResponseEntity
                 .status(e.getErrorMessage().getHttpStatus())
@@ -79,7 +82,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException e) {
         return ResponseEntity
-                .status(BusinessErrorMessage.BODY_ERROR.getHttpStatus()) // TODO: enum 오타면 BODY_ERROR로 리네임 권장
+                .status(BusinessErrorMessage.BODY_ERROR.getHttpStatus())
                 .body(ResponseDTO.fail(BusinessErrorMessage.BODY_ERROR));
     }
 
