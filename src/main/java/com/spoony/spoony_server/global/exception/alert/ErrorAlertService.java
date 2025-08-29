@@ -89,6 +89,10 @@ public class ErrorAlertService {
         Long last = dedupCache.get(key);
         if (last != null && now - last < dedupWindowMs) return true;
         dedupCache.put(key, now);
+
+        // 오래된 엔트리 정리 (dedupWindow의 2배 이상 오래된 항목 제거)
+        dedupCache.entrySet().removeIf(entry ->
+                now - entry.getValue() > dedupWindowMs * 2);
         return false;
     }
 
