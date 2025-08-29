@@ -1,9 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.user.db;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -15,13 +13,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 public class AppleRefreshTokenEntity {
 
     @Id
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "refresh_token", nullable = false)
+    @Column(name = "refresh_token", nullable = false, length = 2048)
     private String refreshToken;
 
     @CreatedDate

@@ -20,13 +20,20 @@ public class AppleRefreshTokenAdapter implements AppleRefreshTokenPort {
     @Override
     @Transactional
     public void upsert(Long userId, String refreshToken) {
-        AppleRefreshTokenEntity entity = appleRefreshTokenRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-        entity.setRefreshToken(refreshToken);
-        appleRefreshTokenRepository.save(entity);
+        appleRefreshTokenRepository.findById(userId)
+            .ifPresentOrElse(entity -> {
+                entity.setRefreshToken(refreshToken);
+            }, () -> {
+            AppleRefreshTokenEntity newEntity = AppleRefreshTokenEntity.builder()
+                .userId(userId)
+                .refreshToken(refreshToken)
+                .build();
+            appleRefreshTokenRepository.save(newEntity);
+        });
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<String> findRefreshTokenByUserId(Long userId) {
         return appleRefreshTokenRepository.findById(userId).map(AppleRefreshTokenEntity::getRefreshToken);
     }

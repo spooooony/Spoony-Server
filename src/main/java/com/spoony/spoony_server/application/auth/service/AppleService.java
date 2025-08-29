@@ -7,12 +7,9 @@ import com.spoony.spoony_server.adapter.auth.out.external.AppleFeignClient;
 import com.spoony.spoony_server.adapter.auth.verification.apple.AppleClientSecretGenerator;
 import com.spoony.spoony_server.adapter.auth.verification.apple.AppleJwtParser;
 import com.spoony.spoony_server.adapter.auth.verification.apple.ApplePublicKeyGenerator;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.AppleRefreshTokenRepository;
 import com.spoony.spoony_server.application.auth.port.out.AppleRefreshTokenPort;
 import com.spoony.spoony_server.global.exception.AuthException;
-import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
-import com.spoony.spoony_server.global.message.business.BusinessErrorMessage;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +42,6 @@ public class AppleService {
         return PlatformUserDTO.of(claims.get(APPLE_SUBJECT, String.class));
     }
 
-    @Transactional
     // 애플 리프레시 토큰 발급
     public void exchangeAndStoreRefreshToken(String authCode, Long userId) {
         if (authCode == null || authCode.isBlank()) {
@@ -60,6 +56,9 @@ public class AppleService {
                     "authorization_code",
                     authCode
             );
+            if (tokenDTO == null || tokenDTO.refreshToken() == null || tokenDTO.refreshToken().isBlank()) {
+                throw new AuthException(AuthErrorMessage.EMPTY_REFRESH_TOKEN);
+            }
             appleRefreshTokenPort.upsert(userId, tokenDTO.refreshToken());
         } catch (Exception e) {
             throw new AuthException(AuthErrorMessage.APPLE_TOKEN_REQUEST_FAILED);

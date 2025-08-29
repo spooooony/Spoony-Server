@@ -44,6 +44,9 @@ public class AuthService implements
         User user = userPort.create(platformUserDTO, userSignupDTO);
 
         if (userSignupDTO.platform() == Platform.APPLE) {
+            if (userSignupDTO.authCode() == null || userSignupDTO.authCode().isBlank()) {
+                throw new AuthException(AuthErrorMessage.EMPTY_AUTH_CODE);
+            }
             appleService.exchangeAndStoreRefreshToken(userSignupDTO.authCode(), user.getUserId());
         }
 
@@ -63,6 +66,9 @@ public class AuthService implements
 
         if (platformRequestDTO.platform() == Platform.APPLE
                 && appleRefreshTokenPort.findRefreshTokenByUserId(user.getUserId()).isEmpty()) {
+            if (platformRequestDTO.authCode() == null || platformRequestDTO.authCode().isBlank()) {
+                throw new AuthException(AuthErrorMessage.EMPTY_AUTH_CODE);
+            }
             appleService.exchangeAndStoreRefreshToken(platformRequestDTO.authCode(), user.getUserId());
         }
 
