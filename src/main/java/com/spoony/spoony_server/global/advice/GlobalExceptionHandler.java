@@ -79,8 +79,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDTO<BusinessErrorMessage>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException e) {
         return ResponseEntity
-                .status(BusinessErrorMessage.BDOY_ERROR.getHttpStatus()) // TODO: enum 오타면 BODY_ERROR로 리네임 권장
-                .body(ResponseDTO.fail(BusinessErrorMessage.BDOY_ERROR));
+                .status(BusinessErrorMessage.BODY_ERROR.getHttpStatus()) // TODO: enum 오타면 BODY_ERROR로 리네임 권장
+                .body(ResponseDTO.fail(BusinessErrorMessage.BODY_ERROR));
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)

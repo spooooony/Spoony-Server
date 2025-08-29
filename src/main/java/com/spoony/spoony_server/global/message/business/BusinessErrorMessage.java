@@ -14,7 +14,7 @@ public enum BusinessErrorMessage implements DefaultErrorMessage {
 
     INVALID_URL_ERROR(HttpStatus.NOT_FOUND, "지원하지 않는 URL 입니다."),
     METHOD_NOT_ALLOWED_ERROR(HttpStatus.METHOD_NOT_ALLOWED, "잘못된 HTTP Method 요청입니다."),
-    BDOY_ERROR(HttpStatus.NOT_FOUND, "올바르지 않은 Body 형식입니다."),
+    BODY_ERROR(HttpStatus.NOT_FOUND, "올바르지 않은 Body 형식입니다."),
     NULL_ERROR(HttpStatus.NOT_FOUND, "Null 오류입니다. 누락 필드 확인 후 문의해주세요."),
     MULTIPART_ERROR(HttpStatus.NOT_FOUND, "필수적인 Part가 전달되지 않았습니다.");
 
