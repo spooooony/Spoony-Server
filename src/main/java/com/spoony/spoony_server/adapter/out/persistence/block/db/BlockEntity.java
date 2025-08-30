@@ -74,7 +74,7 @@ public class BlockEntity {
         }
     }
 
-    //스케쥴러 작동 여부에 대해 라이트로그 찍는 매서드
+    // 스케줄러가 실제 Feed 삭제했을 때 라이트로그 기록
     public void markFeedPurged(LocalDateTime now) {
         this.feedPurgedAt = now;
     }

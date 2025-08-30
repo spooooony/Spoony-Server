@@ -38,7 +38,7 @@ public class FeedEntity {
     @Builder
     public FeedEntity(UserEntity user, UserEntity author ,PostEntity post) {
         this.user = user;
-        this.author = author;
         this.post = post;
+        this.author = author;
     }
 }
