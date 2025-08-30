@@ -75,17 +75,16 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
         @Param("now") LocalDateTime now,
         Pageable pageable);
 
-    // 스케줄러가 Feed 삭제 후 라이트로그 기록
-
+    // 스케줄러가 Feed 삭제 후 라이트로그 기록(JPQL 직접 업데이트)
     @Modifying
     @Query("""
-        
-        
-        """)
+        update BlockEntity b
+        set b.feedPurgedAt = :now
+        where b.blocker.userId = :u
+          and b.blocked.userId = :t
+    """)
     int markFeedPurgedAt(@Param("u") Long u,   // 언팔 or 차단한 사람
         @Param("t") Long t,   // 당한 사람
         @Param("now") LocalDateTime now); // 언제 삭제했는지 기록
-
-
 
 }
