@@ -69,6 +69,7 @@ public class BlockEntity {
         switch(newStatus){
             case UNFOLLOWED -> this.expireAt = now.plusDays(unfollowedDays);
             case BLOCKED ->  this.expireAt = now.plusDays(blockedDays);
+            case FOLLOW     -> { this.expireAt = null; this.feedPurgedAt = null; }
             case REPORT     -> this.expireAt = null;
         }
     }
@@ -78,8 +79,4 @@ public class BlockEntity {
         this.feedPurgedAt = now;
     }
 
-    //재팔로우 등 복구 시 라이트 로그 초기화
-    public void clearFeedPurged() {
-        this.feedPurgedAt = null;
-    }
 }

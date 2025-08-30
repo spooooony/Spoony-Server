@@ -40,6 +40,5 @@ public class FeedEntity {
         this.user = user;
         this.author = author;
         this.post = post;
-        this.createdAt = LocalDateTime.now();
     }
 }
