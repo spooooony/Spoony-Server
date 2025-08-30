@@ -5,13 +5,18 @@ import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockRepository
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
+import com.spoony.spoony_server.adapter.out.persistence.user.mapper.BlockMapper;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
+import com.spoony.spoony_server.domain.user.Block;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,5 +110,17 @@ public class BlockPersistenceAdapter implements BlockPort {
     @Override
     public List<Long> getRelatedUserIdsByReportStatus(Long userId) {
         return blockRepository.findRelatedUserIdsByReportStatus(userId,BlockStatus.REPORT);
+    }
+
+    @Override
+    public List<Block> findExpiredBlocks(List<BlockStatus> statuses, LocalDateTime now, Pageable pageable) {
+        return blockRepository.findExpiredBlocks(statuses,now,pageable)
+            .stream().map(BlockMapper::toDomain).toList();
+    }
+
+    @Override
+    public void markFeedPurgedAt(Long blockerId, Long blockedId, LocalDateTime now) {
+        blockRepository.markFeedPurgedAt(blockerId,blockedId,now);
+
     }
 }
