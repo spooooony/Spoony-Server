@@ -1,5 +1,6 @@
 package com.spoony.spoony_server.adapter.out.persistence.post.db;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,10 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
     @Query("SELECT COUNT(p) FROM PostEntity p WHERE p.user.userId = :userId AND (:reportedPostIds IS NULL OR p.postId NOT IN :reportedPostIds)")
     Long countByUser_UserId(@Param("userId") Long userId,
                             @Param("reportedPostIds") List<Long> reportedPostIds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from PostEntity p where p.postId = :postId")
+    Optional<PostEntity> findByIdForUpdate(@Param("postId") Long postId);
 
     @Modifying
     @Query("update PostEntity p set p.zzimCount = coalesce(p.zzimCount, 0) + 1 where p.postId = :postId")

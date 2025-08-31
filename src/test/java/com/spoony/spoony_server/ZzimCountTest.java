@@ -3,6 +3,7 @@ package com.spoony.spoony_server;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;
 import com.spoony.spoony_server.adapter.out.persistence.zzim.db.ZzimPostRepository;
 import com.spoony.spoony_server.application.port.command.zzim.ZzimAddCommand;
+import com.spoony.spoony_server.application.port.command.zzim.ZzimDeleteCommand;
 import com.spoony.spoony_server.application.service.zzim.ZzimPostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +56,42 @@ public class ZzimCountTest {
         }
         long after = postRepository.findById(postId).orElseThrow().getZzimCount();
         assertThat(after).isEqualTo(base + 3);
+    }
+
+    @Test
+    void 서로_다른_세명이_동시에_찜을_취소하면_정확히_3감소() throws Exception {
+        for (Long uid : userIds) {
+            if (!zzimPostRepository.existsByUser_UserIdAndPost_PostId(uid, postId)) {
+                zzimService.addZzimPost(new ZzimAddCommand(uid, postId));
+            }
+        }
+        long before = postRepository.findById(postId).orElseThrow().getZzimCount();
+
+        ExecutorService es = Executors.newFixedThreadPool(userIds.size());
+        CountDownLatch ready = new CountDownLatch(userIds.size());
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done  = new CountDownLatch(userIds.size());
+
+        for (Long uid : userIds) {
+            es.submit(() -> {
+                ready.countDown();
+                try { start.await(); } catch (InterruptedException ignored) {}
+                zzimService.deleteZzim(new ZzimDeleteCommand(uid, postId));
+                done.countDown();
+            });
+        }
+
+        ready.await();
+        start.countDown();
+        done.await();
+        es.shutdown();
+
+        // 검증: 삭제되었는지 확인
+        for (Long uid : userIds) {
+            boolean exists = zzimPostRepository.existsByUser_UserIdAndPost_PostId(uid, postId);
+            assertThat(exists).isFalse();
+        }
+        long after = postRepository.findById(postId).orElseThrow().getZzimCount();
+        assertThat(after).isEqualTo(before - userIds.size());
     }
 }
