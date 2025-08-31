@@ -70,16 +70,14 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
         PostEntity postEntity = postRepository.findById(post.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
 
-        postEntity.updateZzimCount(1);
-        postRepository.save(postEntity);
-
         ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder()
                 .user(userEntity)
                 .author(userEntity_author)
                 .post(postEntity)
                 .build();
 
-        zzimPostRepository.save(zzimPostEntity);
+        zzimPostRepository.saveAndFlush(zzimPostEntity);
+        postRepository.incrementZzimCount(post.getPostId());
     }
 
     @Override
@@ -102,11 +100,11 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
     public void deleteByUserAndPost(User user, Post post) {
         PostEntity postEntity = postRepository.findById(post.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-        boolean exists = zzimPostRepository.existsByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
-        if (exists) {
-            postEntity.updateZzimCount(-1);
-            postRepository.save(postEntity);
-            zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
+
+        int deleted = zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), postEntity.getPostId());
+
+        if (deleted > 0) {
+            postRepository.decrementZzimCount(postEntity.getPostId());
         }
     }
 }

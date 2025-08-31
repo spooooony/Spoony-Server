@@ -1,9 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.post.db;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +16,13 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
     Long countByUser_UserId(@Param("userId") Long userId,
                             @Param("reportedPostIds") List<Long> reportedPostIds);
 
+    @Modifying
+    @Query("update PostEntity p set p.zzimCount = coalesce(p.zzimCount, 0) + 1 where p.postId = :postId")
+    void incrementZzimCount(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("update PostEntity p set p.zzimCount = case when coalesce(p.zzimCount, 0) > 0 then p.zzimCount - 1 else 0 end where p.postId = :postId")
+    void decrementZzimCount(@Param("postId") Long postId);
 
     //Long countByUser_UserId(Long userId);
     List<PostEntity> findByDescriptionContaining(String query);
