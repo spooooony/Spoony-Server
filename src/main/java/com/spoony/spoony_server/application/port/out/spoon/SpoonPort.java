@@ -9,5 +9,5 @@ public interface SpoonPort {
     void updateSpoonHistory(User user, int amount);
     void updateSpoonHistoryByActivity(User user, Activity activity);
     Activity findActivityByActivityId(Long activityId);
-    int decrementIfEnough(Long userId, int amount);
+    boolean decrementIfEnough(Long userId, int amount);
 }

@@ -352,8 +352,8 @@ public class PostService implements
         }
 
         // 스푼 조건부 차감
-        int decrement = spoonPort.decrementIfEnough(userId, 1);
-        if (decrement == 0) {
+        boolean decrement = spoonPort.decrementIfEnough(userId, 1);
+        if (!decrement) {
             postPort.deleteScoop(userId, postId);
             throw new BusinessException(SpoonErrorMessage.NOT_ENOUGH_SPOONS);
         }

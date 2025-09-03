@@ -325,8 +325,7 @@ public class PostPersistenceAdapter implements
 
     @Override
     public boolean insertScoopIfAbsent(Long userId, Long postId) {
-        int rows = scoopPostRepository.insertIfAbsent(userId, postId);
-        return rows == 1;
+        return scoopPostRepository.insertIfAbsent(userId, postId) == 1;
     }
 
     @Override

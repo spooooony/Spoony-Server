@@ -51,8 +51,8 @@ public class SpoonPersistenceAdapter implements
     }
 
     @Override
-    public int decrementIfEnough(Long userId, int amount) {
-        return spoonBalanceRepository.decrementIfEnough(userId, amount, LocalDateTime.now());
+    public boolean decrementIfEnough(Long userId, int amount) {
+        return spoonBalanceRepository.decrementIfEnough(userId, amount, LocalDateTime.now()) == 1;
     }
 
     @Override

@@ -12,9 +12,9 @@ public interface SpoonBalanceRepository extends JpaRepository<SpoonBalanceEntity
     Optional<SpoonBalanceEntity> findByUser_UserId(Long userId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE SpoonBalanceEntity sb " + " SET sb.amount = sb.amount - :absDelta, " + " sb.updatedAt = :now " +
-            " WHERE sb.user.userId = :userId " + " AND sb.amount >= :absDelta ")
+    @Query("UPDATE SpoonBalanceEntity sb " + " SET sb.amount = sb.amount - :amount, " + " sb.updatedAt = :now " +
+            " WHERE sb.user.userId = :userId " + " AND sb.amount >= :amount ")
     int decrementIfEnough(@Param("userId") Long userId,
-                          @Param("absDelta") int absDelta,
+                          @Param("amount") int amount,
                           @Param("now") LocalDateTime now);
 }
