@@ -14,7 +14,7 @@ public interface ScoopPostRepository extends JpaRepository<ScoopPostEntity, Long
     int insertIfAbsent(@Param("uid") Long userId, @Param("pid") Long postId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = "DELETE FROM scoop_post WHERE user_id = :uid AND post_id = :pid", nativeQuery = true)
+    @Query("DELETE FROM ScoopPostEntity sp WHERE sp.user.userId = :uid AND sp.post.postId = :pid")
     void deleteOne(@Param("uid") Long userId, @Param("pid") Long postId);
 }
 
