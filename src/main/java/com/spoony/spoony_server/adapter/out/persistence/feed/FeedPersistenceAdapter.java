@@ -4,12 +4,17 @@ import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedEntity;
 import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
 import com.spoony.spoony_server.adapter.out.persistence.feed.mapper.FeedMapper;
 import com.spoony.spoony_server.adapter.out.persistence.post.mapper.PostMapper;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.UserMapper;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.annotation.Adapter;
+import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.UserErrorMessage;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +26,7 @@ import java.util.List;
 public class FeedPersistenceAdapter implements FeedPort {
 
     private final FeedRepository feedRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<Feed> findFeedListByFollowing(Long userId) {
@@ -70,6 +76,25 @@ public class FeedPersistenceAdapter implements FeedPort {
     @Override
     public void deleteBidirectional(Long userId, Long authorId) {
         feedRepository.deleteBidirectional(userId, authorId);
+    }
+
+    @Override
+    public void backfillIncremental(Long userId, Long targetUserId, List<Post> newPosts) {
+        if (newPosts == null || newPosts.isEmpty()) return;
+
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(()-> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        for(Post post : newPosts){
+            boolean exists = feedRepository.existsByUserIdAndPostId(userId, post.getPostId());
+            if(!exists){
+                FeedEntity feedEntity = FeedEntity.builder()
+                    .user(userEntity)
+                    .author(UserMapper.toEntity(post.getUser()))
+                    .post(PostMapper.toEntity(post))
+                    .build();
+                feedRepository.save(feedEntity);
+            }
+        }
     }
 }
 

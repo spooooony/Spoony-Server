@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,58 +24,32 @@ public class BlockEntity {
     @JoinColumn(name = "blocker_id", nullable = false)
     private UserEntity blocker;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_id", nullable = false)
     private UserEntity blocked;
 
-
     @Enumerated(EnumType.STRING)
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private BlockStatus status;
 
     @Column(name = "status_changed_at", nullable = false)
-    private LocalDateTime statusChangedAt;   // 상태가 바뀐 시각
+    private LocalDateTime statusChangedAt;
 
     @Column(name = "expire_at")
-    private LocalDateTime expireAt; // 만료 시각 (스케줄러 대상)
-
+    private LocalDateTime expireAt;
 
     @Column(name = "feed_purged_at")
-    private LocalDateTime feedPurgedAt;  // 스케줄러가 feed 지운 시각(라이트로그)
-
-
-
+    private LocalDateTime feedPurgedAt;
 
     @Builder
-    public BlockEntity(UserEntity blocker,UserEntity blocked,BlockStatus status){
+    public BlockEntity(Long blockId, UserEntity blocker, UserEntity blocked, BlockStatus status,
+        LocalDateTime statusChangedAt, LocalDateTime expireAt, LocalDateTime feedPurgedAt) {
+        this.blockId = blockId;
         this.blocker = blocker;
         this.blocked = blocked;
         this.status = status;
-        this.statusChangedAt  = LocalDateTime.now();
-
+        this.statusChangedAt = statusChangedAt;
+        this.expireAt = expireAt;
+        this.feedPurgedAt = feedPurgedAt;
     }
-
-
-    //상태 변경 + TTL 설정
-    public void updateStatus(BlockStatus newStatus , LocalDateTime now, int unfollowedDays, int blockedDays) {
-        if (this.status == newStatus) return;
-
-        this.status = newStatus;
-        this.statusChangedAt = now;
-
-        //만료 시간 설정
-        switch(newStatus){
-            case UNFOLLOWED -> this.expireAt = now.plusDays(unfollowedDays);
-            case BLOCKED ->  this.expireAt = now.plusDays(blockedDays);
-            case FOLLOW     -> { this.expireAt = null; this.feedPurgedAt = null; }
-            case REPORT     -> this.expireAt = null;
-        }
-    }
-
-    // 스케줄러가 실제 Feed 삭제했을 때 라이트로그 기록
-    public void markFeedPurged(LocalDateTime now) {
-        this.feedPurgedAt = now;
-    }
-
 }

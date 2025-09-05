@@ -9,7 +9,9 @@ public interface UserGetUseCase {
     UserResponseDTO getUserInfo(RelatedUserGetCommand relatedUserGetCommand, UserFollowCommand userFollowCommand );
     UserProfileUpdateResponseDTO getUserProfileInfo(UserGetCommand userGetCommand);
     Boolean isUsernameDuplicate(UserNameCheckCommand command);
+
     FollowListResponseDTO getFollowers(FollowGetCommand command);
     FollowListResponseDTO getFollowings(FollowGetCommand command);
+
     BlockListResponseDTO getBlockings(UserGetCommand command);
 }

@@ -35,6 +35,7 @@ public class UserController {
     private final RegionGetUseCase regionGetUseCase;
     private final BlockUserCreateUseCase blockUserCreateUseCase;
     private final BlockCheckUseCase blockCheckUseCase;
+    private final BlockUseCase blockUseCase;
 
     @GetMapping
     @Operation(summary = "사용자 정보 조회 API", description = "특정 사용자의 상세 정보를 조회하는 API (Token 기준)")
@@ -174,10 +175,9 @@ public class UserController {
             @UserId Long userId,
             @RequestBody UserFollowRequestDTO requestDTO
     ) {
-        UserFollowCommand command = new UserFollowCommand(
-                userId,
-                requestDTO.targetUserId()
-        );
+        blockUseCase.follow(userId, requestDTO.targetUserId());
+
+        UserFollowCommand command = new UserFollowCommand(userId,requestDTO.targetUserId());
         userFollowUseCase.createFollow(command);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
@@ -192,11 +192,8 @@ public class UserController {
             @UserId Long userId,
             @RequestBody UserFollowRequestDTO requestDTO
     ) {
-        UserFollowCommand command = new UserFollowCommand(
-                userId,
-                requestDTO.targetUserId()
-        );
-        userFollowUseCase.deleteFollow(command);
+
+        blockUseCase.unfollow(userId, requestDTO.targetUserId());
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
@@ -230,11 +227,7 @@ public class UserController {
             @UserId Long userId,
             @RequestBody UserBlockRequestDTO requestDTO
     ) {
-        BlockUserCommand command = new BlockUserCommand(
-                userId,
-                requestDTO.targetUserId()
-        );
-        blockUserCreateUseCase.deleteUserBlock(command);
+        blockUseCase.unblock(userId, requestDTO.targetUserId());
         return ResponseEntity.ok(ResponseDTO.success(null));
     }
 
@@ -255,5 +248,15 @@ public class UserController {
     public ResponseEntity<ResponseDTO<RegionListResponseDTO>> getRegion() {
         RegionListResponseDTO regionListResponseDTO = regionGetUseCase.getRegionList();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(regionListResponseDTO));
+    }
+
+    @PostMapping("/report")
+    @Operation(summary = "유저 신고 API", description = "다른 사용자를 신고합니다.")
+    public ResponseEntity<ResponseDTO<Void>> reportUser(
+        @UserId Long userId,
+        @RequestBody UserBlockRequestDTO requestDTO
+    ) {
+        blockUseCase.report(userId, requestDTO.targetUserId()); //
+        return ResponseEntity.ok(ResponseDTO.success(null));
     }
 }

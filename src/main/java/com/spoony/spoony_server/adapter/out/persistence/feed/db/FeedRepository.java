@@ -34,4 +34,5 @@ public interface FeedRepository extends JpaRepository<FeedEntity, Long>, JpaSpec
     """)
     int deleteBidirectional(@Param("u") Long u, @Param("t") Long t);
 
+    boolean existsByUserIdAndPostId(Long userId, Long postId);
 }

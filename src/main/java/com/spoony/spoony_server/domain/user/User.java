@@ -4,31 +4,30 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
     private Long userId;
-
-    @Enumerated(EnumType.STRING)
     private Platform platform;
     private String platformId;
-
-    @Enumerated(EnumType.STRING)
     private Long imageLevel;
-
     private Long level;
     private String userName;
     private Region region;
     private String introduction;
     private LocalDate birth;
-
-    @Enumerated(EnumType.STRING)
     private AgeGroup ageGroup;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // id만 있는 User 생성용 (Block에서 PK만 필요할 때)
+    public User(Long userId) {
+        this.userId = userId;
+    }
 }

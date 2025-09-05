@@ -1,5 +1,7 @@
 package com.spoony.spoony_server.application.service.report;
 
+import java.util.Optional;
+
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
@@ -69,28 +71,17 @@ public class ReportService implements ReportCreateUseCase {
         if (command.getReportDetail().length()>300){
             throw new BusinessException(ReportErrorMessage.BAD_REQUEST_CONTENT_TOO_LONG);
         }
-        UserReportType userReportType = command.getUserReportType();
-        if (userReportType == null){
-            userReportType = UserReportType.PROMOTIONAL_CONTENT;
-        }
+
+        UserReportType userReportType = Optional.ofNullable(command.getUserReportType())
+            .orElse(UserReportType.PROMOTIONAL_CONTENT);
+
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
 
         User user = userPort.findUserById(userId);
         User targetUser = userPort.findUserById(targetUserId);
 
-        blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.REPORT);
 
-        // 2. follow 관계 제거 (양방향)
-        userPort.deleteFollowRelation(userId, targetUserId);
-        userPort.deleteFollowRelation(targetUserId, userId);
-
-        // 3. zzimPost 양방향 관계 제거
-        userPort.removeZzimRelationsBetweenUsers(userId, targetUserId);
-
-        //4. 즉시 feed에서 영구 삭제
-        feedPort.deleteByUserIdAndAuthorId(userId, targetUserId);
-        feedPort.deleteByUserIdAndAuthorId(targetUserId, userId);
 
         //5. 신고 저장
         UserReport userReport = new UserReport(userReportType, command.getReportDetail(),user,targetUser);

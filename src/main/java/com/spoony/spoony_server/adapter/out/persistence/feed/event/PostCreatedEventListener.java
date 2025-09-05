@@ -45,7 +45,11 @@ public class PostCreatedEventListener {
                     .map(followerId -> {
                         UserEntity userEntity = userRepository.findById(followerId)
                                 .orElseThrow(() -> new IllegalStateException("Follower not found. id = " + followerId));
-                        return new FeedEntity(userEntity, postEntity, author);
+                        return FeedEntity.builder()
+                            .user(userEntity)
+                            .author(author)
+                            .post(postEntity)
+                            .build();
                     })
                     .toList();
 
