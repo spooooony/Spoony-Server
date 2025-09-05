@@ -10,8 +10,10 @@ import com.spoony.spoony_server.adapter.auth.verification.apple.ApplePublicKeyGe
 import com.spoony.spoony_server.application.auth.port.out.AppleRefreshTokenPort;
 import com.spoony.spoony_server.global.exception.AuthException;
 import com.spoony.spoony_server.global.message.auth.AuthErrorMessage;
+import feign.FeignException;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.PublicKey;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppleService {
@@ -60,7 +63,11 @@ public class AppleService {
                 throw new AuthException(AuthErrorMessage.EMPTY_REFRESH_TOKEN);
             }
             appleRefreshTokenPort.upsert(userId, tokenDTO.refreshToken());
+        } catch (FeignException e) {
+            log.error("[Apple Token] status={}, body={}", e.status(), e.contentUTF8());
+            throw new AuthException(AuthErrorMessage.APPLE_TOKEN_REQUEST_FAILED);
         } catch (Exception e) {
+            log.error("[Apple Token] unexpected error", e);
             throw new AuthException(AuthErrorMessage.APPLE_TOKEN_REQUEST_FAILED);
         }
     }
