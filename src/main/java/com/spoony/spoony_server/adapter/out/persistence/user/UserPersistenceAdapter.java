@@ -251,4 +251,14 @@ public class UserPersistenceAdapter implements UserPort {
             zzimPostRepository.deleteByUserAndAuthorAndPost(targetUser, user, post);
         }
     }
+
+    @Override
+    public void deleteNewFollowRelation(Long userId, Long targetUserId) {
+        newFollowRepository.deleteFollowRelation(userId, targetUserId);
+    }
+
+    @Override
+    public List<Long> findNewFollowingIds(Long userId) {
+        return newFollowRepository.findFollowedUserIdsByUserId(userId);
+    }
 }

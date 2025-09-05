@@ -61,6 +61,7 @@ public class AuthService implements
         User user = userPort.load(platformRequestDTO.platform(), platformUserDTO);
 
         if (user == null) {
+            System.out.println("User is null");
             return LoginResponseDTO.of(false, null, null);
         }
 

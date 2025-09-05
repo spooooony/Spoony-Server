@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,4 +47,6 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
 
     @Query(value = "SELECT COUNT(*) FROM post WHERE is_deleted = true", nativeQuery = true)
     long countDeletedPosts();
+
+    List<PostEntity> findByUser_UserIdAndCreatedAtAfter(Long userId, LocalDateTime createdAt);
 }

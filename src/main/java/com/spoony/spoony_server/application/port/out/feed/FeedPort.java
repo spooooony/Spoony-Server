@@ -11,6 +11,11 @@ public interface FeedPort {
     void deleteFeedByUserIdAndPostId(Long userId, Long postId);
     void addFeedsIfNotExists(User user, List<Post> posts);
     void deleteByUserIdAndAuthorId(Long userId, Long authorId);
+
+    void deleteOneWay(Long userId, Long authorId);       // 언팔로우
+    void deleteBidirectional(Long userId, Long authorId); // 차단, 신고
+
+    void backfillIncremental(Long userId, Long targetUserId, List<Post> newPosts);
 }
 
 

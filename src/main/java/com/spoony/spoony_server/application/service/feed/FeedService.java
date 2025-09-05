@@ -9,6 +9,7 @@ import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
+import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.feed.Feed;
 import com.spoony.spoony_server.domain.post.Category;
 import com.spoony.spoony_server.domain.post.Photo;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FeedService implements FeedGetUseCase {
 
+    private final UserPort userPort;
     private final FeedPort feedPort;
     private  final PostPort postPort;
     private final PostCategoryPort postCategoryPort;
@@ -39,22 +41,40 @@ public class FeedService implements FeedGetUseCase {
     public FeedListResponseDTO getFeedListByFollowingUser(FollowingUserFeedGetCommand command) {
         Long currentUserId = command.getUserId();
 
-        // 1. 팔로우한 유저들의 게시물 리스트를 가져옴(이 경우, 언팔로우 상태가 반영x)
+        //new_follow 존재하면, 전체 백필
+        List<Long> newFollowUserIds = userPort.findNewFollowingIds(currentUserId);
+        if(!newFollowUserIds.isEmpty()){ //새로팔로우한 유저가 있다면 -> 전체 백필 후, newFollow 테이블에서 삭제
+            for(Long newFollowUserId : newFollowUserIds){
+                List<Post> targetPosts = postPort.findPostsByUserId(newFollowUserId);
+                User currentUser = userPort.findUserById(currentUserId);
+
+                //Feed에 전체 백필
+                feedPort.addFeedsIfNotExists(currentUser,targetPosts);
+
+                //newFollow테이블에서 관계 삭제
+                userPort.deleteNewFollowRelation(currentUserId,newFollowUserId);
+            }
+
+        }
+
+
+        //조회 시작
+        // 1. 팔로우한 유저들의 게시물 리스트를 가져오기
         List<Feed> feedList = feedPort.findFeedListByFollowing(command.getUserId());
 
         // 2. 내가 차단한 유저들의 ID를 가져옴
-        List<Long> userIdsBlockedByMe = blockPort.getBlockedUserIds(command.getUserId());
+        List<Long> blockedUserIds  = blockPort.getBlockedUserIds(command.getUserId());
 
         // 3. 나를 차단한 유저들의 ID를 가져옴
-        List<Long> userIdsBlockingMe = blockPort.getBlockerUserIds(command.getUserId());
+        List<Long> blockerUserIds  = blockPort.getBlockerUserIds(command.getUserId());
 
         //4. feed테이블엔 남아있지만, 언팔로우 상태 반영해서 필터링
         List<Long> unfollowedUserIds = blockPort.getUnfollowedUserIds(currentUserId);
 
 
         List<FeedResponseDTO> feedResponseList = feedList.stream()
-                .filter(feed -> !userIdsBlockedByMe.contains(feed.getPost().getUser().getUserId())// 내가 차단한 유저의 게시물 제외
-                        && !userIdsBlockingMe.contains(feed.getPost().getUser().getUserId())// 나를 차단한 유저의 게시물 제외
+                .filter(feed -> !blockedUserIds.contains(feed.getPost().getUser().getUserId())// 내가 차단한 유저의 게시물 제외
+                        && !blockerUserIds.contains(feed.getPost().getUser().getUserId())// 나를 차단한 유저의 게시물 제외
                         && !unfollowedUserIds.contains(feed.getPost().getUser().getUserId())
                 )
                 .map(feed -> {

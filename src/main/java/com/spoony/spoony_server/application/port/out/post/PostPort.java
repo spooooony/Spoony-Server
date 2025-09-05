@@ -8,6 +8,7 @@ import com.spoony.spoony_server.domain.post.PostCategory;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 import com.spoony.spoony_server.domain.user.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostPort {
@@ -45,4 +46,7 @@ public interface PostPort {
     int countAllPosts();
     List<Post> findReportedPosts(int page, int size);
     int countReportedPosts();
+    List<Post> findByAuthorIdAndCreatedAtAfter(Long authorId, LocalDateTime since);
+
+
 }

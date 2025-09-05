@@ -2,11 +2,15 @@ package com.spoony.spoony_server.adapter.out.persistence.block.db;
 
 
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,5 +61,30 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
             "AND b.status = :status")
     List<Long> findRelatedUserIdsByReportStatus(@Param("userId") Long userId, @Param("status") BlockStatus status);
 
+
+
+    // 스케줄러가 만료된 (UNFOLLOWED, BLOCKED) 관계 조회
+    @Query("""
+        SELECT b
+        FROM BlockEntity b
+        WHERE b.status IN :statuses
+          AND b.expireAt IS NOT NULL
+          AND b.expireAt <= :now
+    """)
+    List<BlockEntity> findExpiredBlocks(@Param("statuses") List<BlockStatus> statuses,
+        @Param("now") LocalDateTime now,
+        Pageable pageable);
+
+    // 스케줄러가 Feed 삭제 후 라이트로그 기록(JPQL 직접 업데이트)
+    @Modifying
+    @Query("""
+        update BlockEntity b
+        set b.feedPurgedAt = :now
+        where b.blocker.userId = :u
+          and b.blocked.userId = :t
+    """)
+    int markFeedPurgedAt(@Param("u") Long u,   // 언팔 or 차단한 사람
+        @Param("t") Long t,   // 당한 사람
+        @Param("now") LocalDateTime now); // 언제 삭제했는지 기록
 
 }

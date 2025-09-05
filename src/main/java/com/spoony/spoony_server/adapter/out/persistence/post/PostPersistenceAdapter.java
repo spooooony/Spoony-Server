@@ -30,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -324,6 +325,14 @@ public class PostPersistenceAdapter implements
     @Override
     public int countReportedPosts() {
         return postRepository.countReportedPosts();
+    }
+
+    @Override
+    public List<Post> findByAuthorIdAndCreatedAtAfter(Long authorId, LocalDateTime since) {
+        return postRepository.findByUser_UserIdAndCreatedAtAfter(authorId, since)
+            .stream()
+            .map(PostMapper::toDomain)
+            .collect(Collectors.toList());
     }
 
     @Override
