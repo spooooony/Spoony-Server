@@ -16,8 +16,8 @@ public interface ZzimPostRepository extends JpaRepository<ZzimPostEntity, Long>,
     Long countByUser_UserId(Long userId);
     boolean existsByUser_UserIdAndPost_PostId(Long userId, Long postId);
     List<ZzimPostEntity> findByUser_UserId(Long userId);
-    // 게시물 신고에서 사용
-    void deleteByUser_UserIdAndPost_PostId(Long userId, Long postId);
+    // 북마크 삭제에서 사용
+    int deleteByUser_UserIdAndPost_PostId(Long userId, Long postId);
 
     //유저 신고에서 사용
     void deleteByUserAndAuthorAndPost(UserEntity user, UserEntity author, PostEntity post);
