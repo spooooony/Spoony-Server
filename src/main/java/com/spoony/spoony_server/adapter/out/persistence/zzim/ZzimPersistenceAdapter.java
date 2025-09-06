@@ -19,6 +19,7 @@ import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Sort;
@@ -92,8 +93,12 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .post(postEntity)
                 .build();
 
-        zzimPostRepository.saveAndFlush(zzimPostEntity);
-        postRepository.incrementZzimCount(post.getPostId());
+        try {
+            zzimPostRepository.saveAndFlush(zzimPostEntity);
+            postRepository.incrementZzimCount(post.getPostId());
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(PostErrorMessage.ALREADY_ZZIM);
+        }
     }
 
     @Override
