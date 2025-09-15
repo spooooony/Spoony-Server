@@ -38,11 +38,6 @@ jobs:
           echo "${{ secrets.CD_APPLICATION_NAVER }}" > ./src/main/resources/application-naver.yml
           echo "${{ secrets.CD_APPLICATION_OATH }}" > ./src/main/resources/application-oath.yml
 
-      - name: Generate Apple p8 key
-        run: |
-          mkdir -p ./src/main/resources/key
-          echo "${{ secrets.APPLE_P8 }}" > ./src/main/resources/key/AuthKey_JDTJBM88K5.p8
-
       - name: Build Project
         run: ./gradlew clean build -x test
 

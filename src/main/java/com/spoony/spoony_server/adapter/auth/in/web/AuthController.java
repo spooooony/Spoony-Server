@@ -6,9 +6,11 @@ import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.LoginResponseDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
 import com.spoony.spoony_server.application.auth.port.in.*;
+import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.auth.constant.AuthConstant;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
+import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -43,9 +45,9 @@ public class AuthController {
     @Operation(summary = "로그인 API", description = "사용자 로그인 API, 성공 시 Token Set, 실패 시 회원가입이 필요합니다.")
     public ResponseEntity<ResponseDTO<LoginResponseDTO>> login(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) final String platformToken,
-            @Valid @RequestBody final PlatformRequestDTO platformRequestDTO
+            @RequestBody final PlatformRequestDTO platformRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platformRequestDTO, platformToken)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(loginUseCase.login(platformRequestDTO.platform(), platformToken)));
     }
 
     @PostMapping("/logout")
@@ -60,9 +62,10 @@ public class AuthController {
     @PostMapping("/withdraw")
     @Operation(summary = "회원 탈퇴 API", description = "마이페이지 > 설정에서 회원 탈퇴합니다.")
     public ResponseEntity<ResponseDTO<Void>> withdraw(
-            @UserId Long userId
+            @UserId Long userId,
+            @Nullable @RequestHeader(value = AuthConstant.APPLE_WITHDRAW_HEADER, required = false) final String authCode
     ) {
-        withdrawUseCase.withdraw(userId);
+        withdrawUseCase.withdraw(userId, authCode);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
@@ -71,6 +74,7 @@ public class AuthController {
     public ResponseEntity<ResponseDTO<JwtTokenDTO>> refreshAccessToken(
             @NotBlank @RequestHeader(AuthConstant.AUTHORIZATION_HEADER) String refreshToken
     ) {
+        System.out.println("초기 요청 토큰 " + refreshToken);
         if (refreshToken.startsWith(BEARER_TOKEN_PREFIX)) {
             refreshToken = refreshToken.substring(BEARER_TOKEN_PREFIX.length());
         }

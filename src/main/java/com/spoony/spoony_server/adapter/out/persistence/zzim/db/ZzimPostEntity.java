@@ -16,13 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "zzim_post",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_user_post",
-                        columnNames = {"user_id", "post_id"}
-                )
-        })
+@Table(name = "zzim_post")
 public class ZzimPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

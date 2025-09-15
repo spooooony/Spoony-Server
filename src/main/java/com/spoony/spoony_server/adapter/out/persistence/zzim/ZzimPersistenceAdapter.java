@@ -18,16 +18,9 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DeadlockLoserDataAccessException;
-import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -68,24 +61,17 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .toList();
     }
 
-    @Retryable(
-            retryFor = {
-                    DeadlockLoserDataAccessException.class,
-                    CannotAcquireLockException.class,
-                    PessimisticLockingFailureException.class
-            },
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 5, maxDelay = 50, multiplier = 1.6, random = true)
-    )
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public void saveZzimPost(User user, Post post) {
         UserEntity userEntity = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
         UserEntity userEntity_author =  userRepository.findById(post.getUser().getUserId())
                 .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
-        PostEntity postEntity = postRepository.findByIdForUpdate(post.getPostId())
+        PostEntity postEntity = postRepository.findById(post.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+
+        postEntity.updateZzimCount(1);
+        postRepository.save(postEntity);
 
         ZzimPostEntity zzimPostEntity = ZzimPostEntity.builder()
                 .user(userEntity)
@@ -93,12 +79,7 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .post(postEntity)
                 .build();
 
-        try {
-            zzimPostRepository.saveAndFlush(zzimPostEntity);
-            postRepository.incrementZzimCount(post.getPostId());
-        } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(PostErrorMessage.ALREADY_ZZIM);
-        }
+        zzimPostRepository.save(zzimPostEntity);
     }
 
     @Override
@@ -117,25 +98,15 @@ public class ZzimPersistenceAdapter implements ZzimPostPort {
                 .toList();
     }
 
-    @Retryable(
-            retryFor = {
-                    DeadlockLoserDataAccessException.class,
-                    CannotAcquireLockException.class,
-                    PessimisticLockingFailureException.class
-            },
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 5, maxDelay = 50, multiplier = 1.6, random = true)
-    )
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public void deleteByUserAndPost(User user, Post post) {
-        PostEntity postEntity = postRepository.findByIdForUpdate(post.getPostId())
+        PostEntity postEntity = postRepository.findById(post.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
-
-        int deleted = zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), postEntity.getPostId());
-
-        if (deleted > 0) {
-            postRepository.decrementZzimCount(postEntity.getPostId());
+        boolean exists = zzimPostRepository.existsByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
+        if (exists) {
+            postEntity.updateZzimCount(-1);
+            postRepository.save(postEntity);
+            zzimPostRepository.deleteByUser_UserIdAndPost_PostId(user.getUserId(), post.getPostId());
         }
     }
 }
