@@ -6,7 +6,6 @@ import com.spoony.spoony_server.domain.post.Photo;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.post.PostCategory;
 import com.spoony.spoony_server.domain.user.AgeGroup;
-import com.spoony.spoony_server.domain.user.User;
 
 import java.util.List;
 
@@ -22,7 +21,6 @@ public interface PostPort {
     void savePostCategory(PostCategory postCategory);
     void saveMenu(Menu menu);
     void savePhoto(Photo photo);
-    void saveScoopPost(User user, Post post);
     void deleteById(Long postId);
     void updatePost(Long postId, String description, Double value, String cons);
     void deleteAllPostCategoryByPostId(Long postId);
@@ -45,4 +43,6 @@ public interface PostPort {
     int countAllPosts();
     List<Post> findReportedPosts(int page, int size);
     int countReportedPosts();
+    boolean insertScoopIfAbsent(Long userId, Long postId);
+    void deleteScoop(Long userId, Long postId);
 }
