@@ -1,8 +1,8 @@
 package com.spoony.spoony_server.global.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -17,8 +17,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .servers(List.of(
-                        new Server().url("https://www.spoony-prod.o-r.kr"),
-                        new Server().url("https://www.spoony-dev.o-r.kr")
+                        new Server().url("https://www.spoony-dev.n-e.kr"),
+                        new Server().url("https://www.spoony-prod.o-r.kr")
                 ))
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth", securityScheme()))
