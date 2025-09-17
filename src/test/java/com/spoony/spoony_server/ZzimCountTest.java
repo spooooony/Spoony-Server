@@ -24,8 +24,8 @@ public class ZzimCountTest {
     @Autowired private PostRepository postRepository;
     @Autowired private ZzimPostRepository zzimPostRepository;
 
-    private final Long postId = 28L;
-    private final List<Long> userIds = Arrays.asList(33L, 34L, 35L);
+    private final Long postId = 1L;
+    private final List<Long> userIds = Arrays.asList(1L, 2L, 16L);
 
     @Test
     void 서로_다른_세명이_동시에_찜하면_정확히_3증가() throws Exception {
@@ -93,5 +93,41 @@ public class ZzimCountTest {
         }
         long after = postRepository.findById(postId).orElseThrow().getZzimCount();
         assertThat(after).isEqualTo(before - userIds.size());
+    }
+
+    @Test
+    void 한유저가_저장취소_10번_왕복_최종_카운트_0() throws InterruptedException {
+        final Long uid = 1L;
+        final Long pid = 4L;
+
+        assertThat(zzimPostRepository.existsByUser_UserIdAndPost_PostId(uid, pid)).isFalse();
+        assertThat(postRepository.findById(pid).orElseThrow().getZzimCount()).isZero();
+
+        int rounds = 20; // 클릭 횟수 (10쌍)
+        for (int i = 0; i < rounds; i++) {
+            if (i % 2 == 0) {
+                zzimService.addZzimPost(new ZzimAddCommand(uid, pid));
+            } else {
+                zzimService.deleteZzim(new ZzimDeleteCommand(uid, pid));
+            }
+            Thread.sleep(5); // 5ms 간격 (최대한 빠르게 누르는 상황을 테스트하기 위함)
+        }
+
+        // 중간 검증: 최종 상태는 0
+        boolean existsAfterToggle = zzimPostRepository.existsByUser_UserIdAndPost_PostId(uid, pid);
+        long countAfterToggle = postRepository.findById(pid).orElseThrow().getZzimCount();
+
+        assertThat(existsAfterToggle).isFalse();
+        assertThat(countAfterToggle).isZero();
+
+        // 마지막으로 한 번 저장
+        zzimService.addZzimPost(new ZzimAddCommand(uid, pid));
+
+        // 최종 검증: 레코드 존재, 카운트 +1
+        boolean existsFinal = zzimPostRepository.existsByUser_UserIdAndPost_PostId(uid, pid);
+        long countFinal = postRepository.findById(pid).orElseThrow().getZzimCount();
+
+        assertThat(existsFinal).isTrue();
+        assertThat(countFinal).isEqualTo(1);
     }
 }
