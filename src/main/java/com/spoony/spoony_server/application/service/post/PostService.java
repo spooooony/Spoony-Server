@@ -22,6 +22,7 @@ import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.event.AfterCommitWrapper;
 import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -309,7 +310,7 @@ public class PostService implements
         } catch (DataIntegrityViolationException e) {
             Long existingPostId = postPort
                     .findPostIdByUserAndPlace(user.getUserId(), place.getPlaceId())
-                    .orElseThrow(() -> e);
+                    .orElseThrow(() -> new BusinessException(PostErrorMessage.ALREADY_CREATED));
 
             return new PostCreatedEvent(this, List.of(), existingPostId);
         }
