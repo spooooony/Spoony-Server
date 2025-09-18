@@ -24,6 +24,7 @@ import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,8 +46,7 @@ public class PostService implements
         PostScoopPostUseCase,
         PostDeleteUseCase,
         PostUpdateUseCase,
-        PostSearchUseCase
-{
+        PostSearchUseCase {
     private final PostPort postPort;
     private final PostCreatePort postCreatePort;
     private final PostCategoryPort postCategoryPort;
@@ -60,6 +60,7 @@ public class PostService implements
     private final BlockPort blockPort;
     private final ReportPort reportPort;
     private final RegionPort regionPort;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
@@ -113,7 +114,7 @@ public class PostService implements
     }
 
     //유저페이지 -> 유저가 작성한 리뷰 조회 시 사용
-    public FeedListResponseDTO getPostsByUserId(UserReviewGetCommand command){
+    public FeedListResponseDTO getPostsByUserId(UserReviewGetCommand command) {
         Long userId = command.getUserId();
         Long targetUserId = command.getTargetUserId();
         Boolean isLocalReview = command.getIsLocalReview();
@@ -173,7 +174,7 @@ public class PostService implements
                                     category.getTextColor(),
                                     category.getBackgroundColor()
 
-                    ),
+                            ),
                             post.getZzimCount(),
                             photoUrlList,
                             post.getCreatedAt(),
@@ -185,7 +186,7 @@ public class PostService implements
     }
 
     @Override
-    public PostSearchResultListDTO searchReviewsByQuery(UserGetCommand userGetCommand,PostSearchCommand postSearchCommand){
+    public PostSearchResultListDTO searchReviewsByQuery(UserGetCommand userGetCommand, PostSearchCommand postSearchCommand) {
         List<Long> blockedUserIds = blockPort.getBlockedUserIds(userGetCommand.getUserId());
         List<Long> blockingUserIds = blockPort.getBlockerUserIds(userGetCommand.getUserId());
         List<Long> reportedPostIds = reportPort.findReportedPostIdsByUserId(userGetCommand.getUserId());
@@ -193,9 +194,9 @@ public class PostService implements
         List<Post> postList = postPort.findByPostDescriptionContaining(postSearchCommand.getQuery());
 
         List<FeedResponseDTO> postSearchResultList = postList.stream()
-                .filter(post -> !blockedUserIds.contains(post.getUser().getUserId())&&
-                !blockingUserIds.contains(post.getUser().getUserId()) &&
-                !reportedPostIds.contains(post.getPostId()))
+                .filter(post -> !blockedUserIds.contains(post.getUser().getUserId()) &&
+                        !blockingUserIds.contains(post.getUser().getUserId()) &&
+                        !reportedPostIds.contains(post.getPostId()))
                 .map(post -> {
                     List<String> photoUrlList = postPort.findPhotoById(post.getPostId()).stream()
                             .map(Photo::getPhotoUrl)
@@ -264,50 +265,53 @@ public class PostService implements
             place = placePort.findPlaceById(placeId);
         }
 
-        Post post = new Post(
-                user,
-                place,
-                command.getDescription(),
-                command.getValue(),
-                command.getCons(),
-                null,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+        try {
+            Post post = new Post(
+                    user,
+                    place,
+                    command.getDescription(),
+                    command.getValue(),
+                    command.getCons(),
+                    null,
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
+            );
 
-        Long postId = postPort.savePost(post);
-        post = postPort.findPostById(postId);
+            Long postId = postPort.savePost(post);
+            post = postPort.findPostById(postId);
 
-        PostCategory postCategory = new PostCategory(post, category);
+            PostCategory postCategory = new PostCategory(post, category);
 
-        postPort.savePostCategory(postCategory);
+            postPort.savePostCategory(postCategory);
 
-        Post finalPost = post;
-        command.getMenuList().forEach(menuName -> {
-            Menu menu = new Menu(finalPost, menuName);
-            postPort.saveMenu(menu);
-        });
+            Post finalPost = post;
+            command.getMenuList().forEach(menuName -> {
+                Menu menu = new Menu(finalPost, menuName);
+                postPort.saveMenu(menu);
+            });
 
-        command.getPhotoUrlList().forEach(photoUrl -> {
-            Photo photo = new Photo(finalPost, photoUrl);
-            postPort.savePhoto(photo);
-        });
+            command.getPhotoUrlList().forEach(photoUrl -> {
+                Photo photo = new Photo(finalPost, photoUrl);
+                postPort.savePhoto(photo);
+            });
 
-        // 작성자 스푼 개수 조정
-//        Activity activity = spoonPort.findActivityByActivityId(2L);
-//        spoonPort.updateSpoonBalanceByActivity(user, activity);
+            // 작성자 지도 리스트에 게시물 추가
+            zzimPostPort.saveZzimPost(user, post);
 
-        // 스푼 히스토리 기록
-//        spoonPort.updateSpoonHistoryByActivity(user, activity);
+            // 작성자를 팔로우하는 사용자들의 피드에 게시물 추가
+            List<Follow> followList = userPort.findFollowersByUserId(user.getUserId());
+            List<Long> followerIds = followList.stream().map(follow -> follow.getFollower().getUserId()).toList();
 
-        // 작성자 지도 리스트에 게시물 추가
-        zzimPostPort.saveZzimPost(user, post);
+            PostCreatedEvent event = new PostCreatedEvent(this, followerIds, post.getPostId());
+            eventPublisher.publishEvent(new AfterCommitWrapper(event));
+            return event;
+        } catch (DataIntegrityViolationException e) {
+            Long existingPostId = postPort
+                    .findPostIdByUserAndPlace(user.getUserId(), place.getPlaceId())
+                    .orElseThrow(() -> e);
 
-        // 작성자를 팔로우하는 사용자들의 피드에 게시물 추가
-        List<Follow> followList = userPort.findFollowersByUserId(user.getUserId());
-        List<Long> followerIds = followList.stream().map(follow -> follow.getFollower().getUserId()).toList();
-
-        return new PostCreatedEvent(this, followerIds, post.getPostId());
+            return new PostCreatedEvent(this, List.of(), existingPostId);
+        }
     }
 
     // 모든 카테고리 조회

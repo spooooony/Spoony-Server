@@ -27,7 +27,7 @@ import java.util.List;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "ux_post_user_place",
-                        columnNames = {"user_id", "place_id", "description"}
+                        columnNames = {"user_id", "place_id"}
                 )
         }
 )
