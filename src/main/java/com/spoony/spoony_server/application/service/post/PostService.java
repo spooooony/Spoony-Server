@@ -20,6 +20,7 @@ import com.spoony.spoony_server.domain.spoon.Activity;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
+import com.spoony.spoony_server.global.event.AfterCommitWrapper;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import lombok.RequiredArgsConstructor;
