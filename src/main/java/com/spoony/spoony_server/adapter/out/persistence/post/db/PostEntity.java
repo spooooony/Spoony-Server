@@ -23,7 +23,14 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "post")
+@Table(name = "post",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "ux_post_user_place",
+                        columnNames = {"user_id", "place_id"}
+                )
+        }
+)
 @SQLRestriction("is_deleted = false")
 public class PostEntity {
     @Id

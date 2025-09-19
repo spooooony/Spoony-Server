@@ -8,6 +8,7 @@ import com.spoony.spoony_server.domain.post.PostCategory;
 import com.spoony.spoony_server.domain.user.AgeGroup;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PostPort {
     List<Post> findPostsByUserId(Long userId, int page, int size);
@@ -45,4 +46,5 @@ public interface PostPort {
     int countReportedPosts();
     boolean insertScoopIfAbsent(Long userId, Long postId);
     void deleteScoop(Long userId, Long postId);
+    Optional<Long> findPostIdByUserAndPlace(Long userId, Long placeId);
 }
