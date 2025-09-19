@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <!-- 절대경로로 고정 (호스트에 바인드 마운트 권장: /var/log/spoony:/app/logs) -->
+    <property name="LOG_PATH" value="./app/logs"/>
+    <!-- 콘솔: 색상 O (사람이 보기 편함) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%green([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight([%-5level]) %magenta([%thread]) %cyan(%logger{36})
+                - %msg%n%ex{full}
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 일반 텍스트 로그(파일 1개) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/server.log</file>
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger{36} - %msg%n%ex{full}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/archive/%d{yyyy-MM}/%d{yyyy-MM-dd}-server.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 에러 전용 JSON (알림/수집용) -->
+    <!-- Gradle 의존성 필요: net.logstash.logback:logstash-logback-encoder:7.4 -->
+    <appender name="ERROR_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <file>${LOG_PATH}/server.error.json.log</file>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <pattern>
+                    <pattern>{
+                        "level":"%level",
+                        "logger":"%logger{36}",
+                        "thread":"%thread",
+                        "message":"%message",
+                        "stack_trace":"%exception{full}"
+                        }
+                    </pattern>
+                </pattern>
+                <mdc/>
+            </providers>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/archive/%d{yyyy-MM}/%d{yyyy-MM-dd}-server.error.json.%i.gz</fileNamePattern>
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>31</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_JSON"/>
+    </root>
+</configuration>
