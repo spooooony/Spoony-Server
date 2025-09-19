@@ -108,6 +108,7 @@ jobs:
           sudo docker run -d -p 8080:8080 \
             --name spoony-prod-container \
             --network spoony-network \
+            -v /var/log/spoony:/app/logs \
             sumin317/spoony-prod
 
           echo "🛠 Nginx 설정 포트 고정"
