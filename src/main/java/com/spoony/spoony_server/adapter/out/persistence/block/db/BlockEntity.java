@@ -2,6 +2,8 @@ package com.spoony.spoony_server.adapter.out.persistence.block.db;
 
 
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.domain.user.BlockStatus;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

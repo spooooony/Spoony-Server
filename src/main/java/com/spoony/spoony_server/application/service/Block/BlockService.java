@@ -6,9 +6,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
+import com.spoony.spoony_server.domain.user.BlockStatus;
 import com.spoony.spoony_server.application.port.in.user.BlockUseCase;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
@@ -16,7 +15,6 @@ import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Block;
-import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.UserErrorMessage;
 

@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
+import com.spoony.spoony_server.domain.user.BlockStatus;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.domain.user.Block;

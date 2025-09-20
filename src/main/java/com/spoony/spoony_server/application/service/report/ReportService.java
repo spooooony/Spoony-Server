@@ -2,7 +2,6 @@ package com.spoony.spoony_server.application.service.report;
 
 import java.util.Optional;
 
-import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.report.ReportCreateCommand;
 import com.spoony.spoony_server.application.port.command.report.UserReportCreateCommand;
 import com.spoony.spoony_server.application.port.in.report.ReportCreateUseCase;

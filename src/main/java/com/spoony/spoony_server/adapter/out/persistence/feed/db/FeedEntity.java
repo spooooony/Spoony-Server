@@ -13,8 +13,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "feed",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "post_id"}))
+@Table(
+    name = "feed",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "post_id"})
+    },
+    indexes = {
+        @Index(name = "idx_feed_user_author", columnList = "user_id, author_id")
+    }
+)
 public class FeedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,8 +39,8 @@ public class FeedEntity {
     @JoinColumn(name = "post_id", nullable = false)
     private PostEntity post;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Builder
     public FeedEntity(UserEntity user, UserEntity author ,PostEntity post) {

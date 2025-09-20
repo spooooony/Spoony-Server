@@ -85,7 +85,7 @@ public class FeedPersistenceAdapter implements FeedPort {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(()-> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
 
         for(Post post : newPosts){
-            boolean exists = feedRepository.existsByUserIdAndPostId(userId, post.getPostId());
+            boolean exists = feedRepository.existsByUser_UserIdAndPost_PostId(userId, post.getPostId());
             if(!exists){
                 FeedEntity feedEntity = FeedEntity.builder()
                     .user(userEntity)

@@ -1,7 +1,7 @@
 package com.spoony.spoony_server.adapter.out.persistence.block.db;
 
 
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.domain.user.BlockStatus;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -70,18 +70,20 @@ public interface BlockRepository extends JpaRepository<BlockEntity, Long> {
         WHERE b.status IN :statuses
           AND b.expireAt IS NOT NULL
           AND b.expireAt <= :now
+          ORDER BY b.expireAt ASC, b.blockId ASC
     """)
     List<BlockEntity> findExpiredBlocks(@Param("statuses") List<BlockStatus> statuses,
         @Param("now") LocalDateTime now,
         Pageable pageable);
 
     // 스케줄러가 Feed 삭제 후 라이트로그 기록(JPQL 직접 업데이트)
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
         update BlockEntity b
-        set b.feedPurgedAt = :now
+        set b.feedPurgedAt = COALESCE(b.feedPurgedAt, :now)
         where b.blocker.userId = :u
           and b.blocked.userId = :t
+          and b.feedPurgedAt IS NULL
     """)
     int markFeedPurgedAt(@Param("u") Long u,   // 언팔 or 차단한 사람
         @Param("t") Long t,   // 당한 사람

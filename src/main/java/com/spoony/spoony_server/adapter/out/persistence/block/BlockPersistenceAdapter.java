@@ -2,14 +2,12 @@ package com.spoony.spoony_server.adapter.out.persistence.block;
 
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockEntity;
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockRepository;
-import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
-import com.spoony.spoony_server.adapter.out.persistence.user.db.UserEntity;
+import com.spoony.spoony_server.domain.user.BlockStatus;
 import com.spoony.spoony_server.adapter.out.persistence.user.db.UserRepository;
 import com.spoony.spoony_server.adapter.out.persistence.user.mapper.BlockMapper;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.domain.user.Block;
-import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.business.UserErrorMessage;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;

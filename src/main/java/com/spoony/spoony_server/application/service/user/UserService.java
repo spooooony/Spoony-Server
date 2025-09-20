@@ -2,7 +2,7 @@ package com.spoony.spoony_server.application.service.user;
 
 import com.spoony.spoony_server.adapter.dto.post.response.RegionDTO;
 import com.spoony.spoony_server.adapter.dto.user.response.*;
-import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
+import com.spoony.spoony_server.domain.user.BlockStatus;
 import com.spoony.spoony_server.application.port.command.user.*;
 import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.application.port.out.post.PostPort;

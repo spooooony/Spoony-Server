@@ -2,8 +2,6 @@ package com.spoony.spoony_server.domain.user;
 
 import java.time.LocalDateTime;
 
-import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,6 +57,7 @@ public class Block {
             case BLOCKED -> this.expireAt = now.plusDays(blockedDays);
             case FOLLOW -> { this.expireAt = null; this.feedPurgedAt = null; }
             case REPORT -> this.expireAt = null;
+            default-> throw new IllegalArgumentException("잘못된 상태: " + newStatus);
         }
     }
 
