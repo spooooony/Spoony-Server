@@ -2,6 +2,7 @@ package com.spoony.spoony_server.adapter.dto.user.response;
 
 import com.spoony.spoony_server.domain.user.Platform;
 import com.spoony.spoony_server.domain.user.ProfileImage;
+import com.spoony.spoony_server.global.support.ProfileCdn;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,7 @@ public record UserResponseDTO(long userId,
             int profileImageLevel
     ) {
         ProfileImage profileImage = ProfileImage.fromLevel(profileImageLevel);
-        String profileImageUrl = "https://www.spoony-prod.o-r.kr/profile-images/" + profileImage.getImage();
+        String profileImageUrl = ProfileCdn.url(profileImage.getImage());
 
         return new UserResponseDTO(
                 userId,
