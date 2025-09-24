@@ -41,8 +41,16 @@ jobs:
       - name: Build Project
         run: ./gradlew clean build -x test
 
+      - name: Logout (cleanup)
+        run: docker logout || true
+
       - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          logout: true
 
       - name: Build Docker Image
         run: docker build -t sumin317/spoony-prod:latest .
@@ -105,10 +113,12 @@ jobs:
           sudo docker rm -f spoony-prod-container || true
 
           echo "🔧 새로운 컨테이너 실행"
-          sudo docker run -d -p 8080:8080 \
+          sudo docker run -d \
+            -p 8080:8080 \
+            -p 9292:9292 \
             --name spoony-prod-container \
             --network spoony-network \
-            -v /var/log/spoony:/app/logs \
+            -v /var/log/spoony:/app/app/logs \
             sumin317/spoony-prod
 
           echo "🛠 Nginx 설정 포트 고정"
