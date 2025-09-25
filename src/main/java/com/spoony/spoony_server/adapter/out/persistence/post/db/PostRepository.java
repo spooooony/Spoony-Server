@@ -55,4 +55,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
 
     @Query(value = "SELECT COUNT(*) FROM post WHERE is_deleted = true", nativeQuery = true)
     long countDeletedPosts();
+
+    @Query("select p.postId from PostEntity p " + "where p.user.userId = :userId " + "and p.place.placeId = :placeId")
+    Optional<Long> findIdByUserAndPlace(@Param("userId") Long userId, @Param("placeId") Long placeId);
 }
