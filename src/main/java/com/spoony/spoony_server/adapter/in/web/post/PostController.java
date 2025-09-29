@@ -37,7 +37,6 @@ public class PostController {
     private final PostDeleteUseCase postDeleteUseCase;
     private final PostUpdateUseCase postUpdateUseCase;
     private final PostSearchUseCase postSearchUseCase;
-    private final ApplicationEventPublisher eventPublisher;
 
     @GetMapping("/{postId}")
     @Operation(summary = "게시물 조회 API", description = "특정 게시물의 상세 정보를 조회하는 API")
@@ -82,11 +81,7 @@ public class PostController {
                 photoUrlList
         );
 
-        PostCreatedEvent postCreatedEvent = postCreateUseCase.createPost(command);
-
-        // Event 발행
-        System.out.println("🔥 이벤트 발행 스레드: " + Thread.currentThread().getName());
-        eventPublisher.publishEvent(postCreatedEvent);
+        postCreateUseCase.createPost(command);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
     }

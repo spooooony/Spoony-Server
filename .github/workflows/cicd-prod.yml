@@ -106,6 +106,10 @@ jobs:
             sudo docker run -d --name redis --network spoony-network redis
           fi
 
+          echo "📂 로그 디렉터리 준비"
+          sudo mkdir -p /var/log/spoony/archive
+          sudo chmod 775 /var/log/spoony /var/log/spoony/archive
+
           echo "📥 최신 이미지 가져오기"
           sudo docker pull sumin317/spoony-prod:latest
 

@@ -31,6 +31,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Adapter
@@ -126,7 +127,7 @@ public class PostPersistenceAdapter implements
                 .cons(post.getCons())
                 .build();
 
-        postRepository.save(postEntity);
+        postRepository.saveAndFlush(postEntity);
 
         return postEntity.getPostId();
     }
@@ -339,4 +340,20 @@ public class PostPersistenceAdapter implements
     public int countPostsByUserId(Long userId) {
         return postRepository.countByUserId(userId);
     }
+
+    @Override
+    public boolean insertScoopIfAbsent(Long userId, Long postId) {
+        return scoopPostRepository.insertIfAbsent(userId, postId) == 1;
+    }
+
+    @Override
+    public void deleteScoop(Long userId, Long postId) {
+        scoopPostRepository.deleteOne(userId, postId);
+    }
+
+    @Override
+    public Optional<Long> findPostIdByUserAndPlace(Long userId, Long placeId) {
+        return postRepository.findIdByUserAndPlace(userId, placeId);
+    }
+
 }

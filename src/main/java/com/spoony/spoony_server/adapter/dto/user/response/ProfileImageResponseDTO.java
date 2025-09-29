@@ -1,6 +1,7 @@
 package com.spoony.spoony_server.adapter.dto.user.response;
 
 import com.spoony.spoony_server.domain.user.ProfileImage;
+import com.spoony.spoony_server.global.support.ProfileCdn;
 
 public record ProfileImageResponseDTO(
         int imageLevel,
@@ -10,7 +11,7 @@ public record ProfileImageResponseDTO(
         boolean isUnlocked
 ) {
     public static ProfileImageResponseDTO of(ProfileImage profileImage, boolean isUnlocked) {
-        String imageUrl = "https://www.spoony-prod.o-r.kr/profile-images/" + profileImage.getImage();
+        String imageUrl = ProfileCdn.url(profileImage.getImage());
         return new ProfileImageResponseDTO(
                 profileImage.getImageLevel(),
                 profileImage.getSpoonName(),
