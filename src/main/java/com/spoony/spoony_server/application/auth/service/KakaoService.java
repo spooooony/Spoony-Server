@@ -27,7 +27,6 @@ public class KakaoService {
     }
 
     public void unlink(final String platformId) {
-        System.out.println(AuthConstant.GRANT_TYPE + adminKey + " " + AuthConstant.TARGET_ID_TYPE + " " + Long.valueOf(platformId));
         kakaoFeignClient.unlinkUser(
                 AuthConstant.GRANT_TYPE + adminKey,
                 AuthConstant.TARGET_ID_TYPE,

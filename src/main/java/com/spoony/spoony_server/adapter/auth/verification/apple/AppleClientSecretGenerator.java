@@ -54,7 +54,7 @@ public class AppleClientSecretGenerator {
                 .setExpiration(expirationDate) // 만료 시간
                 .setAudience(AUDIENCE) // aud
                 .setSubject(clientId) // sub
-                .signWith(SignatureAlgorithm.ES256, getPrivateKey())
+                .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
                 .compact();
     }
 

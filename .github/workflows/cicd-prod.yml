@@ -41,16 +41,8 @@ jobs:
       - name: Build Project
         run: ./gradlew clean build -x test
 
-      - name: Logout (cleanup)
-        run: docker logout || true
-
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          logout: true
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
         run: docker build -t sumin317/spoony-prod:latest .

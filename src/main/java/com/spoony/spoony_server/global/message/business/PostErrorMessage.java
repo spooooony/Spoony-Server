@@ -12,7 +12,6 @@ public enum PostErrorMessage implements DefaultErrorMessage {
     ALREADY_ZZIM(HttpStatus.BAD_REQUEST, "이미 찜한 게시글입니다."),
     ALREADY_CREATED(HttpStatus.BAD_REQUEST, "이미 작성한 장소의 게시글입니다.");
 
-
     private HttpStatus httpStatus;
     private String message;
 
