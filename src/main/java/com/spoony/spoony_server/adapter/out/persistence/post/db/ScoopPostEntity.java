@@ -10,12 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "scoop_post",
-       uniqueConstraints = @UniqueConstraint(
-                name = "uk_scoop_user_post",
-                columnNames = {"user_id", "post_id"}
-       )
-)
+@Table(name = "scoop_post")
 public class ScoopPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

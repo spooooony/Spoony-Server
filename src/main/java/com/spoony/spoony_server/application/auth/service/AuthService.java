@@ -1,13 +1,11 @@
 package com.spoony.spoony_server.application.auth.service;
 
 import com.spoony.spoony_server.adapter.auth.dto.PlatformUserDTO;
-import com.spoony.spoony_server.adapter.auth.dto.request.PlatformRequestDTO;
 import com.spoony.spoony_server.adapter.auth.dto.request.UserSignupDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.JwtTokenDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.LoginResponseDTO;
 import com.spoony.spoony_server.adapter.auth.dto.response.UserTokenDTO;
 import com.spoony.spoony_server.application.auth.port.in.*;
-import com.spoony.spoony_server.application.auth.port.out.AppleRefreshTokenPort;
 import com.spoony.spoony_server.application.auth.port.out.TokenPort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.user.Platform;
@@ -32,7 +30,6 @@ public class AuthService implements
 
     private final UserPort userPort;
     private final TokenPort tokenPort;
-    private final AppleRefreshTokenPort appleRefreshTokenPort;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenValidator jwtTokenValidator;
     private final AppleService appleService;
@@ -42,34 +39,19 @@ public class AuthService implements
     public UserTokenDTO signup(String platformToken, UserSignupDTO userSignupDTO) {
         PlatformUserDTO platformUserDTO = getPlatformInfo(platformToken, userSignupDTO);
         User user = userPort.create(platformUserDTO, userSignupDTO);
-
-        if (userSignupDTO.platform() == Platform.APPLE) {
-            if (userSignupDTO.authCode() == null || userSignupDTO.authCode().isBlank()) {
-                throw new AuthException(AuthErrorMessage.EMPTY_AUTH_CODE);
-            }
-            appleService.exchangeAndStoreRefreshToken(userSignupDTO.authCode(), user.getUserId());
-        }
-
         JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
         tokenPort.saveToken(user.getUserId(), token);
         return UserTokenDTO.of(user, token);
     }
 
     @Override
-    public LoginResponseDTO login(PlatformRequestDTO platformRequestDTO, String platformToken) {
-        PlatformUserDTO platformUserDTO = getPlatformInfo(platformRequestDTO.platform(), platformToken);
-        User user = userPort.load(platformRequestDTO.platform(), platformUserDTO);
+    public LoginResponseDTO login(Platform platform, String platformToken) {
+        PlatformUserDTO platformUserDTO = getPlatformInfo(platform, platformToken);
+        User user = userPort.load(platform, platformUserDTO);
 
         if (user == null) {
+            System.out.println("User is null");
             return LoginResponseDTO.of(false, null, null);
-        }
-
-        if (platformRequestDTO.platform() == Platform.APPLE
-                && appleRefreshTokenPort.findRefreshTokenByUserId(user.getUserId()).isEmpty()) {
-            if (platformRequestDTO.authCode() == null || platformRequestDTO.authCode().isBlank()) {
-                throw new AuthException(AuthErrorMessage.EMPTY_AUTH_CODE);
-            }
-            appleService.exchangeAndStoreRefreshToken(platformRequestDTO.authCode(), user.getUserId());
         }
 
         JwtTokenDTO token = jwtTokenProvider.generateTokenPair(user.getUserId());
@@ -84,12 +66,13 @@ public class AuthService implements
     }
 
     @Override
-    public void withdraw(Long userId) {
+    public void withdraw(Long userId, String authCode) {
         User user = userPort.findUserById(userId);
         if(user.getPlatform() == Platform.KAKAO) {
             kakaoService.unlink(user.getPlatformId());
         } else if(user.getPlatform() == Platform.APPLE) {
-            appleService.revokeByUserId(userId);
+            // Apple revoke 스킵 (자체 토큰 발급 이슈)
+            // appleService.revoke(authCode);
         } else {
             throw new AuthException(AuthErrorMessage.PLATFORM_NOT_FOUND);
         }

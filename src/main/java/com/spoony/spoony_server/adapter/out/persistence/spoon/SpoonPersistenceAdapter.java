@@ -51,11 +51,6 @@ public class SpoonPersistenceAdapter implements
     }
 
     @Override
-    public boolean decrementIfEnough(Long userId, int amount) {
-        return spoonBalanceRepository.decrementIfEnough(userId, amount, LocalDateTime.now()) == 1;
-    }
-
-    @Override
     public void updateSpoonBalance(User user, int amount) {
         SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser_UserId(user.getUserId())
                 .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
@@ -80,6 +75,15 @@ public class SpoonPersistenceAdapter implements
                 .build();
 
         spoonHistoryRepository.save(spoonHistoryEntity);
+    }
+
+    @Override
+    public void updateSpoonBalanceByActivity(User user, Activity activity) {
+        SpoonBalanceEntity spoonBalanceEntity = spoonBalanceRepository.findByUser_UserId(user.getUserId())
+                .orElseThrow(() -> new BusinessException(SpoonErrorMessage.USER_NOT_FOUND));
+        spoonBalanceEntity.setAmount(spoonBalanceEntity.getAmount() + activity.getChangeAmount());
+        spoonBalanceEntity.setUpdatedAt(LocalDateTime.now());
+        spoonBalanceRepository.save(spoonBalanceEntity);
     }
 
     @Override

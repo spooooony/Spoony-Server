@@ -16,6 +16,7 @@ import com.spoony.spoony_server.application.port.out.post.PostCategoryPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.user.AgeGroup;
+import com.spoony.spoony_server.domain.user.User;
 import com.spoony.spoony_server.global.annotation.Adapter;
 import com.spoony.spoony_server.global.exception.BusinessException;
 import com.spoony.spoony_server.global.message.business.CategoryErrorMessage;
@@ -188,6 +189,22 @@ public class PostPersistenceAdapter implements
     }
 
     @Override
+    public void saveScoopPost(User user, Post post) {
+        UserEntity userEntity = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new BusinessException(UserErrorMessage.USER_NOT_FOUND));
+
+        PostEntity postEntity = postRepository.findById(post.getPostId())
+                .orElseThrow(() -> new BusinessException(PostErrorMessage.POST_NOT_FOUND));
+
+        ScoopPostEntity scoopPostEntity = ScoopPostEntity.builder()
+                .user(userEntity)
+                .post(postEntity)
+                .build();
+
+        scoopPostRepository.save(scoopPostEntity);
+    }
+
+    @Override
     public void deleteById(Long postId) {
         postRepository.deleteById(postId);
     }
@@ -338,4 +355,5 @@ public class PostPersistenceAdapter implements
     public Optional<Long> findPostIdByUserAndPlace(Long userId, Long placeId) {
         return postRepository.findIdByUserAndPlace(userId, placeId);
     }
+
 }

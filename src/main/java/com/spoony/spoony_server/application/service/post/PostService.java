@@ -17,6 +17,7 @@ import com.spoony.spoony_server.application.port.out.zzim.ZzimPostPort;
 import com.spoony.spoony_server.domain.place.Place;
 import com.spoony.spoony_server.domain.post.*;
 import com.spoony.spoony_server.domain.spoon.Activity;
+import com.spoony.spoony_server.domain.spoon.SpoonBalance;
 import com.spoony.spoony_server.domain.user.Follow;
 import com.spoony.spoony_server.domain.user.Region;
 import com.spoony.spoony_server.domain.user.User;
@@ -26,6 +27,7 @@ import com.spoony.spoony_server.global.message.business.PostErrorMessage;
 import com.spoony.spoony_server.global.message.business.SpoonErrorMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -346,26 +348,25 @@ public class PostService implements
 
     @Transactional
     public void scoopPost(PostScoopPostCommand command) {
-        Long userId = command.getUserId();
-        Long postId = command.getPostId();
 
-        User user = userPort.findUserById(userId);
+        User user = userPort.findUserById(command.getUserId());
+        Post post = postPort.findPostById(command.getPostId());
 
-        // 신규 삽입 시에만 후속 단계 진행
-        boolean inserted = postPort.insertScoopIfAbsent(userId, postId);
-        if (!inserted) {
-            throw new BusinessException(SpoonErrorMessage.ALREADY_SCOOPED);
-        }
+        SpoonBalance spoonBalance = spoonPort.findBalanceByUserId(command.getUserId());
 
-        // 스푼 조건부 차감
-        boolean decrement = spoonPort.decrementIfEnough(userId, 1);
-        if (!decrement) {
-            postPort.deleteScoop(userId, postId);
+        //스푼 잔액이 1개 미만이면 에러 발생
+        if (spoonBalance.getAmount() < 1) {
             throw new BusinessException(SpoonErrorMessage.NOT_ENOUGH_SPOONS);
         }
 
-        // 스푼 히스토리 저장
+        //떠먹은 포스트에 반영
+        postPort.saveScoopPost(user, post);
+
+        // 작성자 스푼 개수 조정
         Activity activity = spoonPort.findActivityByActivityId(3L);
+        spoonPort.updateSpoonBalanceByActivity(user, activity);
+
+        // 스푼 히스토리 기록
         spoonPort.updateSpoonHistoryByActivity(user, activity);
     }
 
