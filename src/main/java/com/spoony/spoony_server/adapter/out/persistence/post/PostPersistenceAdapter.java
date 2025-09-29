@@ -30,6 +30,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Adapter
@@ -125,7 +126,7 @@ public class PostPersistenceAdapter implements
                 .cons(post.getCons())
                 .build();
 
-        postRepository.save(postEntity);
+        postRepository.saveAndFlush(postEntity);
 
         return postEntity.getPostId();
     }
@@ -331,5 +332,10 @@ public class PostPersistenceAdapter implements
     @Override
     public void deleteScoop(Long userId, Long postId) {
         scoopPostRepository.deleteOne(userId, postId);
+    }
+
+    @Override
+    public Optional<Long> findPostIdByUserAndPlace(Long userId, Long placeId) {
+        return postRepository.findIdByUserAndPlace(userId, placeId);
     }
 }
