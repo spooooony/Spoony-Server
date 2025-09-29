@@ -17,16 +17,15 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> , JpaSpe
     Long countByUser_UserId(@Param("userId") Long userId,
                             @Param("reportedPostIds") List<Long> reportedPostIds);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from PostEntity p where p.postId = :postId")
-    Optional<PostEntity> findByIdForUpdate(@Param("postId") Long postId);
+    @Query(value = "SELECT 1 FROM post WHERE post_id = :postId FOR UPDATE", nativeQuery = true)
+    void lockPostForUpdate(@Param("postId") Long postId);
 
-    @Modifying
-    @Query("update PostEntity p set p.zzimCount = coalesce(p.zzimCount, 0) + 1 where p.postId = :postId")
+    @Modifying(clearAutomatically = true)
+    @Query("update PostEntity p set p.zzimCount = coalesce(p.zzimCount,0) + 1 where p.postId = :postId")
     void incrementZzimCount(@Param("postId") Long postId);
 
-    @Modifying
-    @Query("update PostEntity p set p.zzimCount = case when coalesce(p.zzimCount, 0) > 0 then p.zzimCount - 1 else 0 end where p.postId = :postId")
+    @Modifying(clearAutomatically = true)
+    @Query("update PostEntity p set p.zzimCount = case when coalesce(p.zzimCount,0)>0 then p.zzimCount-1 else 0 end where p.postId = :postId")
     void decrementZzimCount(@Param("postId") Long postId);
 
     //Long countByUser_UserId(Long userId);

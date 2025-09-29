@@ -24,8 +24,8 @@ public class ZzimCountTest {
     @Autowired private PostRepository postRepository;
     @Autowired private ZzimPostRepository zzimPostRepository;
 
-    private final Long postId = 28L;
-    private final List<Long> userIds = Arrays.asList(33L, 34L, 35L);
+    private final Long postId = 1L;
+    private final List<Long> userIds = Arrays.asList(1L, 2L, 16L);
 
     @Test
     void 서로_다른_세명이_동시에_찜하면_정확히_3증가() throws Exception {
