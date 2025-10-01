@@ -29,6 +29,8 @@ public interface ZzimPostRepository extends JpaRepository<ZzimPostEntity, Long>,
 
     //유저 신고에서 사용
     void deleteByUserAndAuthorAndPost(UserEntity user, UserEntity author, PostEntity post);
+
+    long countByPost_PostId(long pid);
 }
 
 

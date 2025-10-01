@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -231,4 +232,58 @@ public class ZzimCountTest {
         assertThat(countAfter).isZero();
     }
 
+    @Test
+    void 두유저가_동시에_광클토글_최종정합성() throws Exception {
+        final long pid = 4L;
+        final long uidA = 1L;
+        final long uidB = 2L;
+
+        int opsPerUser = 50; // 각 유저가 누르는 횟수
+        ExecutorService es = Executors.newFixedThreadPool(2);
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done  = new CountDownLatch(2);
+
+        class Spammer implements Runnable {
+            private final long uid;
+            private final Random r = new Random();
+
+            Spammer(long uid) { this.uid = uid; }
+
+            @Override public void run() {
+                ready.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException ignored) {}
+
+                for (int i = 0; i < opsPerUser; i++) {
+                    boolean add = r.nextBoolean(); // 랜덤 토글
+                    try {
+                        if (add) zzimService.addZzimPost(new ZzimAddCommand(uid, pid));
+                        else     zzimService.deleteZzim(new ZzimDeleteCommand(uid, pid));
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        Thread.sleep(r.nextInt(3));
+                    } catch (InterruptedException ignored) {}
+                }
+                done.countDown();
+            }
+        }
+
+        es.submit(new Spammer(uidA));
+        es.submit(new Spammer(uidB));
+
+        ready.await();
+        start.countDown();
+        done.await();
+        es.shutdown();
+
+        // 최종 검증
+        long rowCount = zzimPostRepository.countByPost_PostId(pid);
+        long denorm   = postRepository.findById(pid).orElseThrow().getZzimCount();
+
+        assertThat(denorm).isEqualTo(rowCount);
+        assertThat(denorm).isGreaterThanOrEqualTo(0);
+    }
 }
