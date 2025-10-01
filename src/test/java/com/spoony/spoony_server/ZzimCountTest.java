@@ -286,4 +286,52 @@ public class ZzimCountTest {
         assertThat(denorm).isEqualTo(rowCount);
         assertThat(denorm).isGreaterThanOrEqualTo(0);
     }
+
+    @Test
+    void 한유저_멀티스레드_랜덤토글_최종_행수_카운트_일치() throws Exception {
+        final long pid = 4L;
+        final long uid = 1L;
+
+        final int threads = 10;
+        final int opsPerThread = 10; // 총 100회
+        ExecutorService es = Executors.newFixedThreadPool(threads);
+        CountDownLatch ready = new CountDownLatch(threads);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done  = new CountDownLatch(threads);
+
+        class Burst implements Runnable {
+            private final Random r = new Random();
+            @Override public void run() {
+                ready.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException ignored) {}
+                for (int i = 0; i < opsPerThread; i++) {
+                    boolean add = r.nextBoolean();
+                    try {
+                        if (add) zzimService.addZzimPost(new ZzimAddCommand(uid, pid));
+                        else     zzimService.deleteZzim(new ZzimDeleteCommand(uid, pid));
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        Thread.sleep(r.nextInt(3));
+                    } catch (InterruptedException ignored) {}
+                }
+                done.countDown();
+            }
+        }
+
+        for (int i = 0; i < threads; i++) es.submit(new Burst());
+        ready.await();
+        start.countDown();
+        done.await();
+        es.shutdown();
+
+        // 실데이터 행수 vs 찜카운트 수
+        long rowCount = zzimPostRepository.countByPost_PostId(pid);
+        long denorm   = postRepository.findById(pid).orElseThrow().getZzimCount();
+
+        assertThat(denorm).isEqualTo(rowCount);
+    }
+
 }
