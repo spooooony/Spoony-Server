@@ -9,7 +9,6 @@ import java.util.TimeZone;
 
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class SpoonyServerApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(SpoonyServerApplication.class, args);
 	}
