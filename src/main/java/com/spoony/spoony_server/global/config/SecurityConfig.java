@@ -40,7 +40,8 @@ public class SecurityConfig {
             "/actuator/**",
             "/profile-images/**",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/api/v1/image/presigned"
     );
 
     @Bean

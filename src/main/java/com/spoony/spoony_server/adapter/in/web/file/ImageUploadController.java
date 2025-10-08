@@ -28,9 +28,9 @@ public class ImageUploadController {
 
 	@PostMapping("/presigned")
 	@Operation(summary = "Presigned URL 발급", description = "클라이언트가 직접 S3로 이미지를 업로드할 수 있도록 Presigned URL을 발급합니다.")
-	public ResponseEntity<ResponseDTO<PresignedUrlResponseDTO>> generatePresignedUrl(@UserId Long userId,@RequestBody
+	public ResponseEntity<ResponseDTO<PresignedUrlResponseDTO>> generatePresignedUrl(@RequestBody
 		PresignedUrlRequestDTO request) {
-		PresignedUrlCreateCommand command = new PresignedUrlCreateCommand(userId, request.fileName(),
+		PresignedUrlCreateCommand command = new PresignedUrlCreateCommand(request.fileName(),
 			request.contentType());
 
 		PresignedUrlResponseDTO response = presignedUrlCreateUseCase.createPresignedUrl(command);

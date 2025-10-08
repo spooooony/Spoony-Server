@@ -2,6 +2,8 @@ package com.spoony.spoony_server.application.service.file;
 
 import java.net.URL;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
@@ -22,9 +24,25 @@ public class PresignedUrlService implements PresignedUrlCreateUseCase {
 	private final S3PresignedUrlPort s3PresignedUrlPort;
 	@Override
 	public PresignedUrlResponseDTO createPresignedUrl(PresignedUrlCreateCommand command) {
-		String key = String.format("%d/%s-%s", command.getUserId(), UUID.randomUUID(), command.getFileName());
+
+		LocalDate now = LocalDate.now();
+		String yyyy = now.format(DateTimeFormatter.ofPattern("yyyy"));
+		String mm = now.format(DateTimeFormatter.ofPattern("MM"));
+
+
+		String fileName = command.getFileName();
+		String ext = "";
+		int dotIndex = fileName.lastIndexOf(".");
+		if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+			ext = fileName.substring(dotIndex + 1);
+		}
+
+		String key = String.format("posts/%s/%s/%s.%s",
+			 yyyy, mm, UUID.randomUUID(), ext);
+
 		URL url = s3PresignedUrlPort.generatePresignedPutUrl(key, command.getContentType());
 		Instant expiresAt = Instant.now().plus(5, ChronoUnit.MINUTES);
+
 		return new PresignedUrlResponseDTO(url.toString(), "PUT", expiresAt);
 
 	}
