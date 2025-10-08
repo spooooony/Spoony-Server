@@ -77,6 +77,8 @@ public class SecurityConfig {
 
         config.addAllowedOriginPattern("http://localhost:3000");
         config.addAllowedOriginPattern("https://spoony-admin-web.vercel.app");
+        config.addAllowedOriginPattern("http://localhost:8080");
+        config.addAllowedOriginPattern("https://www.spoony-dev.n-e.kr");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);
