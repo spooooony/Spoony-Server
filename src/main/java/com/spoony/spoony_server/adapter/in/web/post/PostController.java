@@ -51,19 +51,8 @@ public class PostController {
     @Operation(summary = "게시물 등록 API", description = "새로운 게시물을 등록하는 API")
     public ResponseEntity<ResponseDTO<Void>> createPost(
             @UserId Long userId,
-            @RequestPart("data")
-            @Parameter(description = "게시물 생성 요청 데이터 (JSON 형식)")
-            PostCreateRequestDTO postCreateRequestDTO,
-            @RequestPart("photos")
-            @Parameter(description = "게시물에 첨부할 사진 리스트 (이미지 파일)")
-            List<MultipartFile> photos
-    ) throws IOException {
-        List<String> photoUrlList = List.of();
-
-        if (photos != null && photos.stream().anyMatch(photo -> !photo.isEmpty())) {
-            PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
-            photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
-        }
+            @RequestBody PostCreateRequestDTO postCreateRequestDTO
+    ) {
 
         PostCreateCommand command = new PostCreateCommand(
                 userId,
@@ -77,7 +66,7 @@ public class PostController {
                 postCreateRequestDTO.longitude(),
                 postCreateRequestDTO.categoryId(),
                 postCreateRequestDTO.menuList(),
-                photoUrlList
+                postCreateRequestDTO.photoUrlList()
         );
 
         postCreateUseCase.createPost(command);

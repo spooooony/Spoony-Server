@@ -13,5 +13,6 @@ public record PostCreateRequestDTO(@NotNull(message = "게시물 내용은 필�
                                    @NotNull(message = "위도는 필수 값입니다.") Double latitude,
                                    @NotNull(message = "경도는 필수 값입니다.") Double longitude,
                                    @NotNull(message = "카테고리는 필수 값입니다.") long categoryId,
-                                   @NotNull(message = "메뉴는 필수 값입니다.") List<String> menuList) {
+                                   @NotNull(message = "메뉴는 필수 값입니다.") List<String> menuList,
+								   @NotNull(message = "이미지는 필수 값입니다.") List<String> photoUrlList) {
 }
