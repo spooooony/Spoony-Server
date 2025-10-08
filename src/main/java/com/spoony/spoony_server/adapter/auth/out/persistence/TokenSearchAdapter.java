@@ -32,6 +32,7 @@ public class TokenSearchAdapter implements TokenPort {
 
     @Override
     public void checkRefreshToken(String refreshToken, Long userId, boolean isAccessToken) {
+
         Optional<TokenEntity> tokenEntityOpt = tokenRepository.findByRefreshToken(refreshToken);
 
         // Refresh Token 만료 & 탈취 시나리오 동시 처리
