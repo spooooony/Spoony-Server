@@ -15,6 +15,7 @@ import com.spoony.spoony_server.global.dto.ResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Image Upload", description = "이미지 업로드용 Presigned URL 발급 API")
@@ -27,7 +28,8 @@ public class ImageUploadController {
 	@PostMapping("/presigned")
 	@Operation(summary = "Presigned URL 발급", description = "클라이언트가 직접 S3로 이미지를 업로드할 수 있도록 Presigned URL을 발급합니다.")
 	public ResponseEntity<ResponseDTO<PresignedUrlResponseDTO>> generatePresignedUrl(@RequestBody
-		PresignedUrlRequestDTO request) {
+	@Valid
+	PresignedUrlRequestDTO request) {
 		PresignedUrlCreateCommand command = new PresignedUrlCreateCommand(request.fileName(),
 			request.contentType());
 

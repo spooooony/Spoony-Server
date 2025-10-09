@@ -14,8 +14,7 @@ import com.spoony.spoony_server.adapter.dto.file.response.PresignedUrlResponseDT
 import com.spoony.spoony_server.application.port.command.file.PresignedUrlCreateCommand;
 import com.spoony.spoony_server.application.port.in.file.PresignedUrlCreateUseCase;
 import com.spoony.spoony_server.application.port.out.file.S3PresignedUrlPort;
-import com.spoony.spoony_server.global.exception.BusinessException;
-import com.spoony.spoony_server.global.message.business.S3ErrorMessage;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +35,7 @@ public class PresignedUrlService implements PresignedUrlCreateUseCase {
 		String originalFileName = command.getFileName();
 		String fileName = (originalFileName == null || originalFileName.isBlank()) ? "unknown" : originalFileName;
 
-		String key = String.format("posts/%s/%s/%s", yyyy, mm, UUID.randomUUID());
+		String key = String.format("posts/%s/%s/%s-%s", yyyy, mm, UUID.randomUUID(), fileName);
 
 
 		URL url = s3PresignedUrlPort.generatePresignedPutUrl(key, command.getContentType());
