@@ -40,21 +40,17 @@ public class SecurityConfig {
             "/actuator/**",
             "/profile-images/**",
             "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/api/v1/image/presigned"
+            "/v3/api-docs/**"
     );
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                //.cors(cors -> cors.configure(http))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configure(http))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .requestCache(RequestCacheConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers.disable());
-
+                .httpBasic(AbstractHttpConfigurer::disable);
         http
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -82,8 +78,6 @@ public class SecurityConfig {
         config.addAllowedOriginPattern("*");
         config.addAllowedOriginPattern("http://localhost:3000");
         config.addAllowedOriginPattern("https://spoony-admin-web.vercel.app");
-        config.addAllowedOriginPattern("http://localhost:8080");
-        config.addAllowedOriginPattern("https://www.spoony-dev.n-e.kr");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);

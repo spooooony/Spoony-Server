@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.spoony.spoony_server.adapter.dto.file.request.PresignedUrlRequestDTO;
 import com.spoony.spoony_server.adapter.dto.file.response.PresignedUrlResponseDTO;
-import com.spoony.spoony_server.adapter.dto.post.response.PostResponseDTO;
 import com.spoony.spoony_server.application.port.command.file.PresignedUrlCreateCommand;
 import com.spoony.spoony_server.application.port.in.file.PresignedUrlCreateUseCase;
-import com.spoony.spoony_server.global.auth.annotation.UserId;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 
 import feign.Response;
