@@ -24,6 +24,9 @@ public class S3PresignedUrlAdapter implements S3PresignedUrlPort {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucketName;
 
+	@Value("${cloud.aws.s3.presigned-url.expiration-minutes:5}")
+	private int expirationMinutes;
+
 	@Override
 	public URL generatePresignedPutUrl(String key, String contentType) {
 		Date expiration = Date.from(Instant.now().plus(5, ChronoUnit.MINUTES));

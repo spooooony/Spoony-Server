@@ -75,7 +75,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*");
         config.addAllowedOriginPattern("http://localhost:3000");
         config.addAllowedOriginPattern("https://spoony-admin-web.vercel.app");
         config.addAllowedMethod("*");
