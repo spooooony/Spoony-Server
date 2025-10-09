@@ -9,7 +9,8 @@ public enum UserErrorMessage implements DefaultErrorMessage {
     ALEADY_FOLLOW(HttpStatus.FORBIDDEN,"이미 팔로우 관계가 존재합니다."),
     USER_BLOCKED(HttpStatus.FORBIDDEN,"차단된 유저입니다."),
     BLOCK_RELATION_NOT_FOUND(HttpStatus.FORBIDDEN,"차단 관계가 아닙니다"),
-    ALEADY_UNFOLLOWED(HttpStatus.FORBIDDEN,"이미 언팔로우한 사용자입니다.");
+    ALEADY_UNFOLLOWED(HttpStatus.FORBIDDEN,"이미 언팔로우한 사용자입니다."),
+    PROFILE_IMAGE_NOT_UNLOCKED(HttpStatus.FORBIDDEN, "잠금 해제되지 않은 프로필 이미지입니다.");
     private HttpStatus httpStatus;
     private String message;
 
