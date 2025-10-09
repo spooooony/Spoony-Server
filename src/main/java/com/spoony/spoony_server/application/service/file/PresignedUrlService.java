@@ -14,6 +14,8 @@ import com.spoony.spoony_server.adapter.dto.file.response.PresignedUrlResponseDT
 import com.spoony.spoony_server.application.port.command.file.PresignedUrlCreateCommand;
 import com.spoony.spoony_server.application.port.in.file.PresignedUrlCreateUseCase;
 import com.spoony.spoony_server.application.port.out.file.S3PresignedUrlPort;
+import com.spoony.spoony_server.global.exception.BusinessException;
+import com.spoony.spoony_server.global.message.business.S3ErrorMessage;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class PresignedUrlService implements PresignedUrlCreateUseCase {
 
 	private final S3PresignedUrlPort s3PresignedUrlPort;
+
 	@Override
 	public PresignedUrlResponseDTO createPresignedUrl(PresignedUrlCreateCommand command) {
 
@@ -30,15 +33,11 @@ public class PresignedUrlService implements PresignedUrlCreateUseCase {
 		String mm = now.format(DateTimeFormatter.ofPattern("MM"));
 
 
-		String fileName = command.getFileName();
-		String ext = "";
-		int dotIndex = fileName.lastIndexOf(".");
-		if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
-			ext = fileName.substring(dotIndex + 1);
-		}
+		String originalFileName = command.getFileName();
+		String fileName = (originalFileName == null || originalFileName.isBlank()) ? "unknown" : originalFileName;
 
-		String key = String.format("posts/%s/%s/%s.%s",
-			 yyyy, mm, UUID.randomUUID(), ext);
+		String key = String.format("posts/%s/%s/%s", yyyy, mm, UUID.randomUUID());
+
 
 		URL url = s3PresignedUrlPort.generatePresignedPutUrl(key, command.getContentType());
 		Instant expiresAt = Instant.now().plus(5, ChronoUnit.MINUTES);

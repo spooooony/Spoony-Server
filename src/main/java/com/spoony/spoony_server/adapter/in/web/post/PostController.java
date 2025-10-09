@@ -108,24 +108,19 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
-    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+
+    @PatchMapping
     @Operation(summary = "게시물 수정 API", description = "게시물을 수정하는 API")
     public ResponseEntity<ResponseDTO<Void>> updatePost(
             @UserId Long userId,
-            @RequestPart("data")
+            @RequestBody
             @Parameter(description = "게시물 수정 요청 데이터 (JSON 형식)")
-            PostUpdateRequestDTO postUpdateRequestDTO,
-            @RequestPart(value = "photos", required = false)
-            @Parameter(description = "게시물 수정 사진 리스트 (이미지 파일)")
-            List<MultipartFile> photos
-    ) throws IOException {
-        List<String> photoUrlList = List.of();
-
-        if (photos != null && photos.stream().anyMatch(photo -> !photo.isEmpty())) {
-            PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
-            photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
-        }
-
+            PostUpdateRequestDTO postUpdateRequestDTO)
+    {
+        List<String> photoUrlList = postUpdateRequestDTO.photoUrlList() != null
+            ? postUpdateRequestDTO.photoUrlList()
+            : List.of();
         PostUpdateCommand command = new PostUpdateCommand(
                 postUpdateRequestDTO.postId(),
                 postUpdateRequestDTO.description(),
@@ -136,7 +131,6 @@ public class PostController {
                 photoUrlList,
                 postUpdateRequestDTO.deleteImageUrlList()
         );
-
         postUpdateUseCase.updatePost(command);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
