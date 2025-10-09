@@ -5,7 +5,6 @@ import com.spoony.spoony_server.adapter.dto.post.request.PostUpdateRequestDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.PostResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.PostSearchResultListDTO;
-import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
@@ -16,12 +15,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -47,7 +42,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     @Operation(summary = "게시물 등록 API", description = "새로운 게시물을 등록하는 API")
     public ResponseEntity<ResponseDTO<Void>> createPost(
             @UserId Long userId,

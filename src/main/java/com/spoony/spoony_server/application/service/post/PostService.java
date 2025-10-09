@@ -6,6 +6,8 @@ import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
+import com.spoony.spoony_server.application.port.out.file.S3DeletePort;
+import com.spoony.spoony_server.application.port.out.file.S3PresignedUrlPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
@@ -50,7 +52,6 @@ public class PostService implements
         PostUpdateUseCase,
         PostSearchUseCase {
     private final PostPort postPort;
-    private final PostCreatePort postCreatePort;
     private final PostCategoryPort postCategoryPort;
     private final CategoryPort categoryPort;
     private final UserPort userPort;
@@ -63,7 +64,7 @@ public class PostService implements
     private final ReportPort reportPort;
     private final RegionPort regionPort;
     private final ApplicationEventPublisher eventPublisher;
-
+    private final S3DeletePort s3DeletePort;
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
 
@@ -234,10 +235,6 @@ public class PostService implements
         return PostSearchResultListDTO.of(postSearchResultList);
     }
 
-    public List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException {
-        List<String> photoUrlList = postCreatePort.savePostImages(photoSaveCommand.getPhotos());
-        return photoUrlList;
-    }
 
     @Transactional
     public PostCreatedEvent createPost(PostCreateCommand command) {
@@ -373,7 +370,7 @@ public class PostService implements
     public void deletePost(PostDeleteCommand command) {
         //S3 삭제 로직
         List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
-        postDeletePort.deleteImagesFromS3(imageUrls);
+        s3DeletePort.deleteImagesFromS3(imageUrls);
 
         postPort.deleteById(command.getPostId());
     }
@@ -382,7 +379,7 @@ public class PostService implements
     public void updatePost(PostUpdateCommand command) {
         //S3 삭제 로직
         List<String> deletePhotoUrlList = command.getDeletePhotoUrlList();
-        postDeletePort.deleteImagesFromS3(deletePhotoUrlList);
+        s3DeletePort.deleteImagesFromS3(deletePhotoUrlList);
 
         postPort.updatePost(command.getPostId(), command.getDescription(), command.getValue(), command.getCons());
         Post post = postPort.findPostById(command.getPostId());

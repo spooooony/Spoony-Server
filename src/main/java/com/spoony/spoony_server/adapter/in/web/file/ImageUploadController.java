@@ -12,7 +12,7 @@ import com.spoony.spoony_server.application.port.command.file.PresignedUrlCreate
 import com.spoony.spoony_server.application.port.in.file.PresignedUrlCreateUseCase;
 import com.spoony.spoony_server.global.dto.ResponseDTO;
 
-import feign.Response;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

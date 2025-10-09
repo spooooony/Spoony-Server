@@ -6,5 +6,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PostCreatePort {
-    List<String> savePostImages(List<MultipartFile> photos) throws IOException;
+
 }

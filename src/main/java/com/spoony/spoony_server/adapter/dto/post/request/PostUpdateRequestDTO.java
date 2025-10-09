@@ -13,3 +13,5 @@ public record PostUpdateRequestDTO(@NotNull(message = "게시물 ID는 필수 �
 								   List<String> photoUrlList,
                                    List<String> deleteImageUrlList) {
 }
+
+
