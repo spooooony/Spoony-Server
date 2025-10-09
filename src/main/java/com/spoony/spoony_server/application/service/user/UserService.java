@@ -4,12 +4,11 @@ import com.spoony.spoony_server.adapter.dto.post.response.RegionDTO;
 import com.spoony.spoony_server.adapter.dto.user.response.*;
 import com.spoony.spoony_server.adapter.out.persistence.block.db.BlockStatus;
 import com.spoony.spoony_server.application.port.command.user.*;
-import com.spoony.spoony_server.application.port.in.user.BlockCheckUseCase;
-import com.spoony.spoony_server.application.port.in.user.BlockUserCreateUseCase;
 import com.spoony.spoony_server.application.port.in.user.*;
 import com.spoony.spoony_server.application.port.out.feed.FeedPort;
-import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.post.PostPort;
+import com.spoony.spoony_server.application.port.out.user.BlockPort;
+import com.spoony.spoony_server.application.port.out.user.UnlockedProfileImagePort;
 import com.spoony.spoony_server.application.port.out.user.UserPort;
 import com.spoony.spoony_server.domain.post.Post;
 import com.spoony.spoony_server.domain.user.Block;
@@ -41,9 +40,11 @@ public class UserService implements
     private final PostPort postPort;
     private final BlockPort blockPort;
     private final FeedPort feedPort;
+    private final UnlockedProfileImagePort unlockedProfileImagePort;
 
     @Override
-    public UserResponseDTO getUserInfo(RelatedUserGetCommand relatedUserGetCommand, UserFollowCommand userFollowCommand) {
+    public UserResponseDTO getUserInfo(RelatedUserGetCommand relatedUserGetCommand,
+                                       UserFollowCommand userFollowCommand) {
         Long userId = relatedUserGetCommand.getUserId(); // 로그인 유저
         Long targetUserId = relatedUserGetCommand.getTargetUserId(); // 프로필 조회 대상
 
@@ -120,7 +121,8 @@ public class UserService implements
         List<UserSimpleResponseDTO> userDTOList = followers.stream()
                 .map(Follow::getFollower)
                 .filter(followerUser ->
-                        !blockedUserIds.contains(followerUser.getUserId()) && !blockerUserIds.contains(followerUser.getUserId()) && !reportedUserIds.contains(followerUser.getUserId())
+                        !blockedUserIds.contains(followerUser.getUserId()) && !blockerUserIds.contains(followerUser.getUserId())
+                                && !reportedUserIds.contains(followerUser.getUserId())
                 )
                 .map(followerUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followerUser.getUserId());
@@ -158,11 +160,13 @@ public class UserService implements
         List<UserSimpleResponseDTO> userDTOList = followings.stream()
                 .map(Follow::getFollowing)
                 .filter(followingUser ->
-                        !blockedUserIds.contains(followingUser.getUserId()) && !blockerUserIds.contains(followingUser.getUserId())&& !reportedUserIds.contains(followingUser.getUserId())
+                        !blockedUserIds.contains(followingUser.getUserId()) && !blockerUserIds.contains(
+                                followingUser.getUserId()) && !reportedUserIds.contains(followingUser.getUserId())
                 )
                 .map(followingUser -> {
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), followingUser.getUserId());
-                    String regionName = followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
+                    String regionName =
+                            followingUser.getRegion() != null ? followingUser.getRegion().getRegionName() : null;
 
                     return UserSimpleResponseDTO.of(
                             command.getUserId(),
@@ -182,7 +186,7 @@ public class UserService implements
         List<Block> blockIds = userPort.findBlockedByUserId(command.getUserId());
         List<UserBlockResponseDTO> userBlockResponseDTOList = blockIds.stream()
                 .filter(block -> block.getStatus() == BlockStatus.BLOCKED)
-                .map(block ->{
+                .map(block -> {
                     User blockedUser = block.getBlocked();
                     boolean isBlocked = blockPort.existsBlockUserRelation(command.getUserId(), blockedUser.getUserId());
                     String regionName = blockedUser.getRegion() != null ? blockedUser.getRegion().getRegionName() : null;
@@ -209,7 +213,7 @@ public class UserService implements
             throw new BusinessException(UserErrorMessage.ALEADY_FOLLOW);
         }
 
-        Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId,targetUserId);
+        Optional<BlockStatus> blockStatus = blockPort.getBlockRelationStatus(userId, targetUserId);
 
         //어차피 아래 조건문에 도달하지조차 않을테지만(클라 뷰에서 막혀서) 그래도 일단 추가
         if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.BLOCKED) {
@@ -217,11 +221,11 @@ public class UserService implements
         }
 
         //언팔로우->팔로우인지 or 신규 팔로우인지에 따라 분기처리
-        if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.UNFOLLOWED){ //언팔로우->팔로우
-            blockPort.deleteUserBlockRelation(userId,targetUserId,BlockStatus.UNFOLLOWED); //block 테이블에서 삭제
-            userPort.saveFollowRelation(userId,targetUserId);
+        if (blockStatus.isPresent() && blockStatus.get() == BlockStatus.UNFOLLOWED) { //언팔로우->팔로우
+            blockPort.deleteUserBlockRelation(userId, targetUserId, BlockStatus.UNFOLLOWED); //block 테이블에서 삭제
+            userPort.saveFollowRelation(userId, targetUserId);
 
-        } else{  //신규 팔로우
+        } else {  //신규 팔로우
             userPort.saveNewFollowRelation(userId, targetUserId);
             userPort.saveFollowRelation(userId, targetUserId);
         }
@@ -254,7 +258,26 @@ public class UserService implements
 
     @Override
     public void updateUserProfile(UserUpdateCommand command) {
-        userPort.updateUser(command.getUserId(), command.getUserName(), command.getRegionId(), command.getIntroduction(), command.getBirth(), command.getImageLevel());
+        // 프로필 이미지 레벨 검증
+        if (command.getImageLevel() != null) {
+            boolean isUnlocked = unlockedProfileImagePort.isLevelUnlocked(
+                    command.getUserId(),
+                    command.getImageLevel().intValue()
+            );
+
+            if (!isUnlocked) {
+                throw new BusinessException(UserErrorMessage.PROFILE_IMAGE_NOT_UNLOCKED);
+            }
+        }
+
+        userPort.updateUser(
+                command.getUserId(),
+                command.getUserName(),
+                command.getRegionId(),
+                command.getIntroduction(),
+                command.getBirth(),
+                command.getImageLevel()
+        );
     }
 
     @Override
@@ -264,7 +287,7 @@ public class UserService implements
         List<User> userList = userPort.findByUserNameContaining(searchCommand.getQuery());
 
         List<UserSimpleResponseDTO> userSearchResultList = userList.stream()
-                .filter(user -> !blockedUserIds.contains(user.getUserId())&& !blockerUserIds.contains(user.getUserId()))
+                .filter(user -> !blockedUserIds.contains(user.getUserId()) && !blockerUserIds.contains(user.getUserId()))
                 .map(user -> {
                     String regionName = user.getRegion() != null ? user.getRegion().getRegionName() : null;
                     boolean isFollowing = userPort.existsFollowRelation(command.getUserId(), user.getUserId());
@@ -298,7 +321,7 @@ public class UserService implements
         blockPort.saveOrUpdateUserBlockRelation(userId, targetUserId, BlockStatus.BLOCKED);
         userPort.deleteFollowRelation(userId, targetUserId);
         userPort.deleteFollowRelation(targetUserId, userId);
-        userPort.removeZzimRelationsBetweenUsers(userId,targetUserId);
+        userPort.removeZzimRelationsBetweenUsers(userId, targetUserId);
     }
 
     @Override
