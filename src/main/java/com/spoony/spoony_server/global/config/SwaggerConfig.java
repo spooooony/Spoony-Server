@@ -18,7 +18,8 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .servers(List.of(
                         new Server().url("https://www.spoony-dev.n-e.kr"),
-                        new Server().url("https://www.spoony-prod.o-r.kr")
+                        new Server().url("https://www.spoony-prod.o-r.kr"),
+                        new Server().url("http://localhost:8080")
                 ))
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth", securityScheme()))

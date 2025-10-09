@@ -10,5 +10,8 @@ public record PostUpdateRequestDTO(@NotNull(message = "게시물 ID는 필수 �
                                    String cons,
                                    @NotNull(message = "카테고리는 필수 값입니다.") Long categoryId,
                                    @NotNull(message = "메뉴는 필수 값입니다.") List<String> menuList,
+								   List<String> photoUrlList,
                                    List<String> deleteImageUrlList) {
 }
+
+

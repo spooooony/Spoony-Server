@@ -6,6 +6,8 @@ import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.command.user.UserReviewGetCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
+import com.spoony.spoony_server.application.port.out.file.S3DeletePort;
+import com.spoony.spoony_server.application.port.out.file.S3PresignedUrlPort;
 import com.spoony.spoony_server.application.port.out.report.ReportPort;
 import com.spoony.spoony_server.application.port.out.user.BlockPort;
 import com.spoony.spoony_server.application.port.out.place.PlacePort;
@@ -50,20 +52,20 @@ public class PostService implements
         PostUpdateUseCase,
         PostSearchUseCase {
     private final PostPort postPort;
-    private final PostCreatePort postCreatePort;
     private final PostCategoryPort postCategoryPort;
     private final CategoryPort categoryPort;
     private final UserPort userPort;
     private final ZzimPostPort zzimPostPort;
     private final PlacePort placePort;
     private final SpoonPort spoonPort;
-    private final PostDeletePort postDeletePort;
+    //private final PostDeletePort postDeletePort;
+
     private final PhotoPort photoPort;
     private final BlockPort blockPort;
     private final ReportPort reportPort;
     private final RegionPort regionPort;
     private final ApplicationEventPublisher eventPublisher;
-
+    private final S3DeletePort s3DeletePort;
     @Transactional
     public PostResponseDTO getPostById(PostGetCommand command) {
 
@@ -234,10 +236,6 @@ public class PostService implements
         return PostSearchResultListDTO.of(postSearchResultList);
     }
 
-    public List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException {
-        List<String> photoUrlList = postCreatePort.savePostImages(photoSaveCommand.getPhotos());
-        return photoUrlList;
-    }
 
     @Transactional
     public PostCreatedEvent createPost(PostCreateCommand command) {
@@ -371,29 +369,81 @@ public class PostService implements
 
     @Transactional
     public void deletePost(PostDeleteCommand command) {
+
+        Long postId = command.getPostId();
         //S3 삭제 로직
         List<String> imageUrls = photoPort.getPhotoUrls(command.getPostId());
-        postDeletePort.deleteImagesFromS3(imageUrls);
+
+        try {
+            s3DeletePort.deleteImagesFromS3(imageUrls);
+        } catch (Exception e) {
+            // S3 삭제 실패는 Business Exception으로 처리하여 DB 트랜잭션 롤백 유도
+            log.error("S3 파일 삭제 중 오류 발생: {}", e.getMessage());
+            throw new BusinessException(PostErrorMessage.S3_DELETE_FAILED);
+        }
 
         postPort.deleteById(command.getPostId());
     }
 
+    // @Transactional
+    // public void updatePost(PostUpdateCommand command) {
+    //     //S3 삭제 로직
+    //     List<String> deletePhotoUrlList = command.getDeletePhotoUrlList();
+    //
+    //     if (!deletePhotoUrlList.isEmpty()) {
+    //     s3DeletePort.deleteImagesFromS3(deletePhotoUrlList);
+    //
+    //     postPort.updatePost(command.getPostId(), command.getDescription(), command.getValue(), command.getCons());
+    //     Post post = postPort.findPostById(command.getPostId());
+    //
+    //     postPort.deleteAllPostCategoryByPostId(command.getPostId());
+    //     postPort.deleteAllMenusByPostId(command.getPostId());
+    //     postPort.deleteAllPhotosByPhotoUrl(deletePhotoUrlList);
+    //
+    //     Category category = categoryPort.findCategoryById(command.getCategoryId());
+    //     PostCategory postCategory = new PostCategory(post, category);
+    //     postPort.savePostCategory(postCategory);
+    //
+    //     command.getMenuList().forEach(menuName -> {
+    //         Menu menu = new Menu(post, menuName);
+    //         postPort.saveMenu(menu);
+    //     });
+    //
+    //     command.getPhotoUrlList().forEach(photoUrl -> {
+    //         Photo photo = new Photo(post, photoUrl);
+    //         postPort.savePhoto(photo);
+    //     });
+    // }
     @Transactional
     public void updatePost(PostUpdateCommand command) {
-        //S3 삭제 로직
         List<String> deletePhotoUrlList = command.getDeletePhotoUrlList();
-        postDeletePort.deleteImagesFromS3(deletePhotoUrlList);
 
+        if (!deletePhotoUrlList.isEmpty()) {
+            // 1. S3 삭제
+            s3DeletePort.deleteImagesFromS3(deletePhotoUrlList);
+
+            // 2. DB Photo 엔티티 삭제
+            // postPort에 구현된 메서드가 맞다면 이대로 유지.
+            // Photo 관련 책임은 PhotoPort로 분리하는 것이 이상적입니다.
+            postPort.deleteAllPhotosByPhotoUrl(deletePhotoUrlList);
+        }
+
+        // 3. Post 내용 업데이트
         postPort.updatePost(command.getPostId(), command.getDescription(), command.getValue(), command.getCons());
         Post post = postPort.findPostById(command.getPostId());
 
+        // 4. 기존 카테고리/메뉴 정보 삭제 (CascadeType.ALL 대신 수동 삭제를 선택한 경우 유지)
+        // 만약 Cascade를 활용하여 업데이트한다면 이 코드는 제거하고,
+        // post.getMenus().clear(); 후 새 메뉴를 추가해야 합니다.
+        // 현재는 수동 삭제 방식을 유지합니다.
         postPort.deleteAllPostCategoryByPostId(command.getPostId());
         postPort.deleteAllMenusByPostId(command.getPostId());
-        postPort.deleteAllPhotosByPhotoUrl(deletePhotoUrlList);
 
+        // (삭제된 Photo는 위에서 처리했으므로 여기서 다시 호출하면 안 됩니다.)
+
+        // 5. 새로운 카테고리/메뉴/사진 정보 저장 (기존 로직 유지)
         Category category = categoryPort.findCategoryById(command.getCategoryId());
-        PostCategory postCategory = new PostCategory(post, category);
-        postPort.savePostCategory(postCategory);
+        postPort.savePostCategory(new PostCategory(post, category));
 
         command.getMenuList().forEach(menuName -> {
             Menu menu = new Menu(post, menuName);
@@ -406,8 +456,8 @@ public class PostService implements
         });
     }
 
-    public void deletePhotos(PostPhotoDeleteCommand command) {
-        List<String> imageUrls = command.getDeleteImageUrlList();
-        postDeletePort.deleteImagesFromS3(imageUrls);
-    }
+    // public void deletePhotos(PostPhotoDeleteCommand command) {
+    //     List<String> imageUrls = command.getDeleteImageUrlList();
+    //     s3DeletePort.deleteImagesFromS3(imageUrls);
+    // }
 }

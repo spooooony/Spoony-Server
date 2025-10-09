@@ -8,6 +8,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PostCreateUseCase {
-    List<String> savePostImages(PostPhotoSaveCommand photoSaveCommand) throws IOException;
     PostCreatedEvent createPost(PostCreateCommand command);
 }

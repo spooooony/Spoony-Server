@@ -6,6 +6,7 @@ import com.spoony.spoony_server.global.auth.handler.CustomJwtAuthenticationEntry
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -50,9 +51,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .requestCache(RequestCacheConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
-
         http
                 .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(AUTH_WHITE_LIST.toArray(new String[0])).permitAll()
                 .anyRequest().authenticated());
 
@@ -74,7 +75,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
         config.addAllowedOriginPattern("http://localhost:3000");
         config.addAllowedOriginPattern("https://spoony-admin-web.vercel.app");
         config.addAllowedMethod("*");

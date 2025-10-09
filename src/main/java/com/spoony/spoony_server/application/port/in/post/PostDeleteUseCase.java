@@ -5,5 +5,5 @@ import com.spoony.spoony_server.application.port.command.post.PostPhotoDeleteCom
 
 public interface PostDeleteUseCase {
     void deletePost(PostDeleteCommand command);
-    void deletePhotos(PostPhotoDeleteCommand command);
+    //void deletePhotos(PostPhotoDeleteCommand command);
 }

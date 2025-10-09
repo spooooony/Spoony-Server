@@ -1,6 +1,5 @@
 package com.spoony.spoony_server;
 
-import com.spoony.spoony_server.adapter.out.persistence.feed.db.FeedRepository;
 import com.spoony.spoony_server.adapter.out.persistence.feed.event.PostCreatedEventListener;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostEntity;
 import com.spoony.spoony_server.adapter.out.persistence.post.db.PostRepository;

@@ -10,7 +10,8 @@ public enum PostErrorMessage implements DefaultErrorMessage {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글의 카테고리 정보를 찾을 수 없습니다."),
     CATEGORY_SELECT(HttpStatus.BAD_REQUEST, "올바르지 않은 카테고리 중복 선택입니다."),
     ALREADY_ZZIM(HttpStatus.BAD_REQUEST, "이미 찜한 게시글입니다."),
-    ALREADY_CREATED(HttpStatus.BAD_REQUEST, "이미 작성한 장소의 게시글입니다.");
+    ALREADY_CREATED(HttpStatus.BAD_REQUEST, "이미 작성한 장소의 게시글입니다."),
+    S3_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S3파일 삭제중 오류 발생");
 
     private HttpStatus httpStatus;
     private String message;

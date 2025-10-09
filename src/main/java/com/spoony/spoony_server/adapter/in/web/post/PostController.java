@@ -5,7 +5,6 @@ import com.spoony.spoony_server.adapter.dto.post.request.PostUpdateRequestDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.CategoryMonoListResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.PostResponseDTO;
 import com.spoony.spoony_server.adapter.dto.post.response.PostSearchResultListDTO;
-import com.spoony.spoony_server.application.event.PostCreatedEvent;
 import com.spoony.spoony_server.application.port.command.post.*;
 import com.spoony.spoony_server.application.port.command.user.UserGetCommand;
 import com.spoony.spoony_server.application.port.in.post.*;
@@ -15,14 +14,9 @@ import com.spoony.spoony_server.adapter.dto.spoon.request.ScoopPostRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -48,23 +42,12 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(postResponse));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     @Operation(summary = "게시물 등록 API", description = "새로운 게시물을 등록하는 API")
     public ResponseEntity<ResponseDTO<Void>> createPost(
             @UserId Long userId,
-            @RequestPart("data")
-            @Parameter(description = "게시물 생성 요청 데이터 (JSON 형식)")
-            PostCreateRequestDTO postCreateRequestDTO,
-            @RequestPart("photos")
-            @Parameter(description = "게시물에 첨부할 사진 리스트 (이미지 파일)")
-            List<MultipartFile> photos
-    ) throws IOException {
-        List<String> photoUrlList = List.of();
-
-        if (photos != null && photos.stream().anyMatch(photo -> !photo.isEmpty())) {
-            PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
-            photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
-        }
+            @RequestBody PostCreateRequestDTO postCreateRequestDTO
+    ) {
 
         PostCreateCommand command = new PostCreateCommand(
                 userId,
@@ -78,7 +61,7 @@ public class PostController {
                 postCreateRequestDTO.longitude(),
                 postCreateRequestDTO.categoryId(),
                 postCreateRequestDTO.menuList(),
-                photoUrlList
+                postCreateRequestDTO.photoUrlList()
         );
 
         postCreateUseCase.createPost(command);
@@ -120,24 +103,19 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDTO.success(null));
     }
 
-    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+
+    @PatchMapping
     @Operation(summary = "게시물 수정 API", description = "게시물을 수정하는 API")
     public ResponseEntity<ResponseDTO<Void>> updatePost(
             @UserId Long userId,
-            @RequestPart("data")
+            @RequestBody
             @Parameter(description = "게시물 수정 요청 데이터 (JSON 형식)")
-            PostUpdateRequestDTO postUpdateRequestDTO,
-            @RequestPart(value = "photos", required = false)
-            @Parameter(description = "게시물 수정 사진 리스트 (이미지 파일)")
-            List<MultipartFile> photos
-    ) throws IOException {
-        List<String> photoUrlList = List.of();
-
-        if (photos != null && photos.stream().anyMatch(photo -> !photo.isEmpty())) {
-            PostPhotoSaveCommand photoSaveCommand = new PostPhotoSaveCommand(photos);
-            photoUrlList = postCreateUseCase.savePostImages(photoSaveCommand);
-        }
-
+            PostUpdateRequestDTO postUpdateRequestDTO)
+    {
+        List<String> photoUrlList = postUpdateRequestDTO.photoUrlList() != null
+            ? postUpdateRequestDTO.photoUrlList()
+            : List.of();
         PostUpdateCommand command = new PostUpdateCommand(
                 postUpdateRequestDTO.postId(),
                 postUpdateRequestDTO.description(),
@@ -148,7 +126,6 @@ public class PostController {
                 photoUrlList,
                 postUpdateRequestDTO.deleteImageUrlList()
         );
-
         postUpdateUseCase.updatePost(command);
 
         return ResponseEntity.ok(ResponseDTO.success(null));
